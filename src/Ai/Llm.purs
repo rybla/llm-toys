@@ -3,13 +3,18 @@ module Ai.Llm where
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, printJsonDecodeError)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, printJsonDecodeError)
 import Data.Either (Either(..))
+import Data.Literal (Literal)
+import Data.Literal as Literal
+import Data.Newtype (class Newtype, unwrap)
 import Data.Optional (Optional)
 import Data.TaggedUnion (TaggedUnion)
+import Data.Variant (Variant, case_)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
-import Partial.Unsafe (unsafeCrashWith)
+import Foreign.Object (Object)
+import Utility (inj, on)
 
 --------------------------------------------------------------------------------
 -- generate
@@ -66,27 +71,62 @@ type Message = TaggedUnion "role"
   , tool :: { tool_call_id :: String, content :: String }
   )
 
-data ToolCall
+data ToolCall = ToolCall { id :: String, function :: { name :: String, arguments :: String } }
 
 instance EncodeJson ToolCall where
-  encodeJson = unsafeCrashWith "TODO"
+  encodeJson (ToolCall x) = encodeJson
+    { "type": "function"
+    , id: x.id
+    , function: x.function
+    }
 
 instance DecodeJson ToolCall where
-  decodeJson = unsafeCrashWith "TODO"
+  decodeJson json = do
+    x <- decodeJson @{ "type" :: Literal ("function" :: Unit), id :: String, function :: { name :: String, arguments :: String } } json
+    pure $ ToolCall { id: x.id, function: x.function }
 
-data Tool
+type Tool = TaggedUnion "type"
+  ( function :: FunctionDefinition
+  )
 
-instance EncodeJson Tool where
-  encodeJson = unsafeCrashWith "TODO"
+type FunctionDefinition =
+  { name :: String
+  , description :: Optional String
+  , parameters :: Optional FunctionParameters
+  , strict :: Optional Boolean
+  }
 
-instance DecodeJson Tool where
-  decodeJson = unsafeCrashWith "TODO"
+type FunctionParameters = Object Json
 
-data ToolChoice
+newtype ToolChoice = ToolChoice
+  ( Variant
+      ( none :: Unit
+      , auto :: Unit
+      , required :: Unit
+      , named :: String
+      )
+  )
+
+derive instance Newtype ToolChoice _
+
+type NamedToolChoice = { "type" :: Literal ("function" :: Unit), function :: { name :: String } }
 
 instance EncodeJson ToolChoice where
-  encodeJson = unsafeCrashWith "TODO"
+  encodeJson = unwrap >>>
+    ( case_
+        # on @"none" (\_ -> encodeJson "none")
+        # on @"auto" (\_ -> encodeJson "auto")
+        # on @"required" (\_ -> encodeJson "required")
+        # on @"named" (\name -> encodeJson @NamedToolChoice { "type": Literal.make @"function", function: { name } })
+    )
 
 instance DecodeJson ToolChoice where
-  decodeJson = unsafeCrashWith "TODO"
+  decodeJson json = case decodeJson @String json of
+    Right "none" -> pure $ ToolChoice $ inj @"none" unit
+    Right "auto" -> pure $ ToolChoice $ inj @"auto" unit
+    Right "required" -> pure $ ToolChoice $ inj @"required" unit
+    Right str -> throwError $ TypeMismatch $ "invalid ToolChoice: " <> show str
+    Left _ -> case decodeJson @NamedToolChoice json of
+      Right x -> pure $ ToolChoice $ inj @"named" x.function.name
+      Left _ -> throwError $ TypeMismatch $ "invalid ToolChoice"
 
