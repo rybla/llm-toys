@@ -8,6 +8,8 @@ import Data.Either (Either(..))
 import Data.Literal (Literal)
 import Data.Literal as Literal
 import Data.Newtype (class Newtype, unwrap)
+import Data.Optional (Optional)
+import Data.PartialRecord (PartialRecord)
 import Data.TaggedUnion (TaggedUnion)
 import Data.Variant (Variant, case_)
 import Effect (Effect)
@@ -20,26 +22,17 @@ import Utility (inj, on)
 --------------------------------------------------------------------------------
 
 generate
-  :: { apiKey :: String
-     , baseURL :: String
-     , model :: String
-     , messages :: Array Message
-     , tools :: Array Tool
-     , tool_choice :: ToolChoice
-     }
+  :: PartialRecord
+       ( apiKey :: String
+       , baseURL :: Optional String
+       , model :: String
+       , messages :: Array Message
+       , tools :: Optional (Array Tool)
+       , tool_choice :: Optional ToolChoice
+       )
   -> Aff (Either String AssistantMessage)
-generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
-  result <-
-    generate_
-      { ok: pure
-      , err: throwError
-      , apiKey
-      , baseURL
-      , model
-      , messages: messages # map encodeJson
-      , tools: tools # map encodeJson
-      , tool_choice: tool_choice # encodeJson
-      } # toAffE
+generate args = do
+  result <- generate_ { ok: pure, err: throwError } (args # encodeJson) # toAffE
   case result of
     Left err -> pure (throwError err)
     Right json_msg -> do
@@ -48,15 +41,8 @@ generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
         Right msg -> pure (pure msg)
 
 foreign import generate_
-  :: { ok :: Json -> Either String Json
-     , err :: String -> Either String Json
-     , apiKey :: String
-     , baseURL :: String
-     , model :: String
-     , messages :: Array Json
-     , tools :: Array Json
-     , tool_choice :: Json
-     }
+  :: { ok :: Json -> Either String Json, err :: String -> Either String Json }
+  -> Json
   -> Effect (Promise (Either String Json))
 
 --------------------------------------------------------------------------------
@@ -64,14 +50,17 @@ foreign import generate_
 --------------------------------------------------------------------------------
 
 type Message = TaggedUnion "role"
-  ( system :: { content :: String }
-  , user :: { content :: String }
-  , assistant :: { content :: String, tool_calls :: Array ToolCall }
-  , tool :: { tool_call_id :: String, content :: String }
+  ( system :: PartialRecord (content :: String)
+  , user :: PartialRecord (content :: String)
+  , assistant :: AssistantMessageValue
+  , tool :: PartialRecord (tool_call_id :: String, content :: String)
   )
 
 type AssistantMessage = TaggedUnion "role"
-  (assistant :: { content :: String, tool_calls :: Array ToolCall })
+  (assistant :: AssistantMessageValue)
+
+type AssistantMessageValue =
+  PartialRecord (content :: Optional String, tool_calls :: Optional (Array ToolCall))
 
 data ToolCall = ToolCall { id :: String, function :: { name :: String, arguments :: String } }
 

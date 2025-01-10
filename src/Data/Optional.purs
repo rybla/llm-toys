@@ -4,7 +4,6 @@ import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson)
 import Data.Argonaut.Encode.Class (encodeJson)
-import Data.Either (Either(..))
 import Data.Function as Function
 
 foreign import data Optional :: Type -> Type
@@ -16,6 +15,9 @@ foreign import defined :: forall a. a -> Optional a
 
 foreign import optional :: forall a b. b -> (a -> b) -> Optional a -> b
 foreign import optional_ :: forall a b. (Unit -> b) -> (a -> b) -> Optional a -> b
+
+instance Show a => Show (Optional a) where
+  show = optional "undefined" show
 
 instance Functor Optional where
   map f = optional undefined_ (f >>> defined)

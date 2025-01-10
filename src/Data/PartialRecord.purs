@@ -6,7 +6,7 @@ import Control.Monad.Error.Class (throwError)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, fromObject)
 import Data.Either (Either)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
+import Data.Newtype (class Newtype, wrap)
 import Data.Optional (Optional, defined, optional, undefined_)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Foreign.Object (Object)
@@ -58,6 +58,11 @@ else instance
   encodeJson_PartialRecord r =
     Object.insert (reflectSymbol (Proxy @k)) (encodeJson $ Record.get (Proxy @k) r)
       (encodeJson_PartialRecord @_ @l r)
+
+instance (RowToList r l, DecodeJson_PartialRecord r l) => DecodeJson (PartialRecord r) where
+  decodeJson json = do
+    obj <- decodeJson json
+    wrap <$> decodeJson_PartialRecord @r @l obj
 
 class DecodeJson_PartialRecord :: Row Type -> RowList Type -> Constraint
 class DecodeJson_PartialRecord r l | l -> r where
