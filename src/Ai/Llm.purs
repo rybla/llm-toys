@@ -50,10 +50,10 @@ foreign import generate_
 --------------------------------------------------------------------------------
 
 type Message = TaggedUnion "role"
-  ( system :: PartialRecord (content :: String)
-  , user :: PartialRecord (content :: String)
+  ( system :: PartialRecord (name :: Optional String, content :: String)
+  , user :: PartialRecord (name :: Optional String, content :: String)
   , assistant :: AssistantMessageValue
-  , tool :: PartialRecord (tool_call_id :: String, content :: String)
+  , tool :: PartialRecord (name :: Optional String, tool_call_id :: String, content :: String)
   )
 
 type AssistantMessage = TaggedUnion "role"

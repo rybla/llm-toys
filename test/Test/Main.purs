@@ -5,7 +5,7 @@ import Prelude
 import Ai.Llm (generate, noneToolChoice)
 import Data.Either (Either(..))
 import Data.Newtype (unwrap)
-import Data.Optional (defined)
+import Data.Optional (defined, undefined_)
 import Data.PartialRecord (PartialRecord(..))
 import Data.TaggedUnion as TaggedUnion
 import Data.Variant (case_)
@@ -20,7 +20,13 @@ main = launchAff_ do
     { apiKey: "ollama"
     , baseURL: "http://localhost:11434/v1" # defined
     , model: "phi4"
-    , messages: [ TaggedUnion.make @_ @"user" $ PartialRecord { content: "What is 2 + 3? Reply with just the numeric result." } ]
+    , messages:
+        [ TaggedUnion.make @_ @"user" $ PartialRecord
+            { name: undefined_
+            , content:
+                "What is 2 + 3? Reply with just the numeric result."
+            }
+        ]
     , tools: [] # defined
     , tool_choice: noneToolChoice # defined
     }
