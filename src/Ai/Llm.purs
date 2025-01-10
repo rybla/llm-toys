@@ -27,7 +27,7 @@ generate
      , tools :: Array Tool
      , tool_choice :: ToolChoice
      }
-  -> Aff (Either String Message)
+  -> Aff (Either String AssistantMessage)
 generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
   result <-
     generate_
@@ -43,7 +43,7 @@ generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
   case result of
     Left err -> pure (throwError err)
     Right json_msg -> do
-      case decodeJson @Message json_msg of
+      case decodeJson @AssistantMessage json_msg of
         Left err -> pure (throwError (printJsonDecodeError err))
         Right msg -> pure (pure msg)
 
@@ -69,6 +69,9 @@ type Message = TaggedUnion "role"
   , assistant :: { content :: String, tool_calls :: Array ToolCall }
   , tool :: { tool_call_id :: String, content :: String }
   )
+
+type AssistantMessage = TaggedUnion "role"
+  (assistant :: { content :: String, tool_calls :: Array ToolCall })
 
 data ToolCall = ToolCall { id :: String, function :: { name :: String, arguments :: String } }
 

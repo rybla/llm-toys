@@ -19,7 +19,7 @@ bug msg = unsafeCrashWith $ "BUG: " <> msg
 impossible :: forall a. Unit -> a
 impossible _ = unsafeCrashWith "impossible"
 
-expandCons :: forall @k @v r_ r. Cons k v r_ r => Variant r_ -> Variant r
+expandCons :: forall @k @v @r_ r. Cons k v r_ r => Variant r_ -> Variant r
 expandCons = unsafeCoerce
 
 inj :: forall @x a r_ r. Cons x a r_ r => IsSymbol x => a -> Variant r

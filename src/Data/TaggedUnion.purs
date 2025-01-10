@@ -7,7 +7,7 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(
 import Data.Argonaut as Json
 import Data.Either (Either)
 import Data.Maybe (Maybe(..), maybe')
-import Data.Newtype (class Newtype)
+import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Variant (Variant, case_, inj, on)
 import Foreign.Object (Object)
@@ -17,7 +17,7 @@ import Prim.Row (class Cons, class Lacks)
 import Prim.RowList (class RowToList, RowList)
 import Prim.RowList as RL
 import Type.Proxy (Proxy(..))
-import Utility (expandCons)
+import Utility as U
 
 newtype TaggedUnion :: Symbol -> Row Type -> Type
 newtype TaggedUnion tag r = TaggedUnion (Variant r)
@@ -83,6 +83,10 @@ instance
   DecodeJson_TaggedUnion tag r (RL.Cons k (Record v) l) where
   decodeJson_TaggedUnion tag o =
     if tag == reflectSymbol (Proxy @k) then
-      decodeJson_TaggedUnion @tag @r_ @l tag o # map (expandCons @k)
-    else
       inj (Proxy @k) <$> decodeJson (o # Json.fromObject)
+    else
+      decodeJson_TaggedUnion @tag @r_ @l tag o # map (U.expandCons @k)
+
+expandCons :: forall tag @k v r_ r. Cons k v r_ r => TaggedUnion tag r_ -> TaggedUnion tag r
+expandCons = unwrap >>> U.expandCons @k >>> wrap
+
