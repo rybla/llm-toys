@@ -8,7 +8,6 @@ import Data.Either (Either(..))
 import Data.Literal (Literal)
 import Data.Literal as Literal
 import Data.Newtype (class Newtype, unwrap)
-import Data.Optional (Optional)
 import Data.TaggedUnion (TaggedUnion)
 import Data.Variant (Variant, case_)
 import Effect (Effect)
@@ -25,8 +24,8 @@ generate
      , baseURL :: String
      , model :: String
      , messages :: Array Message
-     , tools :: Optional (Array Tool)
-     , tool_choice :: Optional ToolChoice
+     , tools :: Array Tool
+     , tool_choice :: ToolChoice
      }
   -> Aff (Either String Message)
 generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
@@ -38,8 +37,8 @@ generate { apiKey, baseURL, model, messages, tools, tool_choice } = do
       , baseURL
       , model
       , messages: messages # map encodeJson
-      , tools: tools # map (map encodeJson)
-      , tool_choice: tool_choice # map encodeJson
+      , tools: tools # map encodeJson
+      , tool_choice: tool_choice # encodeJson
       } # toAffE
   case result of
     Left err -> pure (throwError err)
@@ -55,8 +54,8 @@ foreign import generate_
      , baseURL :: String
      , model :: String
      , messages :: Array Json
-     , tools :: Optional (Array Json)
-     , tool_choice :: Optional Json
+     , tools :: Array Json
+     , tool_choice :: Json
      }
   -> Effect (Promise (Either String Json))
 
@@ -65,9 +64,9 @@ foreign import generate_
 --------------------------------------------------------------------------------
 
 type Message = TaggedUnion "role"
-  ( system :: { name :: Optional String, content :: String }
-  , user :: { name :: Optional String, content :: String }
-  , assistant :: { name :: Optional String, content :: String, tool_calls :: Array ToolCall }
+  ( system :: { content :: String }
+  , user :: { content :: String }
+  , assistant :: { content :: String, tool_calls :: Array ToolCall }
   , tool :: { tool_call_id :: String, content :: String }
   )
 
@@ -91,9 +90,9 @@ type Tool = TaggedUnion "type"
 
 type FunctionDefinition =
   { name :: String
-  , description :: Optional String
-  , parameters :: Optional FunctionParameters
-  , strict :: Optional Boolean
+  , description :: String
+  , parameters :: FunctionParameters
+  , strict :: Boolean
   }
 
 type FunctionParameters = Object Json
@@ -108,6 +107,13 @@ newtype ToolChoice = ToolChoice
   )
 
 derive instance Newtype ToolChoice _
+
+noneToolChoice = ToolChoice $ inj @"none" unit :: ToolChoice
+autoToolChoice = ToolChoice $ inj @"auto" unit :: ToolChoice
+requiredToolChoice = ToolChoice $ inj @"required" unit :: ToolChoice
+
+namedToolChoice :: String -> ToolChoice
+namedToolChoice str = ToolChoice $ inj @"named" str
 
 type NamedToolChoice = { "type" :: Literal ("function" :: Unit), function :: { name :: String } }
 
