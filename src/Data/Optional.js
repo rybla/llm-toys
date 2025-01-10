@@ -1,3 +1,5 @@
+export const undefinedJson = undefined
+
 export const undefined_ = undefined
 export const defined = a => a
 

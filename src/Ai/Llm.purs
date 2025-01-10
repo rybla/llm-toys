@@ -6,6 +6,8 @@ import Control.Promise (Promise, toAffE)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, printJsonDecodeError)
 import Data.Either (Either(..))
 import Data.Optional (Optional)
+import Data.TaggedUnion (TaggedUnion(..))
+import Data.TaggedUnion as TaggedUnion
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Partial.Unsafe (unsafeCrashWith)
@@ -57,10 +59,17 @@ data Message
   | ToolMessage { tool_call_id :: String, content :: String }
 
 instance EncodeJson Message where
-  encodeJson = unsafeCrashWith "TODO"
+  encodeJson m = encodeJson @(TaggedUnion "role" ("system" :: _, "user" :: _, "assistant" :: _, "tool" :: _)) case m of
+    SystemMessage msg -> TaggedUnion.make @_ @"system" msg
+    UserMessage msg -> TaggedUnion.make @_ @"user" msg
+    AssistantMessage msg -> TaggedUnion.make @_ @"assistant" msg
+    ToolMessage msg -> TaggedUnion.make @_ @"tool" msg
 
 instance DecodeJson Message where
-  decodeJson = unsafeCrashWith "TODO"
+  -- decodeJson json = case decodeJson @{ role :: String, name :: Optional String, content :: String } json of
+  --   Left err -> ?a
+  --   Right a -> ?a
+  decodeJson = unsafeCrashWith ""
 
 data ToolCall
 
