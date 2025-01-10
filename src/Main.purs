@@ -50,12 +50,12 @@ appComponent = H.mkComponent { initialState, eval, render }
                     ( PartialRecord
                         { apiKey: "ollama"
                         , baseURL: "http://localhost:11434/v1" # defined
-                        , model: "phi4"
+                        -- , model: "phi4"
+                        , model: "llama3.2:3b-instruct-q8_0"
                         , messages:
                             [ TaggedUnion.make @_ @"user" $ PartialRecord
                                 { name: undefined_
                                 , content:
-                                    -- "What is 2 + 3? Reply with just the numeric result."
                                     input
                                 }
                             ]
