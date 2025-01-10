@@ -6,11 +6,14 @@ import Control.Promise (Promise, toAffE)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, printJsonDecodeError)
 import Data.Either (Either(..))
 import Data.Optional (Optional)
-import Data.TaggedUnion (TaggedUnion(..))
-import Data.TaggedUnion as TaggedUnion
+import Data.TaggedUnion (TaggedUnion)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Partial.Unsafe (unsafeCrashWith)
+
+--------------------------------------------------------------------------------
+-- generate
+--------------------------------------------------------------------------------
 
 generate
   :: { apiKey :: String
@@ -52,24 +55,16 @@ foreign import generate_
      }
   -> Effect (Promise (Either String Json))
 
-data Message
-  = SystemMessage { name :: Optional String, content :: String }
-  | UserMessage { name :: Optional String, content :: String }
-  | AssistantMessage { name :: Optional String, content :: String, tool_calls :: ToolCall }
-  | ToolMessage { tool_call_id :: String, content :: String }
+--------------------------------------------------------------------------------
+-- types
+--------------------------------------------------------------------------------
 
-instance EncodeJson Message where
-  encodeJson m = encodeJson @(TaggedUnion "role" ("system" :: _, "user" :: _, "assistant" :: _, "tool" :: _)) case m of
-    SystemMessage msg -> TaggedUnion.make @_ @"system" msg
-    UserMessage msg -> TaggedUnion.make @_ @"user" msg
-    AssistantMessage msg -> TaggedUnion.make @_ @"assistant" msg
-    ToolMessage msg -> TaggedUnion.make @_ @"tool" msg
-
-instance DecodeJson Message where
-  -- decodeJson json = case decodeJson @{ role :: String, name :: Optional String, content :: String } json of
-  --   Left err -> ?a
-  --   Right a -> ?a
-  decodeJson = unsafeCrashWith ""
+type Message = TaggedUnion "role"
+  ( system :: { name :: Optional String, content :: String }
+  , user :: { name :: Optional String, content :: String }
+  , assistant :: { name :: Optional String, content :: String, tool_calls :: Array ToolCall }
+  , tool :: { tool_call_id :: String, content :: String }
+  )
 
 data ToolCall
 

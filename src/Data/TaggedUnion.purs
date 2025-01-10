@@ -7,6 +7,7 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(
 import Data.Argonaut as Json
 import Data.Either (Either)
 import Data.Maybe (Maybe(..), maybe')
+import Data.Newtype (class Newtype)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Variant (Variant, case_, inj, on)
 import Foreign.Object (Object)
@@ -20,6 +21,8 @@ import Utility (expandCons)
 
 newtype TaggedUnion :: Symbol -> Row Type -> Type
 newtype TaggedUnion tag r = TaggedUnion (Variant r)
+
+derive instance Newtype (TaggedUnion tag r) _
 
 make :: forall @tag @k v r_ r. IsSymbol k => Cons k v r_ r => v -> TaggedUnion tag r
 make v = TaggedUnion $ inj (Proxy @k) v
