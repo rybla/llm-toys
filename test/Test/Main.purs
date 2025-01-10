@@ -4,15 +4,12 @@ import Prelude
 
 import Ai.Llm (generate, noneToolChoice)
 import Data.Either (Either(..))
-import Data.Newtype (unwrap)
 import Data.Optional (defined, undefined_)
 import Data.PartialRecord (PartialRecord(..))
 import Data.TaggedUnion as TaggedUnion
-import Data.Variant (case_)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class.Console as Console
-import Utility (on)
 
 main :: Effect Unit
 main = launchAff_ do
@@ -33,10 +30,7 @@ main = launchAff_ do
   case result of
     Left err -> do
       Console.log $ "error: " <> err
-    Right msg ->
-      unwrap msg #
-        ( case_ # on @"assistant" \(PartialRecord { content, tool_calls: _ }) -> do
-            Console.log $ "result: " <> show content
-        )
+    Right (PartialRecord { content, tool_calls: _ }) ->
+      Console.log $ "result: " <> show content
   pure unit
 

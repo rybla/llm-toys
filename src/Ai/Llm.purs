@@ -30,13 +30,13 @@ generate
        , tools :: Optional (Array Tool)
        , tool_choice :: Optional ToolChoice
        )
-  -> Aff (Either String AssistantMessage)
+  -> Aff (Either String AssistantMessageValue)
 generate args = do
   result <- generate_ { ok: pure, err: throwError } (args # encodeJson) # toAffE
   case result of
     Left err -> pure (throwError err)
     Right json_msg -> do
-      case decodeJson @AssistantMessage json_msg of
+      case decodeJson @AssistantMessageValue json_msg of
         Left err -> pure (throwError (printJsonDecodeError err))
         Right msg -> pure (pure msg)
 
