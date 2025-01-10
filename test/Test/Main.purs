@@ -20,7 +20,7 @@ main = launchAff_ do
     { apiKey: "ollama"
     , baseURL: "http://localhost:11434/v1" # defined
     , model: "phi4"
-    , messages: [ TaggedUnion.make @_ @"user" $ PartialRecord { content: "What is 2 + 3?" } ]
+    , messages: [ TaggedUnion.make @_ @"user" $ PartialRecord { content: "What is 2 + 3? Reply with just the numeric result." } ]
     , tools: [] # defined
     , tool_choice: noneToolChoice # defined
     }
