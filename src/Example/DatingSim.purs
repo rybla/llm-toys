@@ -2,10 +2,12 @@ module Example.DatingSim where
 
 import Prelude
 
+import Data.Variant (Variant)
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Utility (inj)
 
 type Player =
   { name :: String
@@ -20,6 +22,14 @@ type Player =
 
 type State =
   { player :: Player
+  , world :: World
+  }
+
+type World =
+  { status ::
+      Variant
+        ( filtering :: Unit
+        )
   }
 
 component :: forall query input output. H.Component query input output Aff
@@ -36,6 +46,9 @@ component = H.mkComponent { initialState, eval, render }
         , confidence: 0.5
         , wittiness: 0.5
         , intelligence: 0.5
+        }
+    , world:
+        { status: inj @"filtering" unit
         }
     }
 

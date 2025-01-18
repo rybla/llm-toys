@@ -12504,7 +12504,7 @@ ${str(snapshot)}`);
               return bind8(liftAff2(generate({
                 apiKey: "ollama",
                 baseURL: defined("http://localhost:11434/v1"),
-                model: "llama3.2:3b-instruct-q8_0",
+                model: "command-r7b",
                 messages: [make4({
                   name: undefined_,
                   content: input3
@@ -12521,7 +12521,7 @@ ${str(snapshot)}`);
                     return assign2(prop1)(optional("undefined")(identity12)(result.value0.content));
                   }
                   ;
-                  throw new Error("Failed pattern match at Example.Basic (line 59, column 17 - line 63, column 84): " + [result.constructor.name]);
+                  throw new Error("Failed pattern match at Example.Basic (line 60, column 17 - line 64, column 84): " + [result.constructor.name]);
                 }())(function() {
                   return assign2(prop5)(inj22(unit));
                 });
@@ -12540,6 +12540,11 @@ ${str(snapshot)}`);
 
   // output/Example.DatingSim/index.js
   var show3 = /* @__PURE__ */ show(showNumber);
+  var inj7 = /* @__PURE__ */ inj2()({
+    reflectSymbol: function() {
+      return "filtering";
+    }
+  });
   var component2 = /* @__PURE__ */ function() {
     var render = function(state3) {
       return div2([style("display: flex; flex-direction: row; gap: 0.5em;")])([div2([style("flex-grow: 1;")])([div2([])([text("game")])]), div2([style("flex-grow: 1;")])([div2([])([text("player")]), div_([table_([tr_([text("name: "), text(state3.player.name)]), tr_([text("personality: "), text(state3.player.personality)]), tr_([text("physicality: "), text(state3.player.physicality)]), tr_([text("charm: "), text(show3(state3.player.charm))]), tr_([text("empathy: "), text(show3(state3.player.empathy))]), tr_([text("confidence: "), text(show3(state3.player.confidence))]), tr_([text("wittiness: "), text(show3(state3.player.wittiness))]), tr_([text("intelligence: "), text(show3(state3.player.intelligence))])])])])]);
@@ -12555,6 +12560,9 @@ ${str(snapshot)}`);
           confidence: 0.5,
           wittiness: 0.5,
           intelligence: 0.5
+        },
+        world: {
+          status: inj7(unit)
         }
       };
     };
@@ -13628,7 +13636,7 @@ ${str(snapshot)}`);
   };
 
   // output/Main/index.js
-  var inj7 = /* @__PURE__ */ inj2();
+  var inj8 = /* @__PURE__ */ inj2();
   var on8 = /* @__PURE__ */ on2();
   var DatingSimIsSymbol = {
     reflectSymbol: function() {
@@ -13651,7 +13659,7 @@ ${str(snapshot)}`);
     }
   };
   var on32 = /* @__PURE__ */ on8(menuIsSymbol);
-  var inj14 = /* @__PURE__ */ inj7(menuIsSymbol);
+  var inj14 = /* @__PURE__ */ inj8(menuIsSymbol);
   var assign4 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop6 = /* @__PURE__ */ prop2({
     reflectSymbol: function() {
@@ -13659,7 +13667,7 @@ ${str(snapshot)}`);
     }
   })()()(strongFn);
   var menuButton = function(dictIsSymbol) {
-    var inj23 = inj7(dictIsSymbol);
+    var inj23 = inj8(dictIsSymbol);
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
     return function() {
       return button([onClick($$const(inj23(unit)))])([text(reflectSymbol2($$Proxy.value))]);
