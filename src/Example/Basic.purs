@@ -2,7 +2,7 @@ module Example.Basic where
 
 import Prelude
 
-import Ai.Llm (generate, noneToolChoice)
+import Ai.Llm.Core (generate, noneToolChoice)
 import Data.Either (Either(..))
 import Data.Lens ((.=))
 import Data.Maybe (maybe)

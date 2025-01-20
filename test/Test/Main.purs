@@ -2,7 +2,7 @@ module Test.Main where
 
 import Prelude
 
-import Ai.Llm (generate, noneToolChoice)
+import Ai.Llm.Core (generate, noneToolChoice)
 import Data.Either (Either(..))
 import Data.Optional (defined, undefined_)
 import Data.PartialRecord (PartialRecord(..))
