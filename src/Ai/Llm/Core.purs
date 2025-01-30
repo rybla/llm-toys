@@ -1,3 +1,4 @@
+-- Defines the low-level interface to generation using an LLM.
 module Ai.Llm.Core where
 
 import Prelude

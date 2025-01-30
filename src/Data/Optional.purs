@@ -5,6 +5,7 @@ import Prelude
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson)
 import Data.Argonaut.Encode.Class (encodeJson)
 import Data.Function as Function
+import Data.Maybe (Maybe(..), maybe)
 
 foreign import data Optional :: Type -> Type
 
@@ -15,6 +16,12 @@ foreign import defined :: forall a. a -> Optional a
 
 foreign import optional :: forall a b. b -> (a -> b) -> Optional a -> b
 foreign import optional_ :: forall a b. (Unit -> b) -> (a -> b) -> Optional a -> b
+
+toMaybe :: forall a. Optional a -> Maybe a
+toMaybe = optional Nothing Just
+
+fromMaybe :: forall a. Maybe a -> Optional a
+fromMaybe = maybe undefined_ defined
 
 instance Show a => Show (Optional a) where
   show = optional "undefined" show
