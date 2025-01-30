@@ -16,8 +16,8 @@ type Player =
   , charm :: Number
   , empathy :: Number
   , confidence :: Number
-  , wittiness :: Number
   , intelligence :: Number
+  , wisdom :: Number
   }
 
 type State =
@@ -28,7 +28,7 @@ type State =
 type World =
   { status ::
       Variant
-        ( filtering :: Unit
+        ( filtering :: {}
         )
   }
 
@@ -44,11 +44,11 @@ component = H.mkComponent { initialState, eval, render }
         , charm: 0.5
         , empathy: 0.5
         , confidence: 0.5
-        , wittiness: 0.5
         , intelligence: 0.5
+        , wisdom: 0.5
         }
     , world:
-        { status: inj @"filtering" unit
+        { status: inj @"filtering" {}
         }
     }
 
@@ -56,25 +56,30 @@ component = H.mkComponent { initialState, eval, render }
 
   render state =
     HH.div
-      [ HP.style "display: flex; flex-direction: row; gap: 0.5em;" ]
+      [ HP.style "padding: 1em; display: flex; flex-direction: column; gap: 1em;" ]
       [ HH.div
-          [ HP.style "flex-grow: 1;" ]
-          [ HH.div [] [ HH.text "game" ] ]
+          [ HP.style "flex-grow: 0; flex-shrink: 0;" ]
+          [ HH.table
+              [ HP.style "border-collapse: collapse" ]
+              let
+                key_style = "vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;"
+                val_style = "vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;"
+              in
+                [ HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "name: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.name ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "personality: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.personality ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "physicality: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.physicality ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "charm: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.charm ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "empathy: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.empathy ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "confidence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.confidence ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "wisdom: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.wisdom ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "intelligence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.intelligence ] ]
+                ]
+          ]
       , HH.div
-          [ HP.style "flex-grow: 1;" ]
-          [ HH.div [] [ HH.text "player" ]
-          , HH.div_
-              [ HH.table_
-                  [ HH.tr_ [ HH.text "name: ", HH.text state.player.name ]
-                  , HH.tr_ [ HH.text "personality: ", HH.text state.player.personality ]
-                  , HH.tr_ [ HH.text "physicality: ", HH.text state.player.physicality ]
-                  , HH.tr_ [ HH.text "charm: ", HH.text $ show state.player.charm ]
-                  , HH.tr_ [ HH.text "empathy: ", HH.text $ show state.player.empathy ]
-                  , HH.tr_ [ HH.text "confidence: ", HH.text $ show state.player.confidence ]
-                  , HH.tr_ [ HH.text "wittiness: ", HH.text $ show state.player.wittiness ]
-                  , HH.tr_ [ HH.text "intelligence: ", HH.text $ show state.player.intelligence ]
-                  ]
-              ]
+          [ HP.style "flex-grow: 1; flex-shrink: 0;" ]
+          [ HH.div
+              [ HP.style "padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;" ]
+              [ HH.text "<game>" ]
           ]
       ]
 

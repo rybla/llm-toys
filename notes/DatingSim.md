@@ -6,9 +6,9 @@ Stats
 - the stats are:
   - charm
   - empathy
-  - confidence
   - creativity
   - intelligence
+  - wisdom
 
 Phases
 1. Swipe through a few accounts, to decide on which to pursue 

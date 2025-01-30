@@ -24,7 +24,10 @@ main = HA.runHalogenAff (HVD.runUI appComponent {} =<< HA.awaitBody)
 appComponent :: forall query input output. H.Component query input output Aff
 appComponent = H.mkComponent { initialState, eval, render }
   where
-  initialState _ = { app: inj @"menu" unit }
+  initialState _ =
+    { -- app: inj @"menu" unit
+      app: inj @"DatingSim" unit
+    }
 
   eval = H.mkEval H.defaultEval
     { handleAction = \app -> do

@@ -12819,14 +12819,13 @@ ${str(snapshot)}`);
   var option = /* @__PURE__ */ element2("option");
   var select = /* @__PURE__ */ element2("select");
   var table = /* @__PURE__ */ element2("table");
-  var table_ = /* @__PURE__ */ table([]);
+  var td = /* @__PURE__ */ element2("td");
   var textarea = function(es) {
     return element2("textarea")(es)([]);
   };
   var tr = /* @__PURE__ */ element2("tr");
   var tr_ = /* @__PURE__ */ tr([]);
   var div2 = /* @__PURE__ */ element2("div");
-  var div_ = /* @__PURE__ */ div2([]);
   var button = /* @__PURE__ */ element2("button");
 
   // output/Foreign.Index/foreign.js
@@ -13177,7 +13176,7 @@ ${str(snapshot)}`);
                       });
                     }
                     ;
-                    throw new Error("Failed pattern match at Example.Basic (line 78, column 17 - line 84, column 84): " + [result.constructor.name]);
+                    throw new Error("Failed pattern match at Example.Basic (line 76, column 17 - line 82, column 84): " + [result.constructor.name]);
                   }())(function() {
                     return assign2(prop5)(inj7(unit));
                   });
@@ -13204,7 +13203,7 @@ ${str(snapshot)}`);
   });
   var component2 = /* @__PURE__ */ function() {
     var render = function(state3) {
-      return div2([style("display: flex; flex-direction: row; gap: 0.5em;")])([div2([style("flex-grow: 1;")])([div2([])([text("game")])]), div2([style("flex-grow: 1;")])([div2([])([text("player")]), div_([table_([tr_([text("name: "), text(state3.player.name)]), tr_([text("personality: "), text(state3.player.personality)]), tr_([text("physicality: "), text(state3.player.physicality)]), tr_([text("charm: "), text(show4(state3.player.charm))]), tr_([text("empathy: "), text(show4(state3.player.empathy))]), tr_([text("confidence: "), text(show4(state3.player.confidence))]), tr_([text("wittiness: "), text(show4(state3.player.wittiness))]), tr_([text("intelligence: "), text(show4(state3.player.intelligence))])])])])]);
+      return div2([style("padding: 1em; display: flex; flex-direction: column; gap: 1em;")])([div2([style("flex-grow: 0; flex-shrink: 0;")])([table([style("border-collapse: collapse")])([tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("name: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.name)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("personality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.personality)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("physicality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.physicality)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("charm: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.charm))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("empathy: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.empathy))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("confidence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.confidence))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("wisdom: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.wisdom))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("intelligence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.intelligence))])])])]), div2([style("flex-grow: 1; flex-shrink: 0;")])([div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;")])([text("<game>")])])]);
     };
     var initialState = function(v) {
       return {
@@ -13215,11 +13214,11 @@ ${str(snapshot)}`);
           charm: 0.5,
           empathy: 0.5,
           confidence: 0.5,
-          wittiness: 0.5,
-          intelligence: 0.5
+          intelligence: 0.5,
+          wisdom: 0.5
         },
         world: {
-          status: inj14(unit)
+          status: inj14({})
         }
       };
     };
@@ -14310,13 +14309,12 @@ ${str(snapshot)}`);
   };
   var on23 = /* @__PURE__ */ on5(BasicIsSymbol);
   var slot_22 = /* @__PURE__ */ slot_2(BasicIsSymbol)(ordUnit);
-  var menuIsSymbol = {
+  var on32 = /* @__PURE__ */ on5({
     reflectSymbol: function() {
       return "menu";
     }
-  };
-  var on32 = /* @__PURE__ */ on5(menuIsSymbol);
-  var inj16 = /* @__PURE__ */ inj15(menuIsSymbol);
+  });
+  var inj16 = /* @__PURE__ */ inj15(DatingSimIsSymbol);
   var assign4 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop6 = /* @__PURE__ */ prop2({
     reflectSymbol: function() {
