@@ -4,10 +4,12 @@ module Ai.Llm where
 import Prelude
 
 import Ai.Llm.Core as Core
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), encodeJson)
+import Control.Promise (Promise, toAffE)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), encodeJson, printJsonDecodeError)
 import Data.Argonaut as Argonaut
 import Data.Argonaut.Decode.Class (decodeJson)
 import Data.Either (Either(..))
+import Data.Either.Nested (type (\/))
 import Data.List (List)
 import Data.Map (Map)
 import Data.Map as Map
@@ -18,6 +20,7 @@ import Data.Optional as Optional
 import Data.PartialRecord (PartialRecord(..))
 import Data.Traversable (traverse)
 import Data.Variant (Variant, match)
+import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Foreign.Object (Object)
 import Foreign.Object as Object
@@ -35,18 +38,32 @@ generate
      , tools :: Array Tool
      , tool_choice :: ToolChoice
      }
-  -> Aff Unit
-generate _ = pure unit
+  -> Aff (String \/ AssistantMessage)
+generate args = do
+  result <- generate_ { ok: pure, err: throwError } (args # encodeJson) # toAffE
+  case result of
+    Left err -> pure $ throwError err
+    Right json_msg -> do
+      case decodeJson_Message_assistant json_msg of
+        Left err -> pure $ throwError $ printJsonDecodeError err
+        Right msg -> pure $ pure msg
+
+foreign import generate_
+  :: { ok :: Json -> Either String Json, err :: String -> Either String Json }
+  -> Json
+  -> Effect (Promise (Either String Json))
 
 --------------------------------------------------------------------------------
 -- types
 --------------------------------------------------------------------------------
 
+type AssistantMessage = { content :: Maybe String, tool_calls :: Array ToolCall }
+
 newtype Message = Message
   ( Variant
       ( system :: { name :: Maybe String, content :: String }
       , user :: { name :: Maybe String, content :: String }
-      , assistant :: { content :: Maybe String, tool_calls :: Array ToolCall }
+      , assistant :: AssistantMessage
       , tool ::
           { name :: String
           , tool_call_id :: String
@@ -77,6 +94,12 @@ instance DecodeJson Message where
   decodeJson json | Right (PartialRecord { name, role: "tool", tool_call_id, content }) <- decodeJson @(PartialRecord ("role" :: String, name :: String, tool_call_id :: String, content :: String)) json = do
     pure $ wrap $ inj @"tool" { name, tool_call_id, content }
   decodeJson json = throwError $ UnexpectedValue json
+
+decodeJson_Message_assistant :: Json -> JsonDecodeError \/ AssistantMessage
+decodeJson_Message_assistant json | Right (PartialRecord { role: "assistant", content, tool_calls }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional String, tool_calls :: Json)) json = do
+  tool_calls' <- tool_calls # decodeJson
+  pure { content: content # Optional.toMaybe, tool_calls: tool_calls' }
+decodeJson_Message_assistant json = throwError $ UnexpectedValue json
 
 newtype ToolCall = ToolCall
   { id :: String
@@ -185,3 +208,4 @@ instance DecodeJson ToolChoice where
   decodeJson json | Right "required" <- decodeJson @String json = pure $ wrap $ inj @"required" unit
   decodeJson json | Right { "type": "function", "function": { "name": name } } <- decodeJson @{ "type" :: String, "function" :: { "name" :: String } } json = pure $ wrap $ inj @"named" name
   decodeJson json = throwError $ UnexpectedValue json
+
