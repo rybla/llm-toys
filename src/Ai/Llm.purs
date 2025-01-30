@@ -1,3 +1,4 @@
+-- TODO: test this out
 -- Defines the high-level interface to generation using an LLM.
 module Ai.Llm where
 
@@ -13,7 +14,7 @@ import Data.Either.Nested (type (\/))
 import Data.List (List)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe, maybe, optional)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Optional (Optional)
 import Data.Optional as Optional
@@ -32,7 +33,7 @@ import Utility (inj)
 
 generate
   :: { apiKey :: String
-     , baseUrl :: String
+     , baseURL :: String
      , model :: String
      , messages :: Array Message
      , tools :: Array Tool
@@ -96,8 +97,8 @@ instance DecodeJson Message where
   decodeJson json = throwError $ UnexpectedValue json
 
 decodeJson_Message_assistant :: Json -> JsonDecodeError \/ AssistantMessage
-decodeJson_Message_assistant json | Right (PartialRecord { role: "assistant", content, tool_calls }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional String, tool_calls :: Json)) json = do
-  tool_calls' <- tool_calls # decodeJson
+decodeJson_Message_assistant json | Right (PartialRecord { role: "assistant", content, tool_calls }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional String, tool_calls :: Optional Json)) json = do
+  tool_calls' <- tool_calls # Optional.optional (pure mempty) decodeJson
   pure { content: content # Optional.toMaybe, tool_calls: tool_calls' }
 decodeJson_Message_assistant json = throwError $ UnexpectedValue json
 
@@ -147,7 +148,7 @@ newtype FunctionParameters = FunctionParameters (Map String FunctionParameter)
 derive instance Newtype FunctionParameters _
 
 instance EncodeJson FunctionParameters where
-  encodeJson = unwrap >>> map encodeJson >>> fromJsonMapToJsonObject
+  encodeJson = unwrap >>> map encodeJson >>> fromMapJsonToObjectJson
 
 instance DecodeJson FunctionParameters where
   decodeJson json | Right parameters <- decodeJson @(Object Json) json = do
@@ -172,8 +173,8 @@ instance EncodeJson FunctionParameter where
     , number: \{ description } -> encodeJson { "type": "number", description }
     }
 
-fromJsonMapToJsonObject :: Map String Json -> Json
-fromJsonMapToJsonObject m = (m # Map.toUnfoldable :: List _) # Object.fromFoldable # Argonaut.fromObject
+fromMapJsonToObjectJson :: Map String Json -> Json
+fromMapJsonToObjectJson m = (m # Map.toUnfoldable :: List _) # Object.fromFoldable # Argonaut.fromObject
 
 instance DecodeJson FunctionParameter where
   decodeJson json | Right { "type": "object", parameters } <- decodeJson @{ "type" :: String, "parameters" :: Json } json = do

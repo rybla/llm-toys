@@ -6,7 +6,7 @@
   "scripts": {
     "build": "spago build",
     "bundle": "spago bundle --bundle-type app --outfile dist/main.js",
-    "serve": "bun run server.ts"
+    "serve": "bun run --hot server.ts"
   },
   "keywords": [],
   "author": "",
