@@ -2,18 +2,26 @@ module Example.DatingSim where
 
 import Prelude
 
+import Ai.Llm as Llm
+import Control.Bind (bindFlipped)
 import Control.Monad.State (StateT)
+import Data.Lens ((%=))
 import Data.List (List)
 import Data.Monoid (mempty)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Tree (Tree)
+import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Utility (inj, todo)
+import Utility (inj, prop, todo)
+
+apiKey = ""
+baseURL = ""
+model = ""
 
 type Person =
   { name :: String
@@ -140,14 +148,39 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-summarizeStory :: forall m. MonadAff m => StateT StoryState m Qualia
+summarizeStory :: forall m. MonadAff m => StateT Env m Qualia
 summarizeStory = todo "summarizeStory"
 
-updateStory :: forall m. MonadAff m => StoryChoice -> StateT StoryState m (List StoryChoice)
+applyStoryChoiceToPersonTraits :: StoryChoice -> PersonTraits -> PersonTraits
+applyStoryChoiceToPersonTraits = todo "applyStoryChoiceToPersonTraits"
+
+updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
-  -- summary <- summarizeStory
-  -- apply choice to player traits
+  summary <- summarizeStory
+  prop @"player" <<< prop @"traits" %= applyStoryChoiceToPersonTraits choice
   -- generate: flush out event that is the choice enacted and the immediate consequences of it
+  result <-
+    Llm.generate
+      { apiKey
+      , baseURL
+      , model
+      , messages:
+          [ wrap $ inj @"system"
+              { name: none
+              , content:
+                  "You are ...TODO"
+              }
+          , wrap $ inj @"user"
+              { name: none
+              , content:
+                  "The next event that happens is: " <> unwrap choice.description <> ". Write a fluhsed-out narration of this event happening."
+              }
+          ]
+      , tools: mempty
+      , tool_choice: wrap $ inj @"none" unit
+      }
+      # liftAff
+      # bindFlipped ?a
   -- generate: next choices, partly based on random fluctuation of a few traits
   todo "updateStory"
 
