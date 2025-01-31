@@ -1152,11 +1152,11 @@
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty4 = mempty(dictMonoid);
+      var mempty5 = mempty(dictMonoid);
       return function(v) {
         return function(v1) {
           if (v1 instanceof Nothing) {
-            return mempty4;
+            return mempty5;
           }
           ;
           if (v1 instanceof Just) {
@@ -1172,13 +1172,13 @@
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty5 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x) {
           return function(acc) {
             return append5(f(x))(acc);
           };
-        })(mempty4);
+        })(mempty5);
       };
     };
   };
@@ -1282,7 +1282,7 @@
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty5 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x) {
@@ -1290,7 +1290,7 @@
               return append5(f(i2)(x))(acc);
             };
           };
-        })(mempty4);
+        })(mempty5);
       };
     };
   };
@@ -1543,14 +1543,14 @@
     },
     foldMap: function(dictMonoid) {
       var append22 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty5 = mempty(dictMonoid);
       return function(f) {
         return foldl(foldableList)(function(acc) {
           var $286 = append22(acc);
           return function($287) {
             return $286(f($287));
           };
-        })(mempty4);
+        })(mempty5);
       };
     }
   };
@@ -1564,6 +1564,14 @@
     }
   };
   var append1 = /* @__PURE__ */ append(semigroupList);
+  var monoidList = /* @__PURE__ */ function() {
+    return {
+      mempty: Nil.value,
+      Semigroup0: function() {
+        return semigroupList;
+      }
+    };
+  }();
   var semigroupNonEmptyList = {
     append: function(v) {
       return function(as$prime) {
@@ -8803,7 +8811,7 @@ ${str(snapshot)}`);
   var fold2 = /* @__PURE__ */ _foldM(applyFlipped);
   var foldMap2 = function(dictMonoid) {
     var append12 = append(dictMonoid.Semigroup0());
-    var mempty4 = mempty(dictMonoid);
+    var mempty5 = mempty(dictMonoid);
     return function(f) {
       return fold2(function(acc) {
         return function(k) {
@@ -8811,7 +8819,7 @@ ${str(snapshot)}`);
             return append12(acc)(f(k)(v));
           };
         };
-      })(mempty4);
+      })(mempty5);
     };
   };
   var foldableObject = {
@@ -9540,12 +9548,12 @@ ${str(snapshot)}`);
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty4 = mempty(dictMonoid);
+      var mempty5 = mempty(dictMonoid);
       var append12 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
-            return mempty4;
+            return mempty5;
           }
           ;
           if (v instanceof Node) {
@@ -10100,6 +10108,9 @@ ${str(snapshot)}`);
   // output/Utility/index.js
   var on1 = /* @__PURE__ */ on();
   var inj1 = /* @__PURE__ */ inj();
+  var todo = function(msg) {
+    return unsafeCrashWith("TODO: " + msg);
+  };
   var prop2 = function(dictIsSymbol) {
     var prop12 = prop(dictIsSymbol)()();
     return function() {
@@ -13195,30 +13206,39 @@ ${str(snapshot)}`);
   }();
 
   // output/Example.DatingSim/index.js
+  var unwrap5 = /* @__PURE__ */ unwrap();
   var show4 = /* @__PURE__ */ show(showNumber);
+  var wrap6 = /* @__PURE__ */ wrap();
   var inj14 = /* @__PURE__ */ inj2()({
     reflectSymbol: function() {
-      return "filtering";
+      return "story";
     }
   });
+  var mempty4 = /* @__PURE__ */ mempty(monoidList);
   var component2 = /* @__PURE__ */ function() {
     var render = function(state3) {
-      return div2([style("padding: 1em; display: flex; flex-direction: column; gap: 1em;")])([div2([style("flex-grow: 0; flex-shrink: 0;")])([table([style("border-collapse: collapse")])([tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("name: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.name)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("personality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.personality)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("physicality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.physicality)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("charm: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.charm))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("empathy: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.empathy))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("confidence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.confidence))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("wisdom: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.wisdom))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("intelligence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.intelligence))])])])]), div2([style("flex-grow: 1; flex-shrink: 0;")])([div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;")])([text("<game>")])])]);
+      return div2([style("padding: 1em; display: flex; flex-direction: column; gap: 1em;")])([div2([style("flex-grow: 0; flex-shrink: 0;")])([table([style("border-collapse: collapse")])([tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("name: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(state3.player.name)])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("personality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(unwrap5(state3.player.personality))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("physicality: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(unwrap5(state3.player.physicality))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("charm: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.traits.charm))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("empathy: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.traits.empathy))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("confidence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.traits.confidence))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("wisdom: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.traits.wisdom))])]), tr_([td([style("vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;")])([text("intelligence: ")]), td([style("vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;")])([text(show4(state3.player.traits.intelligence))])])])]), div2([style("flex-grow: 1; flex-shrink: 0;")])([div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;")])([text("<game>")])])]);
     };
     var initialState = function(v) {
       return {
         player: {
           name: "Ash",
-          physicality: "Ash has blue eyes, long black hair, and a thin, athletic build. They may be interested in sports or exercise as well.",
-          personality: "In addition to their physical features, Ash is intelligent, kind-hearted, and independent. They enjoy spending time outdoors, traveling, and exploring new things.",
-          charm: 0.5,
-          empathy: 0.5,
-          confidence: 0.5,
-          intelligence: 0.5,
-          wisdom: 0.5
+          physicality: wrap6("Ash has blue eyes, long black hair, and a thin, athletic build. They may be interested in sports or exercise as well."),
+          personality: wrap6("In addition to their physical features, Ash is intelligent, kind-hearted, and independent. They enjoy spending time outdoors, traveling, and exploring new things."),
+          traits: {
+            charm: 0.5,
+            empathy: 0.5,
+            confidence: 0.5,
+            intelligence: 0.5,
+            wisdom: 0.5
+          }
         },
         world: {
-          status: inj14({})
+          status: inj14({
+            arc: todo("StoryArc"),
+            arc_step_index: 0,
+            choices: mempty4
+          })
         }
       };
     };
@@ -14130,7 +14150,7 @@ ${str(snapshot)}`);
   var $$void7 = /* @__PURE__ */ $$void(functorEffect);
   var pure11 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
-  var unwrap5 = /* @__PURE__ */ unwrap();
+  var unwrap6 = /* @__PURE__ */ unwrap();
   var when3 = /* @__PURE__ */ when(applicativeEffect);
   var not2 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
   var identity12 = /* @__PURE__ */ identity(categoryFn);
@@ -14175,7 +14195,7 @@ ${str(snapshot)}`);
           return unit;
         };
         var buildWidget2 = function(spec) {
-          var buildThunk2 = buildThunk(unwrap5)(spec);
+          var buildThunk2 = buildThunk(unwrap6)(spec);
           var $lazy_patch = $runtime_lazy9("patch", "Halogen.VDom.Driver", function() {
             return function(st, slot) {
               if (st instanceof Just) {
