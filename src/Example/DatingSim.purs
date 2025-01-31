@@ -5,6 +5,8 @@ import Prelude
 import Ai.Llm as Llm
 import Control.Bind (bindFlipped)
 import Control.Monad.State (StateT)
+import Control.Monad.Trans.Class (lift)
+import Data.Either (either)
 import Data.Lens ((%=))
 import Data.List (List)
 import Data.Monoid (mempty)
@@ -12,7 +14,8 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Tree (Tree)
 import Data.Unfoldable (none)
 import Data.Variant (Variant)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, throwError)
+import Effect.Aff as Aff
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -180,7 +183,7 @@ updateStory choice = do
       , tool_choice: wrap $ inj @"none" unit
       }
       # liftAff
-      # bindFlipped ?a
+      # bindFlipped (either (\err -> liftAff $ throwError $ Aff.error $ "generation error: " <> err) pure)
   -- generate: next choices, partly based on random fluctuation of a few traits
   todo "updateStory"
 
