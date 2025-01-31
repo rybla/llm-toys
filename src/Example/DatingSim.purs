@@ -2,17 +2,16 @@ module Example.DatingSim where
 
 import Prelude
 
+import Ai.Llm (mkAssistantMessage, mkSystemMessage, mkUserMessage)
 import Ai.Llm as Llm
-import Control.Bind (bindFlipped)
-import Control.Monad.State (StateT)
-import Control.Monad.Trans.Class (lift)
-import Data.Either (either)
-import Data.Lens ((%=))
+import Control.Monad.State (StateT, gets)
+import Data.Array as Array
+import Data.Either (Either(..))
+import Data.Foldable (fold, foldMap, intercalate, null)
+import Data.Lens (view, (%=))
 import Data.List (List)
-import Data.Monoid (mempty)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.Tree (Tree)
-import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
@@ -20,11 +19,16 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Utility (inj, prop, todo)
+import Utility (for_count, inj, onLens', prop, todo)
 
 apiKey = ""
 baseURL = ""
 model = ""
+
+type Env =
+  { player :: Person
+  , world :: WorldState
+  }
 
 type Person =
   { name :: String
@@ -41,13 +45,8 @@ type PersonTraits =
   , wisdom :: Number
   }
 
-type Env =
-  { player :: Person
-  , world :: WorldState
-  }
-
 type WorldState =
-  { status ::
+  { stage ::
       Variant
         ( filtering :: FilteringState
         , story :: StoryState
@@ -59,7 +58,7 @@ type FilteringState = {}
 type StoryState =
   { arc :: StoryArc
   , arc_step_index :: Int
-  , events :: List Qualia
+  , transcript :: Array { prompt :: Qualia, reply :: Qualia }
   }
 
 type StoryChoice =
@@ -85,10 +84,10 @@ component = H.mkComponent { initialState, eval, render }
             }
         }
     , world:
-        { status: inj @"story"
+        { stage: inj @"story"
             { arc: todo "StoryArc"
             , arc_step_index: zero
-            , events: mempty
+            , transcript: mempty
             }
         }
     }
@@ -151,7 +150,7 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-summarizeStory :: forall m. MonadAff m => StateT Env m Qualia
+summarizeStory :: forall m. MonadAff m => StoryState -> m Qualia
 summarizeStory = todo "summarizeStory"
 
 applyStoryChoiceToPersonTraits :: StoryChoice -> PersonTraits -> PersonTraits
@@ -159,32 +158,55 @@ applyStoryChoiceToPersonTraits = todo "applyStoryChoiceToPersonTraits"
 
 updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
-  summary <- summarizeStory
+  story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
+
+  -- TODO: is this needed?
+  -- summary <- summarizeStory story
+
+  -- apply choice to player's traits
   prop @"player" <<< prop @"traits" %= applyStoryChoiceToPersonTraits choice
-  -- generate: flush out event that is the choice enacted and the immediate consequences of it
+
+  -- write next portion of story
   result <-
     Llm.generate
       { apiKey
       , baseURL
       , model
       , messages:
-          [ wrap $ inj @"system"
-              { name: none
-              , content:
-                  "You are ...TODO"
-              }
-          , wrap $ inj @"user"
-              { name: none
-              , content:
-                  "The next event that happens is: " <> unwrap choice.description <> ". Write a fluhsed-out narration of this event happening."
-              }
-          ]
+          [ [ mkSystemMessage $
+                [ "You are a professional flash fiction writer."
+                , "You are currently writing a flash fiction story in collaboration with the user."
+                , "The way this works is that the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating just this next portion of the story."
+                , "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story."
+                ]
+                  # intercalate " "
+            ]
+          , story.transcript # foldMap \x ->
+              [ mkUserMessage $ x.prompt # unwrap
+              , mkAssistantMessage $ x.reply # unwrap
+              ]
+          , [ mkUserMessage $ choice.description # unwrap ]
+          ] # fold
       , tools: mempty
       , tool_choice: wrap $ inj @"none" unit
       }
       # liftAff
-      # bindFlipped (either (\err -> liftAff $ throwError $ Aff.error $ "generation error: " <> err) pure)
-  -- generate: next choices, partly based on random fluctuation of a few traits
+  reply <- case result of
+    Left err -> liftAff $ throwError $ Aff.error $ "generation error: " <> err
+    Right { tool_calls } | not $ null tool_calls -> liftAff $ throwError $ Aff.error $ "generation error: shouldn't be using tools: " <> show tool_calls
+    Right { content: Nothing } -> liftAff $ throwError $ Aff.error $ "generation error: no content"
+    Right { content: Just reply } -> pure reply
+  prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" %=
+    (_ `Array.snoc` { prompt: choice.description, reply: reply # wrap })
+
+  -- generate next choices
+
+  let n_choices = 3
+  for_count n_choices do
+    -- sample a random fluctuation of traits
+    -- 
+    pure unit
+
   todo "updateStory"
 
 --------------------------------------------------------------------------------

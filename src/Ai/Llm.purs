@@ -11,15 +11,18 @@ import Data.Argonaut as Argonaut
 import Data.Argonaut.Decode.Class (decodeJson)
 import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
+import Data.Generic.Rep (class Generic)
 import Data.List (List)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe, maybe, optional)
+import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Optional (Optional)
 import Data.Optional as Optional
 import Data.PartialRecord (PartialRecord(..))
+import Data.Show.Generic (genericShow)
 import Data.Traversable (traverse)
+import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
@@ -58,8 +61,6 @@ foreign import generate_
 -- types
 --------------------------------------------------------------------------------
 
-type AssistantMessage = { content :: Maybe String, tool_calls :: Array ToolCall }
-
 newtype Message = Message
   ( Variant
       ( system :: { name :: Maybe String, content :: String }
@@ -74,7 +75,22 @@ newtype Message = Message
       )
   )
 
+type AssistantMessage = { content :: Maybe String, tool_calls :: Array ToolCall }
+
+mkSystemMessage :: String -> Message
+mkSystemMessage content = inj @"system" { name: none, content } # wrap
+
+mkUserMessage :: String -> Message
+mkUserMessage content = inj @"user" { name: none, content } # wrap
+
+mkAssistantMessage :: String -> Message
+mkAssistantMessage content = inj @"assistant" { content: content # pure, tool_calls: none } # wrap
+
+mkToolMessage :: String -> String -> String -> Message
+mkToolMessage name tool_call_id content = inj @"tool" { name, tool_call_id, content } # wrap
+
 derive instance Newtype Message _
+derive newtype instance Show Message
 
 instance EncodeJson Message where
   encodeJson = unwrap >>> match
@@ -112,6 +128,7 @@ newtype ToolCall = ToolCall
   }
 
 derive instance Newtype ToolCall _
+derive newtype instance Show ToolCall
 
 instance EncodeJson ToolCall where
   encodeJson = unwrap >>> encodeJson
@@ -126,6 +143,7 @@ newtype Tool = Tool
   )
 
 derive instance Newtype Tool _
+derive newtype instance Show Tool
 
 instance EncodeJson Tool where
   encodeJson = unwrap >>> match
@@ -146,6 +164,10 @@ type FunctionDefinition =
 newtype FunctionParameters = FunctionParameters (Map String FunctionParameter)
 
 derive instance Newtype FunctionParameters _
+derive instance Generic FunctionParameters _
+
+instance Show FunctionParameters where
+  show x = genericShow x
 
 instance EncodeJson FunctionParameters where
   encodeJson = unwrap >>> map encodeJson >>> fromMapJsonToObjectJson
@@ -165,6 +187,7 @@ newtype FunctionParameter = FunctionParameter
   )
 
 derive instance Newtype FunctionParameter _
+derive newtype instance Show FunctionParameter
 
 instance EncodeJson FunctionParameter where
   encodeJson = unwrap >>> match
@@ -194,6 +217,7 @@ newtype ToolChoice = ToolChoice
   )
 
 derive instance Newtype ToolChoice _
+derive newtype instance Show ToolChoice
 
 instance EncodeJson ToolChoice where
   encodeJson = unwrap >>> match
