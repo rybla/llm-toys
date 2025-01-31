@@ -48,7 +48,7 @@ type FilteringState = {}
 type StoryState =
   { arc :: StoryArc
   , arc_step_index :: Int
-  , choices :: List StoryChoice
+  , events :: List Qualia
   }
 
 type StoryChoice =
@@ -77,7 +77,7 @@ component = H.mkComponent { initialState, eval, render }
         { status: inj @"story"
             { arc: todo "StoryArc"
             , arc_step_index: zero
-            , choices: mempty
+            , events: mempty
             }
         }
     }
@@ -140,9 +140,16 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-updateStory :: forall m. MonadAff m => StateT StoryState m Unit
-updateStory = do
-  pure unit
+summarizeStory :: forall m. MonadAff m => StateT StoryState m Qualia
+summarizeStory = todo "summarizeStory"
+
+updateStory :: forall m. MonadAff m => StoryChoice -> StateT StoryState m (List StoryChoice)
+updateStory choice = do
+  -- summary <- summarizeStory
+  -- apply choice to player traits
+  -- generate: flush out event that is the choice enacted and the immediate consequences of it
+  -- generate: next choices, partly based on random fluctuation of a few traits
+  todo "updateStory"
 
 --------------------------------------------------------------------------------
 -- Qualia
