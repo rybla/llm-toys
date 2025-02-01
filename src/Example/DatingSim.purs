@@ -43,7 +43,7 @@ genre :: String
 genre = "erotica"
 
 --------------------------------------------------------------------------------
--- types
+-- Env
 --------------------------------------------------------------------------------
 
 type Env =
@@ -102,62 +102,8 @@ type StoryChoice =
   , profileDiff :: ProfileDiff
   }
 
-component :: forall query input output. H.Component query input output Aff
-component = H.mkComponent { initialState, eval, render }
-  where
-  initialState :: input -> Env
-  initialState _ =
-    { player:
-        { name: "Ash"
-        , physicality: "Ash has blue eyes, long black hair, and a thin, athletic build. They may be interested in sports or exercise as well." # wrap
-        , personality: "In addition to their physical features, Ash is intelligent, kind-hearted, and independent. They enjoy spending time outdoors, traveling, and exploring new things." # wrap
-        , traits:
-            { charm: 0.5
-            , empathy: 0.5
-            , confidence: 0.5
-            , intelligence: 0.5
-            , wisdom: 0.5
-            }
-        }
-    , world:
-        { stage: inj @"story"
-            { arc: todo "StoryArc"
-            , arc_step_index: zero
-            , transcript: mempty
-            }
-        }
-    }
-
-  eval = H.mkEval H.defaultEval
-
-  render state =
-    HH.div
-      [ HP.style "padding: 1em; display: flex; flex-direction: column; gap: 1em;" ]
-      [ HH.div
-          [ HP.style "flex-grow: 0; flex-shrink: 0;" ]
-          [ HH.table
-              [ HP.style "border-collapse: collapse" ]
-              let
-                key_style = "vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;"
-                val_style = "vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;"
-              in
-                [ HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "name: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.name ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "personality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.personality # unwrap ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "physicality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.physicality # unwrap ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "charm: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.charm ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "empathy: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.empathy ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "confidence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.confidence ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "wisdom: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.wisdom ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "intelligence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.intelligence ] ]
-                ]
-          ]
-      , HH.div
-          [ HP.style "flex-grow: 1; flex-shrink: 0;" ]
-          [ HH.div
-              [ HP.style "padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;" ]
-              [ HH.text "<game>" ]
-          ]
-      ]
+applyStoryChoiceToProfile :: StoryChoice -> Profile -> Profile
+applyStoryChoiceToProfile = todo "applyStoryChoiceToProfile"
 
 --------------------------------------------------------------------------------
 -- StoryArc
@@ -183,11 +129,20 @@ type StoryArcStep =
   }
 
 --------------------------------------------------------------------------------
+-- loopStory
+--------------------------------------------------------------------------------
+
+loopStory :: forall m. MonadAff m => StateT Env m Unit
+loopStory = do
+  pure unit
+
+--------------------------------------------------------------------------------
 -- update
 --------------------------------------------------------------------------------
 
-applyStoryChoiceToProfile :: StoryChoice -> Profile -> Profile
-applyStoryChoiceToProfile = todo "applyStoryChoiceToProfile"
+applyStoryChoice :: forall m. MonadAff m => StoryChoice -> StateT Env m Unit
+applyStoryChoice choice = do
+  prop @"player" <<< prop @"traits" %= applyStoryChoiceToProfile choice
 
 updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
@@ -301,6 +256,67 @@ combinations_of_trait_indices :: Array (List Int)
 combinations_of_trait_indices = combinations 5 (0 : 1 : 2 : 3 : 4 : Nil) # Array.fromFoldable
 
 --------------------------------------------------------------------------------
+-- component
+--------------------------------------------------------------------------------
+
+component :: forall query input output. H.Component query input output Aff
+component = H.mkComponent { initialState, eval, render }
+  where
+  initialState :: input -> Env
+  initialState _ =
+    { player:
+        { name: "Ash"
+        , physicality: "Ash has blue eyes, long black hair, and a thin, athletic build. They may be interested in sports or exercise as well." # wrap
+        , personality: "In addition to their physical features, Ash is intelligent, kind-hearted, and independent. They enjoy spending time outdoors, traveling, and exploring new things." # wrap
+        , traits:
+            { charm: 0.5
+            , empathy: 0.5
+            , confidence: 0.5
+            , intelligence: 0.5
+            , wisdom: 0.5
+            }
+        }
+    , world:
+        { stage: inj @"story"
+            { arc: todo "StoryArc"
+            , arc_step_index: zero
+            , transcript: mempty
+            }
+        }
+    }
+
+  eval = H.mkEval H.defaultEval
+
+  render state =
+    HH.div
+      [ HP.style "padding: 1em; display: flex; flex-direction: column; gap: 1em;" ]
+      [ HH.div
+          [ HP.style "flex-grow: 0; flex-shrink: 0;" ]
+          [ HH.table
+              [ HP.style "border-collapse: collapse" ]
+              let
+                key_style = "vertical-align: top; text-align: right; background-color: black; color: white; padding: 0.5em; border: 1px solid black;"
+                val_style = "vertical-align: top; text-align: left; padding: 0.5em; border: 1px solid black;"
+              in
+                [ HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "name: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.name ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "personality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.personality # unwrap ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "physicality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.physicality # unwrap ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "charm: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.charm ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "empathy: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.empathy ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "confidence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.confidence ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "wisdom: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.wisdom ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "intelligence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.intelligence ] ]
+                ]
+          ]
+      , HH.div
+          [ HP.style "flex-grow: 1; flex-shrink: 0;" ]
+          [ HH.div
+              [ HP.style "padding: 0.5em; box-shadow: 0 0 0 1px black; height: 600px;" ]
+              [ HH.text "<game>" ]
+          ]
+      ]
+
+--------------------------------------------------------------------------------
 -- Qualia
 --------------------------------------------------------------------------------
 
@@ -308,4 +324,3 @@ combinations_of_trait_indices = combinations 5 (0 : 1 : 2 : 3 : 4 : Nil) # Array
 newtype Qualia = Qualia String
 
 derive instance Newtype Qualia _
-
