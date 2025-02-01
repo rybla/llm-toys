@@ -55,7 +55,7 @@ type Person =
   { name :: String
   , physicality :: Qualia
   , personality :: Qualia
-  , traits :: Profile
+  , profile :: Profile
   }
 
 type Profile =
@@ -142,14 +142,14 @@ loopStory = do
 
 applyStoryChoice :: forall m. MonadAff m => StoryChoice -> StateT Env m Unit
 applyStoryChoice choice = do
-  prop @"player" <<< prop @"traits" %= applyStoryChoiceToProfile choice
+  prop @"player" <<< prop @"profile" %= applyStoryChoiceToProfile choice
 
 updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
   story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
 
-  -- apply choice to player's traits
-  prop @"player" <<< prop @"traits" %= applyStoryChoiceToProfile choice
+  -- apply choice to player's profile
+  prop @"player" <<< prop @"profile" %= applyStoryChoiceToProfile choice
 
   -- write next portion of story
   reply <-
@@ -268,7 +268,7 @@ component = H.mkComponent { initialState, eval, render }
         { name: "Ash"
         , physicality: "Ash has blue eyes, long black hair, and a thin, athletic build. They may be interested in sports or exercise as well." # wrap
         , personality: "In addition to their physical features, Ash is intelligent, kind-hearted, and independent. They enjoy spending time outdoors, traveling, and exploring new things." # wrap
-        , traits:
+        , profile:
             { charm: 0.5
             , empathy: 0.5
             , confidence: 0.5
@@ -301,11 +301,11 @@ component = H.mkComponent { initialState, eval, render }
                 [ HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "name: " ], HH.td [ HP.style $ val_style ] [ HH.text state.player.name ] ]
                 , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "personality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.personality # unwrap ] ]
                 , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "physicality: " ], HH.td [ HP.style $ val_style ] [ HH.text $ state.player.physicality # unwrap ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "charm: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.charm ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "empathy: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.empathy ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "confidence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.confidence ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "wisdom: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.wisdom ] ]
-                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "intelligence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.traits.intelligence ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "charm: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.profile.charm ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "empathy: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.profile.empathy ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "confidence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.profile.confidence ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "wisdom: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.profile.wisdom ] ]
+                , HH.tr_ [ HH.td [ HP.style $ key_style ] [ HH.text "intelligence: " ], HH.td [ HP.style $ val_style ] [ HH.text $ show state.player.profile.intelligence ] ]
                 ]
           ]
       , HH.div
