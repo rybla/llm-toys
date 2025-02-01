@@ -39,8 +39,10 @@ config1 =
 -- constants
 --------------------------------------------------------------------------------
 
-genre :: String
-genre = "erotica"
+genre = "erotica" :: String
+
+count_of_StoryChoices = 3 :: Int
+magnitude_of_ProfileDiff = 0.05 :: Number
 
 --------------------------------------------------------------------------------
 -- Env
@@ -174,14 +176,13 @@ updateStory choice = do
   prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" %=
     (_ `Array.snoc` { prompt: choice.description, reply: reply # wrap })
 
+  generateStoryChoices
+
+generateStoryChoices :: forall m. MonadAff m => StateT Env m (List StoryChoice)
+generateStoryChoices = do
   -- TODO take into account story arc somehow
-
-  -- generate next choices
-
-  let n_choices = 3
-  forM_count n_choices \_ -> do
-    let magnitude = 0.05
-    profileDiff <- generateProfileDiff magnitude # liftEffect
+  forM_count count_of_StoryChoices \_ -> do
+    profileDiff <- generateProfileDiff magnitude_of_ProfileDiff # liftEffect
     generateStoryChoiceFromProfileDiff profileDiff
 
 -- would be nice not to have to feed in the _entire_ story so far to generate these choices, but clearly that's the best option in terms of quality
