@@ -49,9 +49,11 @@ component = H.mkComponent { initialState, eval, render }
                 state <- get
                 result <-
                   Llm.generate
-                    { apiKey: ""
-                    , baseURL: "http://localhost:11434/v1"
-                    , model: state.model
+                    { config:
+                        { apiKey: ""
+                        , baseURL: "http://localhost:11434/v1"
+                        , model: state.model
+                        }
                     , messages: [ wrap $ inj @"user" { name: none, content: input } ]
                     , tools:
                         [ wrap $ inj @"function"

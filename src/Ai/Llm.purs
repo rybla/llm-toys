@@ -11,11 +11,12 @@ import Data.Argonaut as Argonaut
 import Data.Argonaut.Decode.Class (decodeJson)
 import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
+import Data.Foldable (null)
 import Data.Generic.Rep (class Generic)
 import Data.List (List)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Optional (Optional)
 import Data.Optional as Optional
@@ -26,6 +27,7 @@ import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
+import Effect.Aff as Aff
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Utility (inj)
@@ -34,17 +36,24 @@ import Utility (inj)
 -- generate
 --------------------------------------------------------------------------------
 
-generate
-  :: { apiKey :: String
-     , baseURL :: String
-     , model :: String
-     , messages :: Array Message
-     , tools :: Array Tool
-     , tool_choice :: ToolChoice
-     }
-  -> Aff (String \/ AssistantMessage)
-generate args = do
-  result <- generate_ { ok: pure, err: throwError } (args # encodeJson) # toAffE
+type GenerateArgs =
+  { config :: GenerateConfig
+  , messages :: Array Message
+  , tools :: Array Tool
+  , tool_choice :: ToolChoice
+  }
+
+type GenerateConfig =
+  { apiKey :: String
+  , baseURL :: String
+  , model :: String
+  }
+
+generate :: GenerateArgs -> Aff (String \/ AssistantMessage)
+generate { config: { apiKey, baseURL, model }, messages, tools, tool_choice } = do
+  result <-
+    generate_ { ok: pure, err: throwError }
+      ({ apiKey, baseURL, model, messages, tools, tool_choice } # encodeJson) # toAffE
   case result of
     Left err -> pure $ throwError err
     Right json_msg -> do
@@ -56,6 +65,26 @@ foreign import generate_
   :: { ok :: Json -> Either String Json, err :: String -> Either String Json }
   -> Json
   -> Effect (Promise (Either String Json))
+
+--------------------------------------------------------------------------------
+-- generate refinements
+--------------------------------------------------------------------------------
+
+generate_without_tools
+  :: { config ::
+         { apiKey :: String
+         , baseURL :: String
+         , model :: String
+         }
+     , messages :: Array Message
+     }
+  -> Aff String
+generate_without_tools { config, messages } =
+  generate { config, messages, tools: none, tool_choice: wrap $ inj @"none" unit } >>= case _ of
+    Left err -> throwError $ Aff.error $ "generation error: " <> err
+    Right { tool_calls } | not $ null tool_calls -> throwError $ Aff.error $ "generation error: shouldn't be using tools: " <> show tool_calls
+    Right { content: Nothing } -> throwError $ Aff.error $ "generation error: no content"
+    Right { content: Just reply } -> pure reply
 
 --------------------------------------------------------------------------------
 -- types

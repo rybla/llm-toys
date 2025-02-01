@@ -2,22 +2,20 @@ module Example.DatingSim where
 
 import Prelude
 
-import Ai.Llm (mkAssistantMessage, mkSystemMessage, mkUserMessage)
+import Ai.Llm (GenerateConfig, mkAssistantMessage, mkSystemMessage, mkUserMessage)
 import Ai.Llm as Llm
-import Control.Monad.State (StateT, gets)
+import Control.Monad.State (StateT, get, gets)
 import Data.Array as Array
-import Data.Either (Either(..))
-import Data.Foldable (fold, foldMap, foldr, intercalate, null)
+import Data.Foldable (fold, foldMap, foldr, intercalate)
 import Data.Lens (view, (%=))
 import Data.List (List(..), (:))
-import Data.Maybe (Maybe(..), fromMaybe')
+import Data.Maybe (fromMaybe')
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Traversable (traverse)
-import Data.Tuple.Nested ((/\))
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant)
 import Effect (Effect)
-import Effect.Aff (Aff, throwError)
-import Effect.Aff as Aff
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Random as Random
 import Halogen (liftEffect)
@@ -26,9 +24,27 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Utility (bug, combinations, forM_count, impossible, inj, onLens', prop, todo)
 
-apiKey = ""
-baseURL = ""
-model = ""
+--------------------------------------------------------------------------------
+-- LLM config
+--------------------------------------------------------------------------------
+
+config1 :: GenerateConfig
+config1 =
+  { apiKey: ""
+  , baseURL: ""
+  , model: ""
+  }
+
+--------------------------------------------------------------------------------
+-- constants
+--------------------------------------------------------------------------------
+
+genre :: String
+genre = "erotica"
+
+--------------------------------------------------------------------------------
+-- types
+--------------------------------------------------------------------------------
 
 type Env =
   { player :: Person
@@ -39,10 +55,10 @@ type Person =
   { name :: String
   , physicality :: Qualia
   , personality :: Qualia
-  , traits :: PersonTraits
+  , traits :: Profile
   }
 
-type PersonTraits =
+type Profile =
   { charm :: Number
   , empathy :: Number
   , confidence :: Number
@@ -50,9 +66,20 @@ type PersonTraits =
   , wisdom :: Number
   }
 
-newtype PersonTraitsFluctuation = PersonTraitsFluctuation PersonTraits
+profileFieldNameAtIndex :: Int -> String
+profileFieldNameAtIndex 0 = "charm"
+profileFieldNameAtIndex 1 = "empathy"
+profileFieldNameAtIndex 2 = "confidence"
+profileFieldNameAtIndex 3 = "intelligence"
+profileFieldNameAtIndex 4 = "wisdom"
+profileFieldNameAtIndex i = bug $ "[profileFieldNameAtIndex] invalid index: " <> show i
 
-derive instance Newtype PersonTraitsFluctuation _
+newtype ProfileDiff = ProfileDiff (List (Int /\ Number))
+
+applyProfileDiff :: ProfileDiff -> Profile -> Profile
+applyProfileDiff (ProfileDiff dp) p = foldr (\(i /\ dx) -> modifyProfileAtIndex i (_ + dx)) p dp
+
+derive instance Newtype ProfileDiff _
 
 type WorldState =
   { stage ::
@@ -72,7 +99,7 @@ type StoryState =
 
 type StoryChoice =
   { description :: Qualia
-  , fluctuation :: PersonTraitsFluctuation
+  , profileDiff :: ProfileDiff
   }
 
 component :: forall query input output. H.Component query input output Aff
@@ -159,30 +186,27 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-applyStoryChoiceToPersonTraits :: StoryChoice -> PersonTraits -> PersonTraits
-applyStoryChoiceToPersonTraits = todo "applyStoryChoiceToPersonTraits"
+applyStoryChoiceToProfile :: StoryChoice -> Profile -> Profile
+applyStoryChoiceToProfile = todo "applyStoryChoiceToProfile"
 
 updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
   story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
 
   -- apply choice to player's traits
-  prop @"player" <<< prop @"traits" %= applyStoryChoiceToPersonTraits choice
+  prop @"player" <<< prop @"traits" %= applyStoryChoiceToProfile choice
 
   -- write next portion of story
-  result <-
-    Llm.generate
-      { apiKey
-      , baseURL
-      , model
+  reply <-
+    Llm.generate_without_tools
+      { config: config1
       , messages:
-          [ [ mkSystemMessage $
-                [ "You are a professional flash fiction writer."
+          [ [ mkSystemMessage $ intercalate " " $
+                [ "You are a professional flash fiction writer in the " <> genre <> " genre."
                 , "You are currently writing a flash fiction story in collaboration with the user."
                 , "The way this works is that the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating just this next portion of the story."
                 , "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story."
                 ]
-                  # intercalate " "
             ]
           , story.transcript # foldMap \x ->
               [ mkUserMessage $ x.prompt # unwrap
@@ -190,15 +214,8 @@ updateStory choice = do
               ]
           , [ mkUserMessage $ choice.description # unwrap ]
           ] # fold
-      , tools: mempty
-      , tool_choice: wrap $ inj @"none" unit
       }
       # liftAff
-  reply <- case result of
-    Left err -> liftAff $ throwError $ Aff.error $ "generation error: " <> err
-    Right { tool_calls } | not $ null tool_calls -> liftAff $ throwError $ Aff.error $ "generation error: shouldn't be using tools: " <> show tool_calls
-    Right { content: Nothing } -> liftAff $ throwError $ Aff.error $ "generation error: no content"
-    Right { content: Just reply } -> pure reply
   prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" %=
     (_ `Array.snoc` { prompt: choice.description, reply: reply # wrap })
 
@@ -209,18 +226,59 @@ updateStory choice = do
   let n_choices = 3
   forM_count n_choices \_ -> do
     let magnitude = 0.05
-    fluctuation <- generatePersonTraitsFluctuation magnitude # liftEffect
-    generateStoryChoiceFromPersonTraitsFluctuation fluctuation
+    profileDiff <- generateProfileDiff magnitude # liftEffect
+    generateStoryChoiceFromProfileDiff profileDiff
 
-generateStoryChoiceFromPersonTraitsFluctuation
+-- would be nice not to have to feed in the _entire_ story so far to generate these choices, but clearly that's the best option in terms of quality
+generateStoryChoiceFromProfileDiff
   :: forall m
    . MonadAff m
-  => PersonTraitsFluctuation
+  => ProfileDiff
   -> StateT Env m StoryChoice
-generateStoryChoiceFromPersonTraitsFluctuation = todo "generateStoryChoiceFromPersonTraitsFluctuation"
+generateStoryChoiceFromProfileDiff dp = do
+  env <- get
+  story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
+  reply <-
+    Llm.generate_without_tools
+      { config: config1
+      , messages:
+          [ mkSystemMessage $ intercalate " " $
+              [ "You are a professional creative writing assisstant who is helping the user to write a flash fiction story in the " <> genre <> " genre."
+              , "In the story, the main character's name is " <> env.player.name
+              , "The story is told from " <> env.player.name <> "'s point of view."
+              , "The following is the story so far:"
+              , ""
+              , story.transcript # map (_.reply >>> unwrap >>> ("    " <> _)) # intercalate "\n"
+              , ""
+              , "The next event of the story depends on what " <> env.player.name <> " does next."
+              , "The user will provide description of how what " <> env.player.name <> " does next should reflect on their character."
+              , "You should reply with a single sentence describing at a high level an example of what " <> env.player.name <> " could do next in the story which takes into account the user's description."
+              , "It is critically important that you are creative and help make the story interesting while also taking into account the user's instructions."
+              ]
+          , mkUserMessage $ intercalate " " $
+              [ env.player.name <> "'s next action should reflect " <> (describeProfileDiff dp # unwrap) <> "."
+              ]
+          ]
+      }
+      # liftAff
+  pure
+    { description: reply # wrap
+    , profileDiff: dp
+    }
 
-generatePersonTraitsFluctuation :: Number -> Effect PersonTraitsFluctuation
-generatePersonTraitsFluctuation magnitude = do
+describeProfileDiff :: ProfileDiff -> Qualia
+describeProfileDiff (ProfileDiff dp) = wrap $ intercalate ", " $
+  dp # map \(i /\ n) -> (describeProfileFieldValueDiff n # unwrap) <> " in " <> profileFieldNameAtIndex i
+
+describeProfileFieldValueDiff :: Number -> Qualia
+describeProfileFieldValueDiff n | n <= -0.1 = wrap $ "a dramatic decrease"
+describeProfileFieldValueDiff n | -0.1 < n, n < 0.0 = wrap $ "a slight decrease"
+describeProfileFieldValueDiff n | 0.0 < n, n < 0.1 = wrap $ "a slight increase"
+describeProfileFieldValueDiff n | 0.1 <= n = wrap $ "a dramatic increase"
+describeProfileFieldValueDiff _ = impossible unit
+
+generateProfileDiff :: Number -> Effect ProfileDiff
+generateProfileDiff magnitude = do
   trait_indices_combo_and_diffs <- do
     trait_indices_combo <- do
       trait_combo_index <- Random.randomInt 0 (combinations_of_trait_indices # Array.length)
@@ -229,19 +287,15 @@ generatePersonTraitsFluctuation magnitude = do
       polarity <- Random.randomBool
       let diff = magnitude * (if polarity then 1.0 else -1.0)
       pure $ i /\ diff
-  pure $ PersonTraitsFluctuation $
-    foldr
-      (\(i /\ diff) -> modifyPersonTraitsAtIndex i $ const diff)
-      zero
-      trait_indices_combo_and_diffs
+  pure $ ProfileDiff $ trait_indices_combo_and_diffs
 
-modifyPersonTraitsAtIndex :: Int -> (Number -> Number) -> PersonTraits -> PersonTraits
-modifyPersonTraitsAtIndex 0 f pt = pt { charm = f pt.charm }
-modifyPersonTraitsAtIndex 1 f pt = pt { empathy = f pt.empathy }
-modifyPersonTraitsAtIndex 2 f pt = pt { confidence = f pt.confidence }
-modifyPersonTraitsAtIndex 3 f pt = pt { intelligence = f pt.intelligence }
-modifyPersonTraitsAtIndex 4 f pt = pt { wisdom = f pt.wisdom }
-modifyPersonTraitsAtIndex i _ _ = bug $ "[modifyPersonTraitsAtIndex] invalid index: " <> show i
+modifyProfileAtIndex :: Int -> (Number -> Number) -> Profile -> Profile
+modifyProfileAtIndex 0 f p = p { charm = f p.charm }
+modifyProfileAtIndex 1 f p = p { empathy = f p.empathy }
+modifyProfileAtIndex 2 f p = p { confidence = f p.confidence }
+modifyProfileAtIndex 3 f p = p { intelligence = f p.intelligence }
+modifyProfileAtIndex 4 f p = p { wisdom = f p.wisdom }
+modifyProfileAtIndex i _ _ = bug $ "[modifyProfileAtIndex] invalid index: " <> show i
 
 combinations_of_trait_indices :: Array (List Int)
 combinations_of_trait_indices = combinations 5 (0 : 1 : 2 : 3 : 4 : Nil) # Array.fromFoldable
