@@ -17,6 +17,7 @@
             "maybe",
             "prelude",
             "profunctor-lenses",
+            "random",
             "record",
             "transformers",
             "variant"
@@ -78,6 +79,7 @@
             "prelude",
             "profunctor",
             "profunctor-lenses",
+            "random",
             "record",
             "refs",
             "safe-coerce",
@@ -1384,6 +1386,15 @@
         "record",
         "transformers",
         "tuples"
+      ]
+    },
+    "random": {
+      "type": "registry",
+      "version": "6.0.0",
+      "integrity": "sha256-CJ611a35MPCE7XQMp0rdC6MCn76znlhisiCRgboAG+Q=",
+      "dependencies": [
+        "effect",
+        "integers"
       ]
     },
     "record": {

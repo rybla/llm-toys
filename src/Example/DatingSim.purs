@@ -7,19 +7,24 @@ import Ai.Llm as Llm
 import Control.Monad.State (StateT, gets)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (fold, foldMap, intercalate, null)
+import Data.Foldable (fold, foldMap, foldr, intercalate, null)
 import Data.Lens (view, (%=))
-import Data.List (List)
-import Data.Maybe (Maybe(..))
+import Data.List (List(..), (:))
+import Data.Maybe (Maybe(..), fromMaybe')
 import Data.Newtype (class Newtype, unwrap, wrap)
+import Data.Traversable (traverse)
+import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant)
+import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
 import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Random as Random
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Utility (for_count, inj, onLens', prop, todo)
+import Utility (bug, combinations, forM_count, impossible, inj, onLens', prop, todo)
 
 apiKey = ""
 baseURL = ""
@@ -202,12 +207,46 @@ updateStory choice = do
   -- generate next choices
 
   let n_choices = 3
-  for_count n_choices do
+  choices <- forM_count n_choices \_ -> do
     -- sample a random fluctuation of traits
-    -- 
+
+    description <- todo "generate a description via LLM"
+    let
+      choice :: StoryChoice
+      choice =
+        { description
+        , traits_diff: todo "convert trait_indices_combo + polarity into a PersonTraits"
+        }
     pure unit
 
   todo "updateStory"
+
+generate_fluctuation_of_PersonTraits :: Number -> Effect PersonTraits
+generate_fluctuation_of_PersonTraits magnitude = do
+  trait_indices_combo_and_diffs <- do
+    trait_indices_combo <- do
+      trait_combo_index <- Random.randomInt 0 (combinations_of_trait_indices # Array.length)
+      pure $ combinations_of_trait_indices Array.!! trait_combo_index # fromMaybe' impossible
+    trait_indices_combo # traverse \i -> do
+      polarity <- Random.randomBool
+      let diff = magnitude * (if polarity then 1.0 else -1.0)
+      pure $ i /\ diff
+  pure $
+    foldr
+      (\(i /\ diff) -> modify_PersonTraits_at_index i $ const diff)
+      zero
+      trait_indices_combo_and_diffs
+
+modify_PersonTraits_at_index :: Int -> (Number -> Number) -> PersonTraits -> PersonTraits
+modify_PersonTraits_at_index 0 f pt = pt { charm = f pt.charm }
+modify_PersonTraits_at_index 1 f pt = pt { empathy = f pt.empathy }
+modify_PersonTraits_at_index 2 f pt = pt { confidence = f pt.confidence }
+modify_PersonTraits_at_index 3 f pt = pt { intelligence = f pt.intelligence }
+modify_PersonTraits_at_index 4 f pt = pt { wisdom = f pt.wisdom }
+modify_PersonTraits_at_index i _ _ = bug $ "[modify_PersonTraits_at_index] invalid index: " <> show i
+
+combinations_of_trait_indices :: Array (List Int)
+combinations_of_trait_indices = combinations 5 (0 : 1 : 2 : 3 : 4 : Nil) # Array.fromFoldable
 
 --------------------------------------------------------------------------------
 -- Qualia
