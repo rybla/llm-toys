@@ -77,7 +77,7 @@ profileFieldNameAtIndex i = bug $ "[profileFieldNameAtIndex] invalid index: " <>
 newtype ProfileDiff = ProfileDiff (List (Int /\ Number))
 
 applyProfileDiff :: ProfileDiff -> Profile -> Profile
-applyProfileDiff (ProfileDiff dp) p = foldr (\(i /\ dx) -> modifyProfileAtIndex i (_ + dx)) p dp
+applyProfileDiff (ProfileDiff diff) p = foldr (\(i /\ dx) -> modifyProfileAtIndex i (_ + dx)) p diff
 
 derive instance Newtype ProfileDiff _
 
@@ -235,7 +235,7 @@ generateStoryChoiceFromProfileDiff
    . MonadAff m
   => ProfileDiff
   -> StateT Env m StoryChoice
-generateStoryChoiceFromProfileDiff dp = do
+generateStoryChoiceFromProfileDiff diff = do
   env <- get
   story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
   reply <-
@@ -256,19 +256,19 @@ generateStoryChoiceFromProfileDiff dp = do
               , "It is critically important that you are creative and help make the story interesting while also taking into account the user's instructions."
               ]
           , mkUserMessage $ intercalate " " $
-              [ env.player.name <> "'s next action should reflect " <> (describeProfileDiff dp # unwrap) <> "."
+              [ env.player.name <> "'s next action should reflect " <> (describeProfileDiff diff # unwrap) <> "."
               ]
           ]
       }
       # liftAff
   pure
     { description: reply # wrap
-    , profileDiff: dp
+    , profileDiff: diff
     }
 
 describeProfileDiff :: ProfileDiff -> Qualia
-describeProfileDiff (ProfileDiff dp) = wrap $ intercalate ", " $
-  dp # map \(i /\ n) -> (describeProfileFieldValueDiff n # unwrap) <> " in " <> profileFieldNameAtIndex i
+describeProfileDiff (ProfileDiff diff) = wrap $ intercalate ", " $
+  diff # map \(i /\ n) -> (describeProfileFieldValueDiff n # unwrap) <> " in " <> profileFieldNameAtIndex i
 
 describeProfileFieldValueDiff :: Number -> Qualia
 describeProfileFieldValueDiff n | n <= -0.1 = wrap $ "a dramatic decrease"
