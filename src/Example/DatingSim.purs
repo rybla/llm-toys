@@ -50,6 +50,10 @@ type PersonTraits =
   , wisdom :: Number
   }
 
+newtype PersonTraitsFluctuation = PersonTraitsFluctuation PersonTraits
+
+derive instance Newtype PersonTraitsFluctuation _
+
 type WorldState =
   { stage ::
       Variant
@@ -68,7 +72,7 @@ type StoryState =
 
 type StoryChoice =
   { description :: Qualia
-  , traits_diff :: PersonTraits
+  , fluctuation :: PersonTraitsFluctuation
   }
 
 component :: forall query input output. H.Component query input output Aff
@@ -155,18 +159,12 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-summarizeStory :: forall m. MonadAff m => StoryState -> m Qualia
-summarizeStory = todo "summarizeStory"
-
 applyStoryChoiceToPersonTraits :: StoryChoice -> PersonTraits -> PersonTraits
 applyStoryChoiceToPersonTraits = todo "applyStoryChoiceToPersonTraits"
 
 updateStory :: forall m. MonadAff m => StoryChoice -> StateT Env m (List StoryChoice)
 updateStory choice = do
   story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
-
-  -- TODO: is this needed?
-  -- summary <- summarizeStory story
 
   -- apply choice to player's traits
   prop @"player" <<< prop @"traits" %= applyStoryChoiceToPersonTraits choice
@@ -204,25 +202,25 @@ updateStory choice = do
   prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" %=
     (_ `Array.snoc` { prompt: choice.description, reply: reply # wrap })
 
+  -- TODO take into account story arc somehow
+
   -- generate next choices
 
   let n_choices = 3
-  choices <- forM_count n_choices \_ -> do
-    -- sample a random fluctuation of traits
+  forM_count n_choices \_ -> do
+    let magnitude = 0.05
+    fluctuation <- generatePersonTraitsFluctuation magnitude # liftEffect
+    generateStoryChoiceFromPersonTraitsFluctuation fluctuation
 
-    description <- todo "generate a description via LLM"
-    let
-      choice :: StoryChoice
-      choice =
-        { description
-        , traits_diff: todo "convert trait_indices_combo + polarity into a PersonTraits"
-        }
-    pure unit
+generateStoryChoiceFromPersonTraitsFluctuation
+  :: forall m
+   . MonadAff m
+  => PersonTraitsFluctuation
+  -> StateT Env m StoryChoice
+generateStoryChoiceFromPersonTraitsFluctuation = todo "generateStoryChoiceFromPersonTraitsFluctuation"
 
-  todo "updateStory"
-
-generate_fluctuation_of_PersonTraits :: Number -> Effect PersonTraits
-generate_fluctuation_of_PersonTraits magnitude = do
+generatePersonTraitsFluctuation :: Number -> Effect PersonTraitsFluctuation
+generatePersonTraitsFluctuation magnitude = do
   trait_indices_combo_and_diffs <- do
     trait_indices_combo <- do
       trait_combo_index <- Random.randomInt 0 (combinations_of_trait_indices # Array.length)
@@ -231,19 +229,19 @@ generate_fluctuation_of_PersonTraits magnitude = do
       polarity <- Random.randomBool
       let diff = magnitude * (if polarity then 1.0 else -1.0)
       pure $ i /\ diff
-  pure $
+  pure $ PersonTraitsFluctuation $
     foldr
-      (\(i /\ diff) -> modify_PersonTraits_at_index i $ const diff)
+      (\(i /\ diff) -> modifyPersonTraitsAtIndex i $ const diff)
       zero
       trait_indices_combo_and_diffs
 
-modify_PersonTraits_at_index :: Int -> (Number -> Number) -> PersonTraits -> PersonTraits
-modify_PersonTraits_at_index 0 f pt = pt { charm = f pt.charm }
-modify_PersonTraits_at_index 1 f pt = pt { empathy = f pt.empathy }
-modify_PersonTraits_at_index 2 f pt = pt { confidence = f pt.confidence }
-modify_PersonTraits_at_index 3 f pt = pt { intelligence = f pt.intelligence }
-modify_PersonTraits_at_index 4 f pt = pt { wisdom = f pt.wisdom }
-modify_PersonTraits_at_index i _ _ = bug $ "[modify_PersonTraits_at_index] invalid index: " <> show i
+modifyPersonTraitsAtIndex :: Int -> (Number -> Number) -> PersonTraits -> PersonTraits
+modifyPersonTraitsAtIndex 0 f pt = pt { charm = f pt.charm }
+modifyPersonTraitsAtIndex 1 f pt = pt { empathy = f pt.empathy }
+modifyPersonTraitsAtIndex 2 f pt = pt { confidence = f pt.confidence }
+modifyPersonTraitsAtIndex 3 f pt = pt { intelligence = f pt.intelligence }
+modifyPersonTraitsAtIndex 4 f pt = pt { wisdom = f pt.wisdom }
+modifyPersonTraitsAtIndex i _ _ = bug $ "[modifyPersonTraitsAtIndex] invalid index: " <> show i
 
 combinations_of_trait_indices :: Array (List Int)
 combinations_of_trait_indices = combinations 5 (0 : 1 : 2 : 3 : 4 : Nil) # Array.fromFoldable
