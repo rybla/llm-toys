@@ -13,6 +13,7 @@ import Data.Maybe (fromMaybe')
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Traversable (traverse)
 import Data.Tuple.Nested (type (/\), (/\))
+import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -96,7 +97,8 @@ type FilteringState = {}
 type StoryState =
   { arc :: StoryArc
   , arc_step_index :: Int
-  , transcript :: Array { prompt :: Qualia, reply :: Qualia }
+  , transcript :: Array { choice :: StoryChoice, reply :: Qualia }
+  , choices :: List StoryChoice
   }
 
 type StoryChoice =
@@ -131,14 +133,6 @@ type StoryArcStep =
   }
 
 --------------------------------------------------------------------------------
--- loopStory
---------------------------------------------------------------------------------
-
-loopStory :: forall m. MonadAff m => StateT Env m Unit
-loopStory = do
-  pure unit
-
---------------------------------------------------------------------------------
 -- update
 --------------------------------------------------------------------------------
 
@@ -166,7 +160,7 @@ updateStory choice = do
                 ]
             ]
           , story.transcript # foldMap \x ->
-              [ mkUserMessage $ x.prompt # unwrap
+              [ mkUserMessage $ x.choice.description # unwrap
               , mkAssistantMessage $ x.reply # unwrap
               ]
           , [ mkUserMessage $ choice.description # unwrap ]
@@ -174,7 +168,7 @@ updateStory choice = do
       }
       # liftAff
   prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" %=
-    (_ `Array.snoc` { prompt: choice.description, reply: reply # wrap })
+    (_ `Array.snoc` { choice, reply: reply # wrap })
 
   generateStoryChoices
 
@@ -281,7 +275,8 @@ component = H.mkComponent { initialState, eval, render }
         { stage: inj @"story"
             { arc: todo "StoryArc"
             , arc_step_index: zero
-            , transcript: mempty
+            , transcript: none
+            , choices: none
             }
         }
     }
