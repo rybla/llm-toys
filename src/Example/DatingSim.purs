@@ -167,7 +167,7 @@ updateStory choice = do
 
   -- write next portion of story
   reply <-
-    Llm.generate_without_tools
+    Llm.generate_basic
       { config: config1
       , messages:
           [ [ mkSystemMessage $ intercalate "\n"
@@ -216,7 +216,7 @@ generateStoryChoiceFromProfileDiff diff = do
   basic_preamble <- getBasicPreamble
   story_preamble <- getStoryPreamble
   reply <-
-    Llm.generate_without_tools
+    Llm.generate_basic
       { config: config1
       , messages:
           [ mkSystemMessage $ intercalate "\n" $

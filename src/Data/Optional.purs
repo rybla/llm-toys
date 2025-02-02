@@ -6,6 +6,8 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson)
 import Data.Argonaut.Encode.Class (encodeJson)
 import Data.Function as Function
 import Data.Maybe (Maybe(..), maybe)
+import Data.Monoid (mempty)
+import Data.Traversable (class Foldable, class Traversable)
 
 foreign import data Optional :: Type -> Type
 
@@ -39,6 +41,15 @@ instance Bind Optional where
   bind = optional (const undefined_) (flip Function.apply)
 
 instance Monad Optional
+
+instance Foldable Optional where
+  foldr f b = optional b (flip f b)
+  foldl f b = optional b (f b)
+  foldMap f = optional mempty f
+
+instance Traversable Optional where
+  sequence = optional (pure undefined_) (map defined)
+  traverse f = optional (pure undefined_) (f >>> map defined)
 
 instance EncodeJson a => EncodeJson (Optional a) where
   encodeJson = optional undefinedJson encodeJson

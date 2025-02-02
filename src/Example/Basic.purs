@@ -7,7 +7,7 @@ import Ai.Llm as Llm
 import Control.Monad.State (get, modify_)
 import Data.Argonaut.Decode (fromJsonString)
 import Data.Argonaut.Encode (toJsonString)
-import Data.Either (Either(..), fromRight')
+import Data.Either (fromRight')
 import Data.Lens ((%=), (.=))
 import Data.Map as Map
 import Data.Maybe (fromMaybe, maybe)
@@ -47,8 +47,8 @@ component = H.mkComponent { initialState, eval, render }
                 input <- input_elem # HTMLTextAreaElement.fromHTMLElement # maybe (throwError (Aff.error "impossible")) (HTMLTextAreaElement.value >>> liftEffect)
                 prop @"status" .= inj @"working" unit
                 state <- get
-                result <-
-                  Llm.generate
+                msg <-
+                  Llm.generate_with_tools
                     { config:
                         { apiKey: ""
                         , baseURL: "http://localhost:11434/v1"
@@ -56,32 +56,30 @@ component = H.mkComponent { initialState, eval, render }
                         }
                     , messages: [ wrap $ inj @"user" { name: none, content: input } ]
                     , tools:
-                        [ wrap $ inj @"function"
+                        [ wrap $ wrap $
                             { name: "set_object_color"
                             , description: "Sets the object's color."
-                            , parameters: wrap $ Map.fromFoldable
+                            , parameters: wrap $ inj @"object" $ wrap $ Map.fromFoldable
                                 [ Tuple "color" $ wrap $ inj @"string" { description: "The color to set the object's color to." }
                                 ]
                             }
-                        , wrap $ inj @"function"
+
+                        , wrap $ wrap $
                             { name: "set_object_position"
                             , description: "Sets the object's position"
-                            , parameters: wrap $ Map.fromFoldable
+                            , parameters: wrap $ inj @"object" $ wrap $ Map.fromFoldable
                                 [ Tuple "x" $ wrap $ inj @"number" { description: "The new x-coordinate of the object." }
                                 , Tuple "y" $ wrap $ inj @"number" { description: "The new y-coordinate of the object." }
                                 ]
                             }
+
                         ]
                     , tool_choice: state.tool_choice
                     }
                     # liftAff
-                case result of
-                  Left err -> do
-                    prop @"output" .= "error: " <> err
-                  Right msg -> do
-                    prop @"output" .= (msg.content # fromMaybe "undefined")
-                    msg.tool_calls # traverse_ \tool_call ->
-                      prop @"output" %= (_ <> ("\n • " <> show (unwrap tool_call)))
+                prop @"output" .= (msg.content # fromMaybe "undefined")
+                msg.tool_calls # traverse_ \tool_calls -> tool_calls # traverse_ \tool_call ->
+                  prop @"output" %= (_ <> ("\n • " <> show (unwrap tool_call)))
                 prop @"status" .= inj @"idle" unit
             )
         # on @"modify" \f -> modify_ f
