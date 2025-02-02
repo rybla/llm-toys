@@ -6,7 +6,7 @@ import Prelude
 
 import Ai.Llm.Core as Core
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), encodeJson, printJsonDecodeError)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), encodeJson, printJsonDecodeError, stringifyWithIndent)
 import Data.Argonaut as Argonaut
 import Data.Argonaut.Decode.Class (decodeJson)
 import Data.Either (Either(..))
@@ -28,6 +28,7 @@ import Data.Variant (Variant, match)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
+import Effect.Class.Console as Console
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Utility (inj)
@@ -51,12 +52,13 @@ type GenerateConfig =
 
 generate :: GenerateArgs -> Aff (String \/ AssistantMessage)
 generate { config: { apiKey, baseURL, model }, messages, tools, tool_choice } = do
-  result <-
-    generate_ { ok: pure, err: throwError }
-      ({ apiKey, baseURL, model, messages, tools, tool_choice } # encodeJson) # toAffE
+  let args = { apiKey, baseURL, model, messages, tools, tool_choice } # encodeJson
+  Console.log $ "[generate input]\n" <> stringifyWithIndent 4 args
+  result <- generate_ { ok: pure, err: throwError } args # toAffE
   case result of
     Left err -> pure $ throwError err
     Right json_msg -> do
+      Console.log $ "[generate output]\n" <> stringifyWithIndent 4 json_msg
       case decodeJson_Message_assistant json_msg of
         Left err -> pure $ throwError $ printJsonDecodeError err
         Right msg -> pure $ pure msg

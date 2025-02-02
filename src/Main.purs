@@ -45,7 +45,7 @@ appComponent = H.mkComponent { initialState, eval, render }
                   ]
             )
         # on @"Basic" (\_ -> HH.slot_ (Proxy @"Basic") unit Basic.component unit)
-        # on @"DatingSim" (\_ -> HH.slot_ (Proxy @"DatingSim") unit DatingSim.component unit)
+        # on @"DatingSim" (\_ -> HH.slot_ (Proxy @"DatingSim") unit DatingSim.main_component unit)
     )
 
 menuButton
