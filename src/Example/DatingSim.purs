@@ -8,12 +8,12 @@ import Control.Monad.State (class MonadState, get, gets)
 import Data.Array as Array
 import Data.Foldable (fold, foldMap, foldr, intercalate, null)
 import Data.Lens (view, (%=), (.=))
-import Data.List (List(..), (:))
-import Data.List as List
+import Data.List (List)
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe')
-import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.Number (abs)
-import Data.Traversable (traverse)
+import Data.Newtype (class Newtype, over, unwrap, wrap)
+import Data.Tuple (fst, uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
@@ -28,7 +28,7 @@ import Halogen.HTML (HTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Utility (bug, combinations, forM_count, impossible, inj, onLens', prop)
+import Utility (bug, forM_count, impossible, inj, onLens', prop)
 
 --------------------------------------------------------------------------------
 -- LLM config
@@ -66,13 +66,18 @@ type Person =
   , profile :: Profile
   }
 
-type Profile =
-  { charm :: Number
-  , empathy :: Number
-  , confidence :: Number
-  , intelligence :: Number
-  , wisdom :: Number
-  }
+newtype Profile = Profile (Map String Number)
+
+derive instance Newtype Profile _
+
+default_Profile :: Profile
+default_Profile = wrap $ Map.fromFoldable
+  [ "charm" /\ 0.5
+  , "empathy" /\ 0.5
+  , "confidence" /\ 0.5
+  , "intelligence" /\ 0.5
+  , "wisdom" /\ 0.5
+  ]
 
 profileFieldNameAtIndex :: Int -> String
 profileFieldNameAtIndex 0 = "charm"
@@ -82,10 +87,10 @@ profileFieldNameAtIndex 3 = "intelligence"
 profileFieldNameAtIndex 4 = "wisdom"
 profileFieldNameAtIndex i = bug $ "[profileFieldNameAtIndex] invalid index: " <> show i
 
-newtype ProfileDiff = ProfileDiff (List (Int /\ Number))
+newtype ProfileDiff = ProfileDiff (Array (String /\ Number))
 
 applyProfileDiff :: ProfileDiff -> Profile -> Profile
-applyProfileDiff (ProfileDiff diff) p = foldr (\(i /\ dx) -> modifyProfileAtIndex i (_ + dx)) p diff
+applyProfileDiff (ProfileDiff diff) p = foldr (\(k /\ dx) -> over Profile $ Map.update ((_ + dx) >>> pure) k) p diff
 
 derive instance Newtype ProfileDiff _
 
@@ -156,22 +161,22 @@ updateStory choice = do
     Llm.generate_without_tools
       { config: config1
       , messages:
-          [ [ mkSystemMessage $ intercalate " " $
-                [ "You are a professional flash fiction writer in the " <> genre <> " genre."
-                , "You are currently writing a flash fiction story in collaboration with the user."
-                , "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating the next portion of the story that flushes out the high-level description from the user as well as adds a little bit more of what happens immediately after the even that the user describes."
-                , "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story."
+          [ [ mkSystemMessage $ intercalate "\n"
+                [ intercalate " "
+                    [ "You are a professional flash fiction writer in the " <> genre <> " genre."
+                    , "You are currently writing a flash fiction story in collaboration with the user."
+                    , "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating the next portion of the story that flushes out the high-level description from the user as well as adds a little bit more of what happens immediately after the even that the user describes."
+                    , "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story."
+                    ]
+                , ""
                 , "Additionally, here are points of context about the story:"
                 , "  - In the story, the main character's name is " <> env.player.name
                 , "  - The story is told from " <> env.player.name <> "'s point of view."
                 , "  - The premise of the story is: " <> (story.arc.premise # unwrap)
                 , "  - " <> env.player.name <> "'s physicality is described as follows: " <> (env.player.physicality # unwrap)
                 , "  - " <> env.player.name <> "'s personality is described as follows: " <> (env.player.personality # unwrap)
-                , "  - " <> env.player.name <> " is " <> (describeProfileFieldNameAndValue 0 (env.player.profile.charm) # unwrap)
-                , "  - " <> env.player.name <> " is " <> (describeProfileFieldNameAndValue 1 (env.player.profile.empathy) # unwrap)
-                , "  - " <> env.player.name <> " is " <> (describeProfileFieldNameAndValue 2 (env.player.profile.confidence) # unwrap)
-                , "  - " <> env.player.name <> " is " <> (describeProfileFieldNameAndValue 3 (env.player.profile.intelligence) # unwrap)
-                , "  - " <> env.player.name <> " is " <> (describeProfileFieldNameAndValue 4 (env.player.profile.wisdom) # unwrap)
+                , intercalate "\n" $ env.player.profile # unwrap # (Map.toUnfoldable :: _ -> Array _) # map \(k /\ x) ->
+                    "  - " <> (describeProfileFieldNameAndValue k x # unwrap)
                 ]
             ]
           , story.transcript # foldMap \x ->
@@ -240,7 +245,7 @@ generateStoryChoiceFromProfileDiff diff = do
 
 describeProfileDiff :: ProfileDiff -> Qualia
 describeProfileDiff (ProfileDiff diff) = wrap $ intercalate ", " $
-  diff # map \(i /\ n) -> (describeProfileDiffFieldValue n # unwrap) <> " in " <> profileFieldNameAtIndex i
+  diff # map \(k /\ n) -> (describeProfileDiffFieldValue n # unwrap) <> " in " <> k
 
 describeProfileDiffFieldValue :: Number -> Qualia
 describeProfileDiffFieldValue n | n <= -0.1 = wrap $ "a dramatic decrease"
@@ -249,8 +254,8 @@ describeProfileDiffFieldValue n | 0.0 < n, n < 0.1 = wrap $ "a slight increase"
 describeProfileDiffFieldValue n | 0.1 <= n = wrap $ "a dramatic increase"
 describeProfileDiffFieldValue _ = impossible unit
 
-describeProfileFieldNameAndValue :: Int -> Number -> Qualia
-describeProfileFieldNameAndValue i n = (describeProfileFieldValue n # unwrap) <> " in " <> profileFieldNameAtIndex i # wrap
+describeProfileFieldNameAndValue :: String -> Number -> Qualia
+describeProfileFieldNameAndValue k n = (describeProfileFieldValue n # unwrap) <> " in " <> k # wrap
 
 describeProfileFieldValue :: Number -> Qualia
 describeProfileFieldValue n | n <= 0.0 = "miserably deficient" # wrap
@@ -268,18 +273,13 @@ describeProfileFieldValue _ {- n | 1.0 <= n -} = "utterly maxed out" # wrap
 generateProfileDiff :: Number -> Effect ProfileDiff
 generateProfileDiff magnitude = do
   trait_indices_combo_and_diffs <- do
+    let ks = default_Profile # unwrap # Map.toUnfoldable # map fst
     i1 <- Random.randomInt 0 4
+    let k1 = ks Array.!! i1 # fromMaybe' impossible
     i2 <- Random.randomInt 0 3 # map \i2 -> if i2 < i1 then i2 else i2 + 1
-    pure $ (i1 /\ magnitude) : (i2 /\ -magnitude) : Nil
+    let k2 = ks Array.!! i2 # fromMaybe' impossible
+    pure $ [ k1 /\ magnitude, k2 /\ -magnitude ]
   pure $ ProfileDiff $ trait_indices_combo_and_diffs
-
-modifyProfileAtIndex :: Int -> (Number -> Number) -> Profile -> Profile
-modifyProfileAtIndex 0 f p = p { charm = f p.charm }
-modifyProfileAtIndex 1 f p = p { empathy = f p.empathy }
-modifyProfileAtIndex 2 f p = p { confidence = f p.confidence }
-modifyProfileAtIndex 3 f p = p { intelligence = f p.intelligence }
-modifyProfileAtIndex 4 f p = p { wisdom = f p.wisdom }
-modifyProfileAtIndex i _ _ = bug $ "[modifyProfileAtIndex] invalid index: " <> show i
 
 --------------------------------------------------------------------------------
 -- main_component
@@ -294,13 +294,7 @@ main_component = H.mkComponent { initialState, eval, render }
         { name: "John"
         , physicality: "John has blue eyes, long black hair, and a thin, athletic build, and a nice cock. He may be interested in sports or exercise as well." # wrap
         , personality: "John is exploratory and open-minded and all things, from conversation topics to sex positions." # wrap
-        , profile:
-            { charm: 0.5
-            , empathy: 0.5
-            , confidence: 0.5
-            , intelligence: 0.5
-            , wisdom: 0.5
-            }
+        , profile: default_Profile
         }
     , world:
         { stage: inj @"story"
@@ -384,12 +378,7 @@ main_component = H.mkComponent { initialState, eval, render }
                     in
                       [ HH.table
                           [ HP.style "border-collapse: collapse;" ]
-                          [ mk_row "charm" env.player.profile.charm
-                          , mk_row "empathy" env.player.profile.empathy
-                          , mk_row "confidence" env.player.profile.confidence
-                          , mk_row "intelligence" env.player.profile.intelligence
-                          , mk_row "wisdom" env.player.profile.wisdom
-                          ]
+                          (env.player.profile # unwrap # Map.toUnfoldable # map (uncurry mk_row))
                       ]
                 ]
             , HH.div
@@ -453,7 +442,7 @@ renderProfileDiff (ProfileDiff ds) =
   HH.div
     [ HP.style "display: flex; flex-direction: row; gap: 0.5em; font-size: 0.8em;" ]
     if not (null ds) then
-      ds # Array.fromFoldable # map \(i /\ dx) ->
+      ds # Array.fromFoldable # map \(k /\ dx) ->
         HH.div
           [ HP.style $
               fold
@@ -471,7 +460,7 @@ renderProfileDiff (ProfileDiff ds) =
               -- , " "
               -- , profileFieldNameAtIndex i
               -- ]
-              [ profileFieldNameAtIndex i ]
+              [ k ]
           ]
     else
       [ HH.div
