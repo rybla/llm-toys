@@ -50,18 +50,18 @@ type GenerateConfig =
   , model :: String
   }
 
-generate :: GenerateArgs -> Aff (String \/ AssistantMessage)
+generate :: GenerateArgs -> Aff AssistantMessage
 generate { config: { apiKey, baseURL, model }, messages, tools, tool_choice } = do
   let args = { apiKey, baseURL, model, messages, tools, tool_choice } # encodeJson
   Console.log $ "[generate input]\n" <> stringifyWithIndent 4 args
   result <- generate_ { ok: pure, err: throwError } args # toAffE
   case result of
-    Left err -> pure $ throwError err
+    Left err -> throwError $ Aff.error err
     Right json_msg -> do
       Console.log $ "[generate output]\n" <> stringifyWithIndent 4 json_msg
       case decodeJson_Message_assistant json_msg of
-        Left err -> pure $ throwError $ printJsonDecodeError err
-        Right msg -> pure $ pure msg
+        Left err -> throwError $ Aff.error $ printJsonDecodeError err
+        Right msg -> pure msg
 
 foreign import generate_
   :: { ok :: Json -> Either String Json, err :: String -> Either String Json }
@@ -83,10 +83,9 @@ generate_without_tools
   -> Aff String
 generate_without_tools { config, messages } =
   generate { config, messages, tools: none, tool_choice: wrap $ inj @"none" unit } >>= case _ of
-    Left err -> throwError $ Aff.error $ "generation error: " <> err
-    Right { tool_calls } | not $ null tool_calls -> throwError $ Aff.error $ "generation error: shouldn't be using tools: " <> show tool_calls
-    Right { content: Nothing } -> throwError $ Aff.error $ "generation error: no content"
-    Right { content: Just reply } -> pure reply
+    { tool_calls } | not $ null tool_calls -> throwError $ Aff.error $ "generation error: shouldn't be using tools: " <> show tool_calls
+    { content: Nothing } -> throwError $ Aff.error $ "generation error: no content"
+    { content: Just reply } -> pure reply
 
 --------------------------------------------------------------------------------
 -- types
@@ -167,23 +166,23 @@ instance EncodeJson ToolCall where
 instance DecodeJson ToolCall where
   decodeJson = decodeJson >>> map wrap
 
-newtype Tool = Tool
-  ( Variant
-      ( function :: FunctionDefinition
-      )
-  )
+-- newtype Tool = Tool
+--   ( Variant
+--       ( function :: FunctionDefinition
+--       )
+--   )
+newtype Tool = Tool FunctionDefinition
 
 derive instance Newtype Tool _
 derive newtype instance Show Tool
 
 instance EncodeJson Tool where
-  encodeJson = unwrap >>> match
-    { function: \tool -> encodeJson { "type": "function", function: tool } }
+  encodeJson = unwrap >>> \tool -> encodeJson { "type": "function", function: tool }
 
 instance DecodeJson Tool where
   decodeJson json | Right { "type": "function", function } <- decodeJson @{ "type" :: String, function :: Json } json = do
     function' <- json # decodeJson @FunctionDefinition
-    pure $ wrap $ inj @"function" function'
+    pure $ wrap function'
   decodeJson json = throwError $ UnexpectedValue json
 
 type FunctionDefinition =
