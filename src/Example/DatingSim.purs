@@ -4,7 +4,7 @@ import Prelude
 
 import Ai.Llm (GenerateConfig, mkAssistantMessage, mkSystemMessage, mkUserMessage)
 import Ai.Llm as Llm
-import Control.Monad.State (class MonadState, get, gets)
+import Control.Monad.State (get, gets)
 import Data.Array as Array
 import Data.Foldable (fold, foldMap, foldr, intercalate, null)
 import Data.Lens (view, (%=), (.=))
@@ -19,10 +19,10 @@ import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Aff.Class (liftAff)
 import Effect.Class.Console as Console
 import Effect.Random as Random
-import Halogen (liftEffect)
+import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.HTML (HTML)
 import Halogen.HTML as HH
@@ -147,7 +147,7 @@ type StoryArcStep =
 -- update
 --------------------------------------------------------------------------------
 
-updateStory :: forall m. MonadAff m => MonadState Env m => StoryChoice -> m (List StoryChoice)
+updateStory :: StoryChoice -> M (List StoryChoice)
 updateStory choice = do
   applyStoryChoice choice
 
@@ -194,11 +194,11 @@ updateStory choice = do
 
   generateStoryChoices
 
-applyStoryChoice :: forall m. MonadAff m => MonadState Env m => StoryChoice -> m Unit
+applyStoryChoice :: StoryChoice -> M Unit
 applyStoryChoice choice = do
   prop @"player" <<< prop @"profile" %= applyStoryChoiceToProfile choice
 
-generateStoryChoices :: forall m. MonadAff m => MonadState Env m => m (List StoryChoice)
+generateStoryChoices :: M (List StoryChoice)
 generateStoryChoices = do
   -- TODO take into account story arc somehow
   forM_count count_of_StoryChoices \_ -> do
@@ -206,12 +206,7 @@ generateStoryChoices = do
     generateStoryChoiceFromProfileDiff diff
 
 -- would be nice not to have to feed in the _entire_ story so far to generate these choices, but clearly that's the best option in terms of quality
-generateStoryChoiceFromProfileDiff
-  :: forall m
-   . MonadAff m
-  => MonadState Env m
-  => ProfileDiff
-  -> m StoryChoice
+generateStoryChoiceFromProfileDiff :: ProfileDiff -> M StoryChoice
 generateStoryChoiceFromProfileDiff diff = do
   env <- get
   story <- gets $ view $ prop @"world" <<< prop @"stage" <<< onLens' @"story"
@@ -285,7 +280,20 @@ generateProfileDiff magnitude = do
 -- main_component
 --------------------------------------------------------------------------------
 
-main_component :: forall query input output. H.Component query input output Aff
+type M =
+  HalogenM
+    Env
+    ( Variant
+        ( "startStory" :: Unit
+        , "regenerateChoices" :: Unit
+        , "submitChoice" :: StoryChoice
+        )
+    )
+    ()
+    Void
+    Aff
+
+main_component :: forall query input. H.Component query input Void Aff
 main_component = H.mkComponent { initialState, eval, render }
   where
   initialState :: input -> Env
