@@ -13663,6 +13663,7 @@ ${str(snapshot)}`);
 
   // output/Example.DatingSim/index.js
   var show5 = /* @__PURE__ */ show(showInt);
+  var $$null5 = /* @__PURE__ */ $$null(foldableList);
   var map18 = /* @__PURE__ */ map(functorArray);
   var fold3 = /* @__PURE__ */ fold(foldableArray);
   var fold12 = /* @__PURE__ */ fold3(monoidString);
@@ -13777,24 +13778,31 @@ ${str(snapshot)}`);
     return bug("[profileFieldNameAtIndex] invalid index: " + show5(v));
   };
   var renderProfileDiff = function(v) {
-    return div2([style("display: flex; flex-direction: row; gap: 0.5em; font-size: 0.8em;")])(map18(function(v1) {
-      return div2([style(fold12(["padding: 0.2em; ", function() {
-        var $176 = v1.value1 < 0;
-        if ($176) {
-          return "background-color: rgba(255, 0, 0, 0.5); ";
-        }
-        ;
-        var $177 = v1.value1 > 0;
-        if ($177) {
-          return "background-color: rgba(0, 255, 0, 0.5); ";
-        }
-        ;
-        return "";
-      }()]))])([text(fold12([profileFieldNameAtIndex(v1.value0)]))]);
-    })(fromFoldable7(v)));
+    return div2([style("display: flex; flex-direction: row; gap: 0.5em; font-size: 0.8em;")])(function() {
+      var $176 = !$$null5(v);
+      if ($176) {
+        return map18(function(v1) {
+          return div2([style(fold12(["padding: 0.2em; ", function() {
+            var $178 = v1.value1 < 0;
+            if ($178) {
+              return "background-color: rgba(255, 0, 0, 0.5); ";
+            }
+            ;
+            var $179 = v1.value1 > 0;
+            if ($179) {
+              return "background-color: rgba(0, 255, 0, 0.5); ";
+            }
+            ;
+            return "";
+          }()]))])([text(fold12([profileFieldNameAtIndex(v1.value0)]))]);
+        })(fromFoldable7(v));
+      }
+      ;
+      return [div2([style("padding: 0.2em; background-color: rgba(0, 0, 255, 0.5);")])([text("neutral")])];
+    }());
   };
   var renderStoryChoice = function(choice) {
-    return div2([style("display: flex; flex-direction: column; gap: 0.5em;")])([renderProfileDiff(choice.profileDiff), text(unwrap6(choice.description))]);
+    return div2([style("display: flex; flex-direction: column; gap: 0.5em;")])([renderProfileDiff(choice.diff), text(unwrap6(choice.description))]);
   };
   var modifyProfileAtIndex = function(v) {
     return function(v1) {
@@ -13860,8 +13868,8 @@ ${str(snapshot)}`);
       var trait_indices_combo_and_diffs = function __do3() {
         var i1 = randomInt(0)(4)();
         var i2 = map19(function(i22) {
-          var $183 = i22 < i1;
-          if ($183) {
+          var $185 = i22 < i1;
+          if ($185) {
             return i22;
           }
           ;
@@ -13933,10 +13941,10 @@ ${str(snapshot)}`);
         ;
         return impossible(unit);
       };
-      var $188 = 0 < v;
-      if ($188) {
-        var $189 = v < 0.1;
-        if ($189) {
+      var $190 = 0 < v;
+      if ($190) {
+        var $191 = v < 0.1;
+        if ($191) {
           return wrap6("a slight increase");
         }
         ;
@@ -13945,10 +13953,10 @@ ${str(snapshot)}`);
       ;
       return v3(true);
     };
-    var $191 = -0.1 < v;
-    if ($191) {
-      var $192 = v < 0;
-      if ($192) {
+    var $193 = -0.1 < v;
+    if ($193) {
+      var $194 = v < 0;
+      if ($194) {
         return wrap6("a slight decrease");
       }
       ;
@@ -13978,22 +13986,22 @@ ${str(snapshot)}`);
       var gets1 = gets(dictMonadState);
       return function(diff) {
         return bind22(get4)(function(env) {
-          return bind22(gets1(view(function($207) {
-            return prop12(prop32(onLens$prime1($207)));
+          return bind22(gets1(view(function($209) {
+            return prop12(prop32(onLens$prime1($209)));
           })))(function(story) {
             return bind22(liftAff3(generate_without_tools({
               config: config1,
-              messages: [mkSystemMessage(intercalate1(" ")(["You are a professional creative writing assisstant who is helping the user to write a flash fiction story in the " + (genre + " genre."), "In the story, the main character's name is " + env.player.name, "The story is told from " + (env.player.name + "'s point of view."), "The following is the story so far:", "", intercalate1("\n")(map18(function($208) {
+              messages: [mkSystemMessage(intercalate1(" ")(["You are a professional creative writing assisstant who is helping the user to write a flash fiction story in the " + (genre + " genre."), "In the story, the main character's name is " + env.player.name, "The story is told from " + (env.player.name + "'s point of view."), "The following is the story so far:", "", intercalate1("\n")(map18(function($210) {
                 return function(v) {
                   return "    " + v;
                 }(unwrap6(function(v) {
                   return v.reply;
-                }($208)));
-              })(story.transcript)), "", "The next event of the story depends on what " + (env.player.name + " does next."), "The user will provide description of how what " + (env.player.name + " does next should reflect on their character."), "You should reply with a single sentence describing at a high level an example of what " + (env.player.name + " could do next in the story which takes into account the user's description."), "It is critically important that you are creative and help make the story interesting while also taking into account the user's instructions."])), mkUserMessage(intercalate1(" ")([env.player.name + ("'s next action should reflect " + (unwrap6(describeProfileDiff(diff)) + "."))]))]
+                }($210)));
+              })(story.transcript)), "", "The next event of the story depends on what " + (env.player.name + " does next."), "The user will provide description of how what " + (env.player.name + " does next should reflect on their character."), "You should reply with a single SHORT, VAGUE, and HIGH-LEVEL sentence describing an example of what " + (env.player.name + " could do next in the story which takes into account the user's description."), "It is critically important that you are creative and help make the story interesting while also taking into account the user's instructions."])), mkUserMessage(intercalate1(" ")([env.player.name + ("'s next action should reflect " + (unwrap6(describeProfileDiff(diff)) + "."))]))]
             })))(function(reply) {
               return pure32({
                 description: wrap6(reply),
-                profileDiff: diff
+                diff
               });
             });
           });
@@ -14011,8 +14019,8 @@ ${str(snapshot)}`);
     return function(dictMonadState) {
       var generateStoryChoiceFromProfileDiff2 = generateStoryChoiceFromProfileDiff1(dictMonadState);
       return forM_count2(count_of_StoryChoices)(function(v) {
-        return bind22(liftEffect9(generateProfileDiff(magnitude_of_ProfileDiff)))(function(profileDiff) {
-          return generateStoryChoiceFromProfileDiff2(profileDiff);
+        return bind22(liftEffect9(generateProfileDiff(magnitude_of_ProfileDiff)))(function(diff) {
+          return generateStoryChoiceFromProfileDiff2(diff);
         });
       });
     };
@@ -14028,14 +14036,14 @@ ${str(snapshot)}`);
     };
   };
   var applyStoryChoiceToProfile = function(choice) {
-    return applyProfileDiff(choice.profileDiff);
+    return applyProfileDiff(choice.diff);
   };
   var applyStoryChoice = function(dictMonadAff) {
     return function(dictMonadState) {
       var modifying3 = modifying(dictMonadState);
       return function(choice) {
-        return modifying3(function($209) {
-          return prop42(prop52($209));
+        return modifying3(function($211) {
+          return prop42(prop52($211));
         })(applyStoryChoiceToProfile(choice));
       };
     };
@@ -14057,28 +14065,28 @@ ${str(snapshot)}`);
       return function(choice) {
         return discard23(applyStoryChoice2(choice))(function() {
           return bind22(get4)(function(env) {
-            return bind22(gets1(view(function($210) {
-              return prop12(prop32(onLens$prime1($210)));
+            return bind22(gets1(view(function($212) {
+              return prop12(prop32(onLens$prime1($212)));
             })))(function(story) {
-              return discard23(assign1(function($211) {
-                return prop62(prop7(onLens$prime22(prop8($211))));
+              return discard23(assign1(function($213) {
+                return prop62(prop7(onLens$prime22(prop8($213))));
               })(true))(function() {
                 return bind22(liftAff3(generate_without_tools({
                   config: config1,
-                  messages: fold22([[mkSystemMessage(intercalate1(" ")(["You are a professional flash fiction writer in the " + (genre + " genre."), "You are currently writing a flash fiction story in collaboration with the user.", "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating just this next portion of the story.", "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story.", "Additionally, here are points of context about the story:", "  - In the story, the main character's name is " + env.player.name, "  - The story is told from " + (env.player.name + "'s point of view."), "  - The premise of the story is: " + unwrap6(story.arc.premise), "  - " + (env.player.name + ("'s physicality is described as follows: " + unwrap6(env.player.physicality))), "  - " + (env.player.name + ("'s personality is described as follows: " + unwrap6(env.player.personality))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(0)(env.player.profile.charm)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(1)(env.player.profile.empathy)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(2)(env.player.profile.confidence)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(3)(env.player.profile.intelligence)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(4)(env.player.profile.wisdom))))]))], foldMap3(function(x) {
+                  messages: fold22([[mkSystemMessage(intercalate1(" ")(["You are a professional flash fiction writer in the " + (genre + " genre."), "You are currently writing a flash fiction story in collaboration with the user.", "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating the next portion of the story that flushes out the high-level description from the user as well as adds a little bit more of what happens immediately after the even that the user describes.", "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story.", "Additionally, here are points of context about the story:", "  - In the story, the main character's name is " + env.player.name, "  - The story is told from " + (env.player.name + "'s point of view."), "  - The premise of the story is: " + unwrap6(story.arc.premise), "  - " + (env.player.name + ("'s physicality is described as follows: " + unwrap6(env.player.physicality))), "  - " + (env.player.name + ("'s personality is described as follows: " + unwrap6(env.player.personality))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(0)(env.player.profile.charm)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(1)(env.player.profile.empathy)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(2)(env.player.profile.confidence)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(3)(env.player.profile.intelligence)))), "  - " + (env.player.name + (" is " + unwrap6(describeProfileFieldNameAndValue(4)(env.player.profile.wisdom))))]))], foldMap3(function(x) {
                     return [mkUserMessage(unwrap6(x.choice.description)), mkAssistantMessage(unwrap6(x.reply))];
                   })(story.transcript), [mkUserMessage(unwrap6(choice.description))]])
                 })))(function(reply) {
-                  return discard23(modifying3(function($212) {
-                    return prop62(prop7(onLens$prime22(prop9($212))));
+                  return discard23(modifying3(function($214) {
+                    return prop62(prop7(onLens$prime22(prop9($214))));
                   })(function(v) {
                     return snoc2(v)({
                       choice,
                       reply: wrap6(reply)
                     });
                   }))(function() {
-                    return discard23(assign1(function($213) {
-                      return prop62(prop7(onLens$prime22(prop8($213))));
+                    return discard23(assign1(function($215) {
+                      return prop62(prop7(onLens$prime22(prop8($215))));
                     })(false))(function() {
                       return generateStoryChoices3;
                     });
@@ -14113,11 +14121,11 @@ ${str(snapshot)}`);
               };
             };
             return [table([style("border-collapse: collapse;")])([mk_row("charm")(env.player.profile.charm), mk_row("empathy")(env.player.profile.empathy), mk_row("confidence")(env.player.profile.confidence), mk_row("intelligence")(env.player.profile.intelligence), mk_row("wisdom")(env.player.profile.wisdom)])];
-          }())]), div2([style("display: flex; flex-direction: row; gap: 1em;")])([div2([style("flex: 1; padding: 0.5em; box-shadow: 0 0 0 1px black; display: flex; flex-direction: column; gap: 1em;")])([div2([])([text("Transcript:")]), div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 300px; overflow-y: scroll; display: flex; flex-direction: column; gap: 0.5em;")])(fold22([map18(function(step3) {
-            return div2([])([text(unwrap6(step3.reply))]);
+          }())]), div2([style("display: flex; flex-direction: row; gap: 1em;")])([div2([style("flex: 1; padding: 0.5em; box-shadow: 0 0 0 1px black; display: flex; flex-direction: column; gap: 1em;")])([div2([])([text("Transcript:")]), div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 300px; overflow-y: scroll; display: flex; flex-direction: column; gap: 0.5em;")])(fold22([foldMap3(function(step3) {
+            return [div2([style("padding: 0.5em; background-color: rgba(0, 0, 0, 0.2);")])([text(unwrap6(step3.choice.description))]), renderProfileDiff(step3.choice.diff), div2([])([text(unwrap6(step3.reply))])];
           })(story.transcript), function() {
-            var $202 = !story.generating_next_transcript_step;
-            if ($202) {
+            var $204 = !story.generating_next_transcript_step;
+            if ($204) {
               return [];
             }
             ;
@@ -14137,7 +14145,7 @@ ${str(snapshot)}`);
               })(fromFoldable7(story.choices.value0.value0)), [button([onClick($$const(inj34(unit)))])([text("regenerate")])]]);
             }
             ;
-            throw new Error("Failed pattern match at Example.DatingSim (line 416, column 25 - line 435, column 32): " + [story.choices.constructor.name]);
+            throw new Error("Failed pattern match at Example.DatingSim (line 418, column 25 - line 437, column 32): " + [story.choices.constructor.name]);
           }())])])]);
         }
       })(env.world.stage);
@@ -14175,24 +14183,24 @@ ${str(snapshot)}`);
     var handleAction = match3({
       startStory: function(v) {
         return discard1(log5("[action] startStory"))(function() {
-          return bind13(gets2(view(function($214) {
-            return prop12(prop32(onLens$prime1($214)));
+          return bind13(gets2(view(function($216) {
+            return prop12(prop32(onLens$prime1($216)));
           })))(function(story) {
-            return discard1(assign3(function($215) {
-              return prop62(prop7(onLens$prime22(prop9($215))));
+            return discard1(assign3(function($217) {
+              return prop62(prop7(onLens$prime22(prop9($217))));
             })([{
               choice: {
                 description: wrap6("Write the introduction to the story."),
-                profileDiff: none5
+                diff: none5
               },
               reply: story.arc.intro
             }]))(function() {
-              return discard1(assign3(function($216) {
-                return prop62(prop7(onLens$prime22(prop10($216))));
+              return discard1(assign3(function($218) {
+                return prop62(prop7(onLens$prime22(prop10($218))));
               })(pure12(none22)))(function() {
                 return bind13(generateStoryChoices1)(function(choices) {
-                  return discard1(assign3(function($217) {
-                    return prop62(prop7(onLens$prime22(prop10($217))));
+                  return discard1(assign3(function($219) {
+                    return prop62(prop7(onLens$prime22(prop10($219))));
                   })(pure12(pure12(choices))))(function() {
                     return pure24(unit);
                   });
@@ -14203,12 +14211,12 @@ ${str(snapshot)}`);
         });
       },
       regenerateChoices: function(v) {
-        return discard1(assign3(function($218) {
-          return prop62(prop7(onLens$prime22(prop10($218))));
+        return discard1(assign3(function($220) {
+          return prop62(prop7(onLens$prime22(prop10($220))));
         })(pure12(none22)))(function() {
           return bind13(generateStoryChoices1)(function(choices) {
-            return discard1(assign3(function($219) {
-              return prop62(prop7(onLens$prime22(prop10($219))));
+            return discard1(assign3(function($221) {
+              return prop62(prop7(onLens$prime22(prop10($221))));
             })(pure12(pure12(choices))))(function() {
               return pure24(unit);
             });
@@ -14217,12 +14225,12 @@ ${str(snapshot)}`);
       },
       submitChoice: function(choice) {
         return discard1(log5("[action] submitChoice"))(function() {
-          return discard1(assign3(function($220) {
-            return prop62(prop7(onLens$prime22(prop10($220))));
+          return discard1(assign3(function($222) {
+            return prop62(prop7(onLens$prime22(prop10($222))));
           })(pure12(none22)))(function() {
             return bind13(updateStory1(choice))(function(choices) {
-              return discard1(assign3(function($221) {
-                return prop62(prop7(onLens$prime22(prop10($221))));
+              return discard1(assign3(function($223) {
+                return prop62(prop7(onLens$prime22(prop10($223))));
               })(pure12(pure12(choices))))(function() {
                 return pure24(unit);
               });

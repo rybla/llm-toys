@@ -6,7 +6,7 @@ import Ai.Llm (GenerateConfig, mkAssistantMessage, mkSystemMessage, mkUserMessag
 import Ai.Llm as Llm
 import Control.Monad.State (class MonadState, get, gets)
 import Data.Array as Array
-import Data.Foldable (fold, foldMap, foldr, intercalate)
+import Data.Foldable (fold, foldMap, foldr, intercalate, null)
 import Data.Lens (view, (%=), (.=))
 import Data.List (List(..), (:))
 import Data.List as List
@@ -109,11 +109,11 @@ type StoryState =
 
 type StoryChoice =
   { description :: Qualia
-  , profileDiff :: ProfileDiff
+  , diff :: ProfileDiff
   }
 
 applyStoryChoiceToProfile :: StoryChoice -> Profile -> Profile
-applyStoryChoiceToProfile choice = applyProfileDiff choice.profileDiff
+applyStoryChoiceToProfile choice = applyProfileDiff choice.diff
 
 --------------------------------------------------------------------------------
 -- StoryArc
@@ -159,7 +159,7 @@ updateStory choice = do
           [ [ mkSystemMessage $ intercalate " " $
                 [ "You are a professional flash fiction writer in the " <> genre <> " genre."
                 , "You are currently writing a flash fiction story in collaboration with the user."
-                , "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating just this next portion of the story."
+                , "The method of collaboration is as follows: the user will you a high-level prompt for what should happen next in the story, and you should reply with a single paragraph narrating the next portion of the story that flushes out the high-level description from the user as well as adds a little bit more of what happens immediately after the even that the user describes."
                 , "Make sure that your writing follows the user's prompt at a high level, but also make sure to flush out your writing with all the details of a good story."
                 , "Additionally, here are points of context about the story:"
                 , "  - In the story, the main character's name is " <> env.player.name
@@ -197,8 +197,8 @@ generateStoryChoices :: forall m. MonadAff m => MonadState Env m => m (List Stor
 generateStoryChoices = do
   -- TODO take into account story arc somehow
   forM_count count_of_StoryChoices \_ -> do
-    profileDiff <- generateProfileDiff magnitude_of_ProfileDiff # liftEffect
-    generateStoryChoiceFromProfileDiff profileDiff
+    diff <- generateProfileDiff magnitude_of_ProfileDiff # liftEffect
+    generateStoryChoiceFromProfileDiff diff
 
 -- would be nice not to have to feed in the _entire_ story so far to generate these choices, but clearly that's the best option in terms of quality
 generateStoryChoiceFromProfileDiff
@@ -224,7 +224,7 @@ generateStoryChoiceFromProfileDiff diff = do
               , ""
               , "The next event of the story depends on what " <> env.player.name <> " does next."
               , "The user will provide description of how what " <> env.player.name <> " does next should reflect on their character."
-              , "You should reply with a single sentence describing at a high level an example of what " <> env.player.name <> " could do next in the story which takes into account the user's description."
+              , "You should reply with a single SHORT, VAGUE, and HIGH-LEVEL sentence describing an example of what " <> env.player.name <> " could do next in the story which takes into account the user's description."
               , "It is critically important that you are creative and help make the story interesting while also taking into account the user's instructions."
               ]
           , mkUserMessage $ intercalate " " $
@@ -235,7 +235,7 @@ generateStoryChoiceFromProfileDiff diff = do
       # liftAff
   pure
     { description: reply # wrap
-    , profileDiff: diff
+    , diff: diff
     }
 
 describeProfileDiff :: ProfileDiff -> Qualia
@@ -327,7 +327,7 @@ main_component = H.mkComponent { initialState, eval, render }
         prop @"world" <<< prop @"stage" <<< onLens' @"story" <<< prop @"transcript" .=
           [ { choice:
                 { description: "Write the introduction to the story." # wrap
-                , profileDiff: ProfileDiff none
+                , diff: ProfileDiff none
                 }
             , reply: story.arc.intro
             }
@@ -399,9 +399,11 @@ main_component = H.mkComponent { initialState, eval, render }
                     [ HH.div [] [ HH.text "Transcript:" ]
                     , HH.div
                         [ HP.style "padding: 0.5em; box-shadow: 0 0 0 1px black; height: 300px; overflow-y: scroll; display: flex; flex-direction: column; gap: 0.5em;" ] $ fold
-                        [ story.transcript # map \step ->
-                            HH.div []
-                              [ HH.text $ step.reply # unwrap ]
+                        [ story.transcript # foldMap \step ->
+                            [ HH.div [ HP.style "padding: 0.5em; background-color: rgba(0, 0, 0, 0.2);" ] [ HH.text $ step.choice.description # unwrap ]
+                            , renderProfileDiff step.choice.diff
+                            , HH.div [] [ HH.text $ step.reply # unwrap ]
+                            ]
                         , if not story.generating_next_transcript_step then []
                           else
                             [ HH.text $ "generating..." ]
@@ -442,7 +444,7 @@ renderStoryChoice :: forall w i. StoryChoice -> HTML w i
 renderStoryChoice choice =
   HH.div
     [ HP.style "display: flex; flex-direction: column; gap: 0.5em;" ]
-    [ renderProfileDiff choice.profileDiff
+    [ renderProfileDiff choice.diff
     , HH.text $ choice.description # unwrap
     ]
 
@@ -450,7 +452,8 @@ renderProfileDiff :: forall w i. ProfileDiff -> HTML w i
 renderProfileDiff (ProfileDiff ds) =
   HH.div
     [ HP.style "display: flex; flex-direction: row; gap: 0.5em; font-size: 0.8em;" ]
-    ( ds # Array.fromFoldable # map \(i /\ dx) ->
+    if not (null ds) then
+      ds # Array.fromFoldable # map \(i /\ dx) ->
         HH.div
           [ HP.style $
               fold
@@ -470,7 +473,11 @@ renderProfileDiff (ProfileDiff ds) =
               -- ]
               [ profileFieldNameAtIndex i ]
           ]
-    )
+    else
+      [ HH.div
+          [ HP.style "padding: 0.2em; background-color: rgba(0, 0, 255, 0.5);" ]
+          [ HH.text "neutral" ]
+      ]
 
 --------------------------------------------------------------------------------
 -- Qualia
