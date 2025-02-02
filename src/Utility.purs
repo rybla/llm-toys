@@ -14,10 +14,12 @@ import Data.Symbol (class IsSymbol)
 import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Data.Variant as V
+import Effect (Effect)
 import Partial.Unsafe (unsafeCrashWith)
 import Prim.Row (class Cons)
 import Type.Prelude (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
+import Web.DOM (Element)
 
 todo :: forall a. String -> a
 todo msg = unsafeCrashWith $ "[[TODO]]\n" <> msg
@@ -79,4 +81,6 @@ combinations n xs = do
     y : ys -> do
       zs <- combinations (n - 1) ys
       pure $ y : zs
+
+foreign import scrollIntoView :: Element -> Effect Unit
 
