@@ -44,8 +44,8 @@ config1 :: GenerateConfig
 config1 =
   { apiKey: "ollama"
   , baseURL: "http://localhost:11434/v1"
-  -- , model: "llama3.2"
-  , model: "llama2-uncensored:latest"
+  , model: "llama3.2"
+  -- , model: "llama2-uncensored:latest"
   }
 
 --------------------------------------------------------------------------------
@@ -79,19 +79,19 @@ derive instance Newtype Profile _
 
 default_Profile :: Profile
 default_Profile = wrap $ Map.fromFoldable
-  [ "charm" /\ 0.5
-  , "empathy" /\ 0.5
-  , "confidence" /\ 0.5
-  , "intelligence" /\ 0.5
-  , "wisdom" /\ 0.5
+  [ "arrogance" /\ 0.5
+  , "emotiveness" /\ 0.5
+  , "thoughtfulness" /\ 0.5
+  , "sincereness" /\ 0.5
+  , "sophistication" /\ 0.5
   ]
 
 profileFieldNameAtIndex :: Int -> String
-profileFieldNameAtIndex 0 = "charm"
-profileFieldNameAtIndex 1 = "empathy"
-profileFieldNameAtIndex 2 = "confidence"
-profileFieldNameAtIndex 3 = "intelligence"
-profileFieldNameAtIndex 4 = "wisdom"
+profileFieldNameAtIndex 0 = "arrogance"
+profileFieldNameAtIndex 1 = "emotiveness"
+profileFieldNameAtIndex 2 = "thoughtfulness"
+profileFieldNameAtIndex 3 = "sincereness"
+profileFieldNameAtIndex 4 = "sophistication"
 profileFieldNameAtIndex i = bug $ "[profileFieldNameAtIndex] invalid index: " <> show i
 
 newtype ProfileDiff = ProfileDiff (Array (String /\ Number))

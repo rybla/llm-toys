@@ -377,15 +377,6 @@
       }
     ) + '"';
   };
-  var showArrayImpl = function(f) {
-    return function(xs) {
-      var ss = [];
-      for (var i2 = 0, l = xs.length; i2 < l; i2++) {
-        ss[i2] = f(xs[i2]);
-      }
-      return "[" + ss.join(",") + "]";
-    };
-  };
 
   // output/Data.Show/index.js
   var showString = {
@@ -411,11 +402,6 @@
   };
   var show = function(dict) {
     return dict.show;
-  };
-  var showArray = function(dictShow) {
-    return {
-      show: showArrayImpl(show(dictShow))
-    };
   };
   var showRecordFieldsCons = function(dictIsSymbol) {
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
@@ -1250,9 +1236,9 @@
     };
   };
   var for_ = function(dictApplicative) {
-    var traverse_14 = traverse_(dictApplicative);
+    var traverse_15 = traverse_(dictApplicative);
     return function(dictFoldable) {
-      return flip(traverse_14(dictFoldable));
+      return flip(traverse_15(dictFoldable));
     };
   };
   var foldl = function(dict) {
@@ -1262,7 +1248,7 @@
     var foldl22 = foldl(dictFoldable);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(sep) {
         return function(xs) {
           var go2 = function(v) {
@@ -1282,7 +1268,7 @@
           };
           return foldl22(go2)({
             init: true,
-            acc: mempty4
+            acc: mempty3
           })(xs).acc;
         };
       };
@@ -1320,11 +1306,11 @@
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(v) {
         return function(v1) {
           if (v1 instanceof Nothing) {
-            return mempty4;
+            return mempty3;
           }
           ;
           if (v1 instanceof Just) {
@@ -1340,13 +1326,13 @@
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x) {
           return function(acc) {
             return append5(f(x))(acc);
           };
-        })(mempty4);
+        })(mempty3);
       };
     };
   };
@@ -1493,7 +1479,7 @@
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x) {
@@ -1501,7 +1487,7 @@
               return append5(f(i2)(x))(acc);
             };
           };
-        })(mempty4);
+        })(mempty3);
       };
     };
   };
@@ -1754,14 +1740,14 @@
     },
     foldMap: function(dictMonoid) {
       var append22 = append(dictMonoid.Semigroup0());
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldl(foldableList)(function(acc) {
           var $286 = append22(acc);
           return function($287) {
             return $286(f($287));
           };
-        })(mempty4);
+        })(mempty3);
       };
     }
   };
@@ -3263,9 +3249,9 @@
     return function(dictApplicative) {
       var traverse_8 = traverse_(dictApplicative);
       return function(dictFoldable) {
-        var traverse_14 = traverse_8(dictFoldable);
+        var traverse_15 = traverse_8(dictFoldable);
         return function(f) {
-          var $51 = traverse_14(function($53) {
+          var $51 = traverse_15(function($53) {
             return parallel4(f($53));
           });
           return function($52) {
@@ -3673,7 +3659,7 @@
     return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
   }
   var sentinel = {};
-  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter3, sort2, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset2, sideChannel) {
+  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter4, sort2, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset2, sideChannel) {
     let obj = object2;
     let tmp_sc = sideChannel;
     let step3 = 0;
@@ -3692,8 +3678,8 @@
         step3 = 0;
       }
     }
-    if (typeof filter3 === "function") {
-      obj = filter3(prefix, obj);
+    if (typeof filter4 === "function") {
+      obj = filter4(prefix, obj);
     } else if (obj instanceof Date) {
       obj = serializeDate?.(obj);
     } else if (generateArrayPrefix === "comma" && is_array2(obj)) {
@@ -3723,9 +3709,9 @@
       }
       return [formatter?.(prefix) + "=" + formatter?.(String(obj))];
     }
-    const values2 = [];
+    const values3 = [];
     if (typeof obj === "undefined") {
-      return values2;
+      return values3;
     }
     let obj_keys;
     if (generateArrayPrefix === "comma" && is_array2(obj)) {
@@ -3733,11 +3719,11 @@
         obj = maybe_map(obj, encoder);
       }
       obj_keys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
-    } else if (is_array2(filter3)) {
-      obj_keys = filter3;
+    } else if (is_array2(filter4)) {
+      obj_keys = filter4;
     } else {
-      const keys3 = Object.keys(obj);
-      obj_keys = sort2 ? keys3.sort(sort2) : keys3;
+      const keys4 = Object.keys(obj);
+      obj_keys = sort2 ? keys4.sort(sort2) : keys4;
     }
     const encoded_prefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
     const adjusted_prefix = commaRoundTrip && is_array2(obj) && obj.length === 1 ? encoded_prefix + "[]" : encoded_prefix;
@@ -3758,7 +3744,7 @@
       sideChannel.set(object2, step3);
       const valueSideChannel = /* @__PURE__ */ new WeakMap();
       valueSideChannel.set(sentinel, sideChannel);
-      push_to_array(values2, inner_stringify(
+      push_to_array(values3, inner_stringify(
         value14,
         key_prefix,
         generateArrayPrefix,
@@ -3769,7 +3755,7 @@
         encodeDotInKeys,
         // @ts-ignore
         generateArrayPrefix === "comma" && encodeValuesOnly && is_array2(obj) ? null : encoder,
-        filter3,
+        filter4,
         sort2,
         allowDots,
         serializeDate,
@@ -3780,7 +3766,7 @@
         valueSideChannel
       ));
     }
-    return values2;
+    return values3;
   }
   function normalize_stringify_options(opts = defaults) {
     if (typeof opts.allowEmptyArrays !== "undefined" && typeof opts.allowEmptyArrays !== "boolean") {
@@ -3804,9 +3790,9 @@
       format = opts.format;
     }
     const formatter = formatters[format];
-    let filter3 = defaults.filter;
+    let filter4 = defaults.filter;
     if (typeof opts.filter === "function" || is_array2(opts.filter)) {
-      filter3 = opts.filter;
+      filter4 = opts.filter;
     }
     let arrayFormat;
     if (opts.arrayFormat && opts.arrayFormat in array_prefix_generators) {
@@ -3834,7 +3820,7 @@
       encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults.encodeDotInKeys,
       encoder: typeof opts.encoder === "function" ? opts.encoder : defaults.encoder,
       encodeValuesOnly: typeof opts.encodeValuesOnly === "boolean" ? opts.encodeValuesOnly : defaults.encodeValuesOnly,
-      filter: filter3,
+      filter: filter4,
       format,
       formatter,
       serializeDate: typeof opts.serializeDate === "function" ? opts.serializeDate : defaults.serializeDate,
@@ -3848,15 +3834,15 @@
     let obj = object2;
     const options2 = normalize_stringify_options(opts);
     let obj_keys;
-    let filter3;
+    let filter4;
     if (typeof options2.filter === "function") {
-      filter3 = options2.filter;
-      obj = filter3("", obj);
+      filter4 = options2.filter;
+      obj = filter4("", obj);
     } else if (is_array2(options2.filter)) {
-      filter3 = options2.filter;
-      obj_keys = filter3;
+      filter4 = options2.filter;
+      obj_keys = filter4;
     }
-    const keys3 = [];
+    const keys4 = [];
     if (typeof obj !== "object" || obj === null) {
       return "";
     }
@@ -3874,7 +3860,7 @@
       if (options2.skipNulls && obj[key] === null) {
         continue;
       }
-      push_to_array(keys3, inner_stringify(
+      push_to_array(keys4, inner_stringify(
         obj[key],
         key,
         // @ts-expect-error
@@ -3896,7 +3882,7 @@
         sideChannel
       ));
     }
-    const joined = keys3.join(options2.delimiter);
+    const joined = keys4.join(options2.delimiter);
     let prefix = options2.addQueryPrefix === true ? "?" : "";
     if (options2.charsetSentinel) {
       if (options2.charset === "iso-8859-1") {
@@ -7835,13 +7821,13 @@ ${str(snapshot)}`);
       }
       throw new Error(`${rejected.length} promise(s) failed - see the above errors`);
     }
-    const values2 = [];
+    const values3 = [];
     for (const result of results) {
       if (result.status === "fulfilled") {
-        values2.push(result.value);
+        values3.push(result.value);
       }
     }
-    return values2;
+    return values3;
   };
 
   // node_modules/openai/resources/beta/vector-stores/files.mjs
@@ -8924,8 +8910,8 @@ ${str(snapshot)}`);
       }
       return result;
     }
-    return function(foldr6, xs) {
-      return listToArray(foldr6(curryCons)(emptyList)(xs));
+    return function(foldr7, xs) {
+      return listToArray(foldr7(curryCons)(emptyList)(xs));
     };
   }();
   var length3 = function(xs) {
@@ -9120,7 +9106,7 @@ ${str(snapshot)}`);
   var fold2 = /* @__PURE__ */ _foldM(applyFlipped);
   var foldMap2 = function(dictMonoid) {
     var append12 = append(dictMonoid.Semigroup0());
-    var mempty4 = mempty(dictMonoid);
+    var mempty3 = mempty(dictMonoid);
     return function(f) {
       return fold2(function(acc) {
         return function(k) {
@@ -9128,7 +9114,7 @@ ${str(snapshot)}`);
             return append12(acc)(f(k)(v));
           };
         };
-      })(mempty4);
+      })(mempty3);
     };
   };
   var foldableObject = {
@@ -9349,6 +9335,34 @@ ${str(snapshot)}`);
       throw new Error("Failed pattern match at Data.Argonaut.Decode.Error (line 37, column 8 - line 43, column 44): " + [v.constructor.name]);
     };
     return "An error occurred while decoding a JSON value:\n" + go2(err);
+  };
+
+  // output/Data.Array.NonEmpty.Internal/index.js
+  var NonEmptyArray = function(x) {
+    return x;
+  };
+
+  // output/Data.Array.NonEmpty/index.js
+  var unsafeFromArray = NonEmptyArray;
+  var toArray2 = function(v) {
+    return v;
+  };
+  var fromArray = function(xs) {
+    if (length3(xs) > 0) {
+      return new Just(unsafeFromArray(xs));
+    }
+    ;
+    if (otherwise) {
+      return Nothing.value;
+    }
+    ;
+    throw new Error("Failed pattern match at Data.Array.NonEmpty (line 161, column 1 - line 161, column 58): " + [xs.constructor.name]);
+  };
+  var fromFoldable4 = function(dictFoldable) {
+    var $119 = fromFoldable2(dictFoldable);
+    return function($120) {
+      return fromArray($119($120));
+    };
   };
 
   // output/Data.Map.Internal/index.js
@@ -9898,12 +9912,12 @@ ${str(snapshot)}`);
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty4 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       var append12 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
-            return mempty4;
+            return mempty3;
           }
           ;
           if (v instanceof Node) {
@@ -9916,10 +9930,84 @@ ${str(snapshot)}`);
       };
     }
   };
+  var foldableWithIndexMap = {
+    foldrWithIndex: function(f) {
+      return function(z) {
+        var $lazy_go = $runtime_lazy3("go", "Data.Map.Internal", function() {
+          return function(m$prime, z$prime) {
+            if (m$prime instanceof Leaf) {
+              return z$prime;
+            }
+            ;
+            if (m$prime instanceof Node) {
+              return $lazy_go(192)(m$prime.value4, f(m$prime.value2)(m$prime.value3)($lazy_go(192)(m$prime.value5, z$prime)));
+            }
+            ;
+            throw new Error("Failed pattern match at Data.Map.Internal (line 189, column 26 - line 192, column 45): " + [m$prime.constructor.name]);
+          };
+        });
+        var go2 = $lazy_go(189);
+        return function(m) {
+          return go2(m, z);
+        };
+      };
+    },
+    foldlWithIndex: function(f) {
+      return function(z) {
+        var $lazy_go = $runtime_lazy3("go", "Data.Map.Internal", function() {
+          return function(z$prime, m$prime) {
+            if (m$prime instanceof Leaf) {
+              return z$prime;
+            }
+            ;
+            if (m$prime instanceof Node) {
+              return $lazy_go(198)(f(m$prime.value2)($lazy_go(198)(z$prime, m$prime.value4))(m$prime.value3), m$prime.value5);
+            }
+            ;
+            throw new Error("Failed pattern match at Data.Map.Internal (line 195, column 26 - line 198, column 45): " + [m$prime.constructor.name]);
+          };
+        });
+        var go2 = $lazy_go(195);
+        return function(m) {
+          return go2(z, m);
+        };
+      };
+    },
+    foldMapWithIndex: function(dictMonoid) {
+      var mempty3 = mempty(dictMonoid);
+      var append12 = append(dictMonoid.Semigroup0());
+      return function(f) {
+        var go2 = function(v) {
+          if (v instanceof Leaf) {
+            return mempty3;
+          }
+          ;
+          if (v instanceof Node) {
+            return append12(go2(v.value4))(append12(f(v.value2)(v.value3))(go2(v.value5)));
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Map.Internal (line 201, column 10 - line 204, column 30): " + [v.constructor.name]);
+        };
+        return go2;
+      };
+    },
+    Foldable0: function() {
+      return foldableMap;
+    }
+  };
+  var keys2 = /* @__PURE__ */ function() {
+    return foldrWithIndex(foldableWithIndexMap)(function(k) {
+      return function(v) {
+        return function(acc) {
+          return new Cons(k, acc);
+        };
+      };
+    })(Nil.value);
+  }();
   var empty3 = /* @__PURE__ */ function() {
     return Leaf.value;
   }();
-  var fromFoldable4 = function(dictOrd) {
+  var fromFoldable5 = function(dictOrd) {
     var insert13 = insert3(dictOrd);
     return function(dictFoldable) {
       return foldl(dictFoldable)(function(m) {
@@ -9978,6 +10066,45 @@ ${str(snapshot)}`);
         };
       };
     };
+  };
+
+  // output/Data.Set/index.js
+  var foldMap3 = /* @__PURE__ */ foldMap(foldableList);
+  var foldl3 = /* @__PURE__ */ foldl(foldableList);
+  var foldr4 = /* @__PURE__ */ foldr(foldableList);
+  var $$Set = function(x) {
+    return x;
+  };
+  var toList2 = function(v) {
+    return keys2(v);
+  };
+  var fromMap = $$Set;
+  var foldableSet = {
+    foldMap: function(dictMonoid) {
+      var foldMap12 = foldMap3(dictMonoid);
+      return function(f) {
+        var $98 = foldMap12(f);
+        return function($99) {
+          return $98(toList2($99));
+        };
+      };
+    },
+    foldl: function(f) {
+      return function(x) {
+        var $100 = foldl3(f)(x);
+        return function($101) {
+          return $100(toList2($101));
+        };
+      };
+    },
+    foldr: function(f) {
+      return function(x) {
+        var $102 = foldr4(f)(x);
+        return function($103) {
+          return $102(toList2($103));
+        };
+      };
+    }
   };
 
   // output/Data.String.CodePoints/foreign.js
@@ -10159,10 +10286,10 @@ ${str(snapshot)}`);
     };
   };
   var decodeFieldId = function(dictDecodeJson) {
-    var decodeJson12 = decodeJson(dictDecodeJson);
+    var decodeJson13 = decodeJson(dictDecodeJson);
     return {
       decodeJsonField: function(j) {
-        return map10(decodeJson12)(j);
+        return map10(decodeJson13)(j);
       }
     };
   };
@@ -10188,10 +10315,17 @@ ${str(snapshot)}`);
       throw new Error("Failed pattern match at Data.Argonaut.Encode.Encoders (line 31, column 23 - line 33, column 22): " + [v.constructor.name]);
     };
   };
+  var encodeBoolean = id;
   var encodeArray = function(encoder) {
     var $58 = map11(encoder);
     return function($59) {
       return id($58($59));
+    };
+  };
+  var encodeNonEmptyArray = function(encoder) {
+    var $60 = encodeArray(encoder);
+    return function($61) {
+      return $60(toArray2($61));
     };
   };
 
@@ -10222,6 +10356,9 @@ ${str(snapshot)}`);
   var encodeJsonJString = {
     encodeJson: encodeString
   };
+  var encodeJsonJBoolean = {
+    encodeJson: encodeBoolean
+  };
   var encodeJson = function(dict) {
     return dict.encodeJson;
   };
@@ -10233,6 +10370,11 @@ ${str(snapshot)}`);
   var encodeJsonMaybe = function(dictEncodeJson) {
     return {
       encodeJson: encodeMaybe(encodeJson(dictEncodeJson))
+    };
+  };
+  var encodeJsonNonEmptyArray = function(dictEncodeJson) {
+    return {
+      encodeJson: encodeNonEmptyArray(encodeJson(dictEncodeJson))
     };
   };
   var gEncodeJsonCons = function(dictEncodeJson) {
@@ -10255,6 +10397,14 @@ ${str(snapshot)}`);
     };
   };
 
+  // output/Data.Map/index.js
+  var keys3 = /* @__PURE__ */ function() {
+    var $38 = $$void(functorMap);
+    return function($39) {
+      return fromMap($38($39));
+    };
+  }();
+
   // output/Data.Optional/foreign.js
   var undefined_ = void 0;
   var defined = (a2) => a2;
@@ -10264,6 +10414,54 @@ ${str(snapshot)}`);
   };
 
   // output/Data.Optional/index.js
+  var functorOptional = {
+    map: function(f) {
+      return optional(undefined_)(function($34) {
+        return defined(f($34));
+      });
+    }
+  };
+  var foldableOptional = {
+    foldr: function(f) {
+      return function(b2) {
+        return optional(b2)(flip(f)(b2));
+      };
+    },
+    foldl: function(f) {
+      return function(b2) {
+        return optional(b2)(f(b2));
+      };
+    },
+    foldMap: function(dictMonoid) {
+      var mempty3 = mempty(dictMonoid);
+      return function(f) {
+        return optional(mempty3)(f);
+      };
+    }
+  };
+  var traversableOptional = {
+    sequence: function(dictApplicative) {
+      return optional(pure(dictApplicative)(undefined_))(map(dictApplicative.Apply0().Functor0())(defined));
+    },
+    traverse: function(dictApplicative) {
+      var pure16 = pure(dictApplicative);
+      var map112 = map(dictApplicative.Apply0().Functor0());
+      return function(f) {
+        return optional(pure16(undefined_))(function() {
+          var $35 = map112(defined);
+          return function($36) {
+            return $35(f($36));
+          };
+        }());
+      };
+    },
+    Functor0: function() {
+      return functorOptional;
+    },
+    Foldable1: function() {
+      return foldableOptional;
+    }
+  };
   var toMaybe = /* @__PURE__ */ function() {
     return optional(Nothing.value)(Just.create);
   }();
@@ -10359,7 +10557,7 @@ ${str(snapshot)}`);
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
     var insert8 = insert4(dictIsSymbol)()();
     return function(dictDecodeJson) {
-      var decodeJson12 = decodeJson(dictDecodeJson);
+      var decodeJson13 = decodeJson(dictDecodeJson);
       return function() {
         return function() {
           return function(dictDecodeJson_PartialRecord) {
@@ -10372,7 +10570,7 @@ ${str(snapshot)}`);
                 }
                 ;
                 if (v instanceof Just) {
-                  return bind4(decodeJson12(v.value0))(function(v1) {
+                  return bind4(decodeJson13(v.value0))(function(v1) {
                     return map12(insert8($$Proxy.value)(defined(v1)))(decodeJson_PartialRecord1(obj));
                   });
                 }
@@ -10389,7 +10587,7 @@ ${str(snapshot)}`);
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
     var insert8 = insert4(dictIsSymbol)()();
     return function(dictDecodeJson) {
-      var decodeJson12 = decodeJson(dictDecodeJson);
+      var decodeJson13 = decodeJson(dictDecodeJson);
       return function() {
         return function() {
           return function(dictDecodeJson_PartialRecord) {
@@ -10402,7 +10600,7 @@ ${str(snapshot)}`);
                 }
                 ;
                 if (v instanceof Just) {
-                  return bind4(decodeJson12(v.value0))(function(v1) {
+                  return bind4(decodeJson13(v.value0))(function(v1) {
                     return map12(insert8($$Proxy.value)(v1))(decodeJson_PartialRecord1(obj));
                   });
                 }
@@ -10587,7 +10785,6 @@ ${str(snapshot)}`);
       return "auto";
     }
   };
-  var showRecord2 = /* @__PURE__ */ showRecord()();
   var functionIsSymbol = {
     reflectSymbol: function() {
       return "function";
@@ -10608,7 +10805,6 @@ ${str(snapshot)}`);
       return "name";
     }
   };
-  var showRecordFieldsConsNil2 = /* @__PURE__ */ showRecordFieldsConsNil(nameIsSymbol);
   var userIsSymbol = {
     reflectSymbol: function() {
       return "user";
@@ -10689,34 +10885,55 @@ ${str(snapshot)}`);
   var inj23 = /* @__PURE__ */ inj3(requiredIsSymbol);
   var inj32 = /* @__PURE__ */ inj3(autoIsSymbol);
   var inj4 = /* @__PURE__ */ inj3(noneIsSymbol);
+  var bind5 = /* @__PURE__ */ bind(bindEither);
+  var propertiesIsSymbol = {
+    reflectSymbol: function() {
+      return "properties";
+    }
+  };
   var decodeJsonPartialRecord2 = /* @__PURE__ */ decodeJsonPartialRecord();
   var decodeJson_PartialRecordC11 = /* @__PURE__ */ decodeJson_PartialRecordC1(roleIsSymbol)(decodeJsonString)()();
-  var decodeJson_PartialRecordC2 = /* @__PURE__ */ decodeJson_PartialRecordC(contentIsSymbol)(decodeJsonString)()();
-  var bind5 = /* @__PURE__ */ bind(bindEither);
-  var inj6 = /* @__PURE__ */ inj3(assistantIsSymbol);
-  var inj7 = /* @__PURE__ */ inj3(userIsSymbol);
-  var inj8 = /* @__PURE__ */ inj3(systemIsSymbol);
+  var decodeJson_PartialRecordC2 = /* @__PURE__ */ decodeJson_PartialRecordC(contentIsSymbol);
+  var inj9 = /* @__PURE__ */ inj3(assistantIsSymbol);
+  var inj10 = /* @__PURE__ */ inj3(userIsSymbol);
+  var inj11 = /* @__PURE__ */ inj3(systemIsSymbol);
   var none3 = /* @__PURE__ */ none(unfoldableMaybe);
   var pure1 = /* @__PURE__ */ pure(applicativeMaybe);
-  var none1 = /* @__PURE__ */ none(unfoldableArray);
   var fromFoldable1 = /* @__PURE__ */ fromFoldable3(foldableList);
   var toUnfoldable1 = /* @__PURE__ */ toUnfoldable2(unfoldableList);
-  var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJson)(gEncodeJsonCons3)(parametersIsSymbol)())());
+  var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJson)(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonMaybe(/* @__PURE__ */ encodeJsonNonEmptyArray(encodeJsonJString)))(gEncodeJsonCons3)(requiredIsSymbol)())(propertiesIsSymbol)())());
+  var fromFoldable22 = /* @__PURE__ */ fromFoldable4(foldableSet);
   var encodeJson6 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(gEncodeJsonCons3)(descriptionIsSymbol)())());
-  var decodeJson9 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeJsonPartialRecord2(/* @__PURE__ */ decodeJson_PartialRecordC2(/* @__PURE__ */ decodeJson_PartialRecordC11(/* @__PURE__ */ decodeJson_PartialRecordC(tool_callsIsSymbol)(decodeJsonJson)()()(decodeJson_PartialRecordR)))));
-  var mempty3 = /* @__PURE__ */ mempty(monoidArray);
+  var decodeJson10 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeJsonPartialRecord2(/* @__PURE__ */ decodeJson_PartialRecordC2(decodeJsonJson)()()(/* @__PURE__ */ decodeJson_PartialRecordC11(/* @__PURE__ */ decodeJson_PartialRecordC(tool_callsIsSymbol)(decodeJsonJson)()()(decodeJson_PartialRecordR)))));
+  var traverse12 = /* @__PURE__ */ traverse(traversableOptional)(applicativeEither);
   var discard2 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var log4 = /* @__PURE__ */ log3(monadEffectAff);
   var bind12 = /* @__PURE__ */ bind(bindAff);
-  var pure23 = /* @__PURE__ */ pure(applicativeAff);
   var throwError1 = /* @__PURE__ */ throwError(monadThrowAff);
-  var $$null3 = /* @__PURE__ */ $$null(foldableArray);
-  var showToolCall = /* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons(functionIsSymbol)(/* @__PURE__ */ showRecordFieldsConsNil(idIsSymbol)(showString))(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons(argumentsIsSymbol)(/* @__PURE__ */ showRecordFieldsConsNil2(showString))(showString))));
-  var showArray2 = /* @__PURE__ */ showArray(showToolCall);
-  var show3 = /* @__PURE__ */ show(showArray2);
+  var pure23 = /* @__PURE__ */ pure(applicativeAff);
+  var modelIsSymbol = {
+    reflectSymbol: function() {
+      return "model";
+    }
+  };
+  var messagesIsSymbol = {
+    reflectSymbol: function() {
+      return "messages";
+    }
+  };
+  var baseURLIsSymbol = {
+    reflectSymbol: function() {
+      return "baseURL";
+    }
+  };
+  var apiKeyIsSymbol = {
+    reflectSymbol: function() {
+      return "apiKey";
+    }
+  };
   var encodeJsonToolChoice = {
     encodeJson: /* @__PURE__ */ function() {
-      var $628 = match2({
+      var $697 = match2({
         none: function(v) {
           return encodeJson2("none");
         },
@@ -10735,14 +10952,14 @@ ${str(snapshot)}`);
           });
         }
       });
-      return function($629) {
-        return $628(unwrap3($629));
+      return function($698) {
+        return $697(unwrap3($698));
       };
     }()
   };
   var encodeJsonMessage = {
     encodeJson: /* @__PURE__ */ function() {
-      var $632 = match2({
+      var $701 = match2({
         system: function(msg) {
           return encodeJson22({
             role: "system",
@@ -10772,11 +10989,14 @@ ${str(snapshot)}`);
           });
         }
       });
-      return function($633) {
-        return $632(unwrap3($633));
+      return function($702) {
+        return $701(unwrap3($702));
       };
     }()
   };
+  var gEncodeJsonCons4 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMessage));
+  var gEncodeJsonCons5 = /* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons1(modelIsSymbol)())(messagesIsSymbol)();
+  var encodeJson7 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons2(gEncodeJsonCons5)(baseURLIsSymbol)())(apiKeyIsSymbol)())());
   var decodeJsonToolChoice = {
     decodeJson: function(v) {
       var v1 = function(v2) {
@@ -10785,29 +11005,29 @@ ${str(snapshot)}`);
             var v7 = function(v8) {
               return throwError3(new UnexpectedValue(v));
             };
-            var $525 = decodeJson3(v);
-            if ($525 instanceof Right && $525.value0.type === "function") {
-              return pure4(wrap3(inj12($525["value0"]["function"].name)));
+            var $580 = decodeJson3(v);
+            if ($580 instanceof Right && $580.value0.type === "function") {
+              return pure4(wrap3(inj12($580["value0"]["function"].name)));
             }
             ;
             return v7(true);
           };
-          var $531 = decodeJson1(v);
-          if ($531 instanceof Right && $531.value0 === "required") {
+          var $586 = decodeJson1(v);
+          if ($586 instanceof Right && $586.value0 === "required") {
             return pure4(wrap3(inj23(unit)));
           }
           ;
           return v5(true);
         };
-        var $534 = decodeJson1(v);
-        if ($534 instanceof Right && $534.value0 === "auto") {
+        var $589 = decodeJson1(v);
+        if ($589 instanceof Right && $589.value0 === "auto") {
           return pure4(wrap3(inj32(unit)));
         }
         ;
         return v3(true);
       };
-      var $537 = decodeJson1(v);
-      if ($537 instanceof Right && $537.value0 === "none") {
+      var $592 = decodeJson1(v);
+      if ($592 instanceof Right && $592.value0 === "none") {
         return pure4(wrap3(inj4(unit)));
       }
       ;
@@ -10816,43 +11036,45 @@ ${str(snapshot)}`);
   };
   var decodeJsonToolCall = {
     decodeJson: /* @__PURE__ */ function() {
-      var $634 = map(functorEither)(wrap3);
-      var $635 = decodeJson(decodeRecord(gDecodeJsonCons(decodeFieldId(decodeRecord(gDecodeJsonCons2(gDecodeJsonCons22)(argumentsIsSymbol)()())()))(gDecodeJsonCons1(idIsSymbol)()())(functionIsSymbol)()())());
-      return function($636) {
-        return $634($635($636));
+      var $703 = map(functorEither)(wrap3);
+      var $704 = decodeJson(decodeRecord(gDecodeJsonCons(decodeFieldId(decodeRecord(gDecodeJsonCons2(gDecodeJsonCons22)(argumentsIsSymbol)()())()))(gDecodeJsonCons1(idIsSymbol)()())(functionIsSymbol)()())());
+      return function($705) {
+        return $703($704($705));
       };
     }()
   };
-  var decodeJson10 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeArray2(decodeJsonToolCall));
+  var decodeArray3 = /* @__PURE__ */ decodeArray2(decodeJsonToolCall);
+  var decodeJson12 = /* @__PURE__ */ decodeJson(decodeArray3);
   var mkUserMessage = function(content3) {
-    return wrap3(inj7({
+    return wrap3(inj10({
       name: none3,
       content: content3
     }));
   };
   var mkSystemMessage = function(content3) {
-    return wrap3(inj8({
+    return wrap3(inj11({
       name: none3,
       content: content3
     }));
   };
   var mkAssistantMessage = function(content3) {
-    return wrap3(inj6({
+    return wrap3(inj9({
       content: pure1(content3),
-      tool_calls: none1
+      tool_calls: none3
     }));
   };
   var fromMapJsonToObjectJson = function(m) {
     return id(fromFoldable1(toUnfoldable1(m)));
   };
-  var $lazy_encodeJsonFunctionParamet = /* @__PURE__ */ $runtime_lazy4("encodeJsonFunctionParamet", "Ai.Llm", function() {
+  var $lazy_encodeJsonStructure = /* @__PURE__ */ $runtime_lazy4("encodeJsonStructure", "Ai.Llm", function() {
     return {
       encodeJson: function() {
-        var $637 = match2({
-          object: function(parameters) {
+        var $706 = match2({
+          object: function(properties) {
             return encodeJson5({
               type: "object",
-              parameters: encodeJson($lazy_encodeJsonFunctionParamet1(0))(parameters)
+              properties: encodeJson($lazy_encodeJsonStructureFields(0))(properties),
+              required: fromFoldable22(keys3(unwrap3(properties)))
             });
           },
           string: function(v) {
@@ -10868,40 +11090,51 @@ ${str(snapshot)}`);
             });
           }
         });
-        return function($638) {
-          return $637(unwrap3($638));
+        return function($707) {
+          return $706(unwrap3($707));
         };
       }()
     };
   });
-  var $lazy_encodeJsonFunctionParamet1 = /* @__PURE__ */ $runtime_lazy4("encodeJsonFunctionParamet1", "Ai.Llm", function() {
+  var $lazy_encodeJsonStructureFields = /* @__PURE__ */ $runtime_lazy4("encodeJsonStructureFields", "Ai.Llm", function() {
     return {
       encodeJson: function() {
-        var $639 = map(functorMap)(encodeJson($lazy_encodeJsonFunctionParamet(0)));
-        return function($640) {
-          return fromMapJsonToObjectJson($639(unwrap3($640)));
+        var $708 = map(functorMap)(encodeJson($lazy_encodeJsonStructure(0)));
+        return function($709) {
+          return fromMapJsonToObjectJson($708(unwrap3($709)));
         };
       }()
     };
   });
-  var encodeJsonFunctionParamet1 = /* @__PURE__ */ $lazy_encodeJsonFunctionParamet1(203);
-  var encodeJson7 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons(encodeJsonFunctionParamet1)(gEncodeJsonNil)(parametersIsSymbol)())(nameIsSymbol)())(descriptionIsSymbol)())())(gEncodeJsonCons3)(functionIsSymbol)())());
-  var encodeJsonTool = {
-    encodeJson: /* @__PURE__ */ function() {
-      var $641 = match2({
-        "function": function(tool) {
-          return encodeJson7({
-            type: "function",
-            "function": tool
-          });
-        }
+  var encodeJsonStructure = /* @__PURE__ */ $lazy_encodeJsonStructure(291);
+  var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonStructure);
+  var encodeJson8 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJBoolean)(gEncodeJsonNil)({
+    reflectSymbol: function() {
+      return "strict";
+    }
+  })())(parametersIsSymbol)())(nameIsSymbol)())(descriptionIsSymbol)())());
+  var encodeJsonFunctionDefinit = {
+    encodeJson: function(v) {
+      return encodeJson8({
+        name: v.name,
+        description: v.description,
+        parameters: v.parameters,
+        strict: true
       });
-      return function($642) {
-        return $641(unwrap3($642));
-      };
-    }()
+    }
   };
-  var encodeJson8 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMessage))(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons(encodeJsonToolChoice)(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonTool))(gEncodeJsonNil)({
+  var encodeJson10 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(encodeJsonFunctionDefinit)(gEncodeJsonCons3)(functionIsSymbol)())());
+  var encodeJsonTool = {
+    encodeJson: function($710) {
+      return function(tool) {
+        return encodeJson10({
+          type: "function",
+          "function": tool
+        });
+      }(unwrap3($710));
+    }
+  };
+  var encodeJson11 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons(encodeJsonToolChoice)(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonTool))(gEncodeJsonNil)({
     reflectSymbol: function() {
       return "tools";
     }
@@ -10909,101 +11142,81 @@ ${str(snapshot)}`);
     reflectSymbol: function() {
       return "tool_choice";
     }
-  })())({
-    reflectSymbol: function() {
-      return "model";
-    }
-  })())({
-    reflectSymbol: function() {
-      return "messages";
-    }
-  })())({
-    reflectSymbol: function() {
-      return "baseURL";
-    }
-  })())({
-    reflectSymbol: function() {
-      return "apiKey";
-    }
-  })())());
+  })())(modelIsSymbol)())(messagesIsSymbol)())(baseURLIsSymbol)())(apiKeyIsSymbol)())());
   var decodeJson_Message_assistant = function(v) {
     var v1 = function(v2) {
       return throwError3(new UnexpectedValue(v));
     };
-    var $597 = decodeJson9(v);
-    if ($597 instanceof Right && $597.value0.role === "assistant") {
-      return bind5(optional(pure4(mempty3))(decodeJson10)($597.value0.tool_calls))(function(tool_calls$prime) {
-        return pure4({
-          content: toMaybe($597.value0.content),
-          tool_calls: tool_calls$prime
+    var $657 = decodeJson10(v);
+    if ($657 instanceof Right && $657.value0.role === "assistant") {
+      return bind5(traverse12(decodeJson1)($657.value0.content))(function(content$prime) {
+        return bind5(traverse12(decodeJson12)($657.value0.tool_calls))(function(tool_calls$prime) {
+          return pure4({
+            content: toMaybe(content$prime),
+            tool_calls: toMaybe(tool_calls$prime)
+          });
         });
       });
     }
     ;
     return v1(true);
   };
-  var generate = function(v) {
-    var args = encodeJson8({
-      apiKey: v.config.apiKey,
-      baseURL: v.config.baseURL,
-      model: v.config.model,
-      messages: v.messages,
-      tools: v.tools,
-      tool_choice: v.tool_choice
-    });
+  var generate_raw = function(args) {
     return discard2(log4("[generate input]\n" + stringifyWithIndent(4)(args)))(function() {
       return bind12(toAffE(generate_({
         ok: pure4,
         err: throwError3
       })(args)))(function(result) {
         if (result instanceof Left) {
-          return pure23(throwError3(result.value0));
+          return throwError1(error(result.value0));
         }
         ;
         if (result instanceof Right) {
           return discard2(log4("[generate output]\n" + stringifyWithIndent(4)(result.value0)))(function() {
-            var v1 = decodeJson_Message_assistant(result.value0);
-            if (v1 instanceof Left) {
-              return pure23(throwError3(printJsonDecodeError(v1.value0)));
+            var v = decodeJson_Message_assistant(result.value0);
+            if (v instanceof Left) {
+              return throwError1(error(printJsonDecodeError(v.value0)));
             }
             ;
-            if (v1 instanceof Right) {
-              return pure23(pure4(v1.value0));
+            if (v instanceof Right) {
+              return pure23(v.value0);
             }
             ;
-            throw new Error("Failed pattern match at Ai.Llm (line 62, column 7 - line 64, column 37): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Ai.Llm (line 98, column 7 - line 100, column 30): " + [v.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at Ai.Llm (line 58, column 3 - line 64, column 37): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Ai.Llm (line 94, column 3 - line 100, column 30): " + [result.constructor.name]);
       });
     });
   };
-  var generate_without_tools = function(v) {
-    return bind12(generate({
-      config: v.config,
-      messages: v.messages,
-      tools: none1,
-      tool_choice: wrap3(inj4(unit))
-    }))(function(v1) {
-      if (v1 instanceof Left) {
-        return throwError1(error("generation error: " + v1.value0));
+  var generate_basic = function(v) {
+    return bind12(generate_raw(encodeJson7({
+      apiKey: v.config.apiKey,
+      baseURL: v.config.baseURL,
+      model: v.config.model,
+      messages: v.messages
+    })))(function(v1) {
+      if (v1.content instanceof Nothing) {
+        return throwError1(error("no content"));
       }
       ;
-      if (v1 instanceof Right && !$$null3(v1.value0.tool_calls)) {
-        return throwError1(error("generation error: shouldn't be using tools: " + show3(v1.value0.tool_calls)));
+      if (v1.content instanceof Just) {
+        return pure23(v1.content.value0);
       }
       ;
-      if (v1 instanceof Right && v1.value0.content instanceof Nothing) {
-        return throwError1(error("generation error: no content"));
-      }
-      ;
-      if (v1 instanceof Right && v1.value0.content instanceof Just) {
-        return pure23(v1.value0.content.value0);
-      }
-      ;
-      throw new Error("Failed pattern match at Ai.Llm (line 85, column 88 - line 89, column 48): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Ai.Llm (line 52, column 70 - line 54, column 46): " + [v1.constructor.name]);
     });
+  };
+  var generate_with_tools = function(v) {
+    return generate_raw(encodeJson11({
+      apiKey: v.config.apiKey,
+      baseURL: v.config.baseURL,
+      model: v.config.model,
+      messages: v.messages,
+      tools: v.tools,
+      tool_choice: v.tool_choice
+    }));
   };
 
   // output/Data.Argonaut.Parser/foreign.js
@@ -12544,7 +12757,7 @@ ${str(snapshot)}`);
       return new CatQueue(v.value0, new Cons(a2, v.value1));
     };
   };
-  var $$null4 = function(v) {
+  var $$null3 = function(v) {
     if (v.value0 instanceof Nil && v.value1 instanceof Nil) {
       return true;
     }
@@ -12593,10 +12806,10 @@ ${str(snapshot)}`);
       throw new Error("Failed pattern match at Data.CatList (line 108, column 1 - line 108, column 54): " + [v.constructor.name, v1.constructor.name]);
     };
   };
-  var foldr4 = function(k) {
+  var foldr5 = function(k) {
     return function(b2) {
       return function(q2) {
-        var foldl3 = function($copy_v) {
+        var foldl4 = function($copy_v) {
           return function($copy_v1) {
             return function($copy_v2) {
               var $tco_var_v = $copy_v;
@@ -12636,7 +12849,7 @@ ${str(snapshot)}`);
               var v = uncons3(xs);
               if (v instanceof Nothing) {
                 $tco_done1 = true;
-                return foldl3(function(x) {
+                return foldl4(function(x) {
                   return function(i2) {
                     return i2(x);
                   };
@@ -12670,12 +12883,12 @@ ${str(snapshot)}`);
     ;
     if (v instanceof CatCons) {
       return new Just(new Tuple(v.value0, function() {
-        var $66 = $$null4(v.value1);
+        var $66 = $$null3(v.value1);
         if ($66) {
           return CatNil.value;
         }
         ;
-        return foldr4(link)(CatNil.value)(v.value1);
+        return foldr5(link)(CatNil.value)(v.value1);
       }()));
     }
     ;
@@ -13524,7 +13737,7 @@ ${str(snapshot)}`);
       return "submit";
     }
   };
-  var inj62 = /* @__PURE__ */ inj5(submitIsSymbol);
+  var inj6 = /* @__PURE__ */ inj5(submitIsSymbol);
   var on4 = /* @__PURE__ */ on2();
   var workingIsSymbol = {
     reflectSymbol: function() {
@@ -13538,7 +13751,7 @@ ${str(snapshot)}`);
     }
   };
   var on23 = /* @__PURE__ */ on4(idleIsSymbol);
-  var inj72 = /* @__PURE__ */ inj5(idleIsSymbol);
+  var inj7 = /* @__PURE__ */ inj5(idleIsSymbol);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var throwError4 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
@@ -13551,24 +13764,23 @@ ${str(snapshot)}`);
       return "status";
     }
   })()()(strongFn);
-  var inj82 = /* @__PURE__ */ inj5(workingIsSymbol);
+  var inj8 = /* @__PURE__ */ inj5(workingIsSymbol);
   var get3 = /* @__PURE__ */ get(monadStateHalogenM);
   var liftAff2 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var wrap5 = /* @__PURE__ */ wrap();
-  var inj9 = /* @__PURE__ */ inj5({
+  var inj92 = /* @__PURE__ */ inj5({
     reflectSymbol: function() {
       return "user";
     }
   });
   var none4 = /* @__PURE__ */ none(unfoldableMaybe);
-  var functionIsSymbol2 = {
+  var inj102 = /* @__PURE__ */ inj5({
     reflectSymbol: function() {
-      return "function";
+      return "object";
     }
-  };
-  var inj10 = /* @__PURE__ */ inj5(functionIsSymbol2);
-  var fromFoldable6 = /* @__PURE__ */ fromFoldable4(ordString)(foldableArray);
-  var inj11 = /* @__PURE__ */ inj5({
+  });
+  var fromFoldable7 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var inj112 = /* @__PURE__ */ inj5({
     reflectSymbol: function() {
       return "string";
     }
@@ -13583,14 +13795,20 @@ ${str(snapshot)}`);
       return "output";
     }
   })()()(strongFn);
-  var traverse_4 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
+  var traverse_4 = /* @__PURE__ */ traverse_(applicativeHalogenM);
+  var traverse_12 = /* @__PURE__ */ traverse_4(foldableMaybe);
+  var traverse_22 = /* @__PURE__ */ traverse_4(foldableArray);
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
-  var showRecord3 = /* @__PURE__ */ showRecord()();
-  var show4 = /* @__PURE__ */ show(/* @__PURE__ */ showRecord3(/* @__PURE__ */ showRecordFieldsCons(functionIsSymbol2)(/* @__PURE__ */ showRecordFieldsConsNil({
+  var showRecord2 = /* @__PURE__ */ showRecord()();
+  var show3 = /* @__PURE__ */ show(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons({
+    reflectSymbol: function() {
+      return "function";
+    }
+  })(/* @__PURE__ */ showRecordFieldsConsNil({
     reflectSymbol: function() {
       return "id";
     }
-  })(showString))(/* @__PURE__ */ showRecord3(/* @__PURE__ */ showRecordFieldsCons({
+  })(showString))(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons({
     reflectSymbol: function() {
       return "arguments";
     }
@@ -13604,31 +13822,31 @@ ${str(snapshot)}`);
     var render = function(state3) {
       return div2([style("display: flex; flex-direction: column; gap: 1.0em;")])([textarea([ref2("input"), value4("Set the object's color to red.")]), div2([style("display: flex; flex-direction: row; gap: 0.5em;")])([div2([])([text("model")]), select([onValueChange(function(model) {
         return inj13(function(v) {
-          var $92 = {};
-          for (var $93 in v) {
-            if ({}.hasOwnProperty.call(v, $93)) {
-              $92[$93] = v[$93];
+          var $94 = {};
+          for (var $95 in v) {
+            if ({}.hasOwnProperty.call(v, $95)) {
+              $94[$95] = v[$95];
             }
             ;
           }
           ;
-          $92.model = model;
-          return $92;
+          $94.model = model;
+          return $94;
         });
       })])([option([value4("command-r7b")])([text("command-r7b")]), option([value4("phi4")])([text("phi4")]), option([value4("llama3.2")])([text("llama3.2")])])]), div2([style("display: flex; flex-direction: row; gap: 0.5em;")])([div2([])([text("tool_choice")]), select([onValueChange(function(tool_choice) {
         return inj13(function(v) {
-          var $95 = {};
-          for (var $96 in v) {
-            if ({}.hasOwnProperty.call(v, $96)) {
-              $95[$96] = v[$96];
+          var $97 = {};
+          for (var $98 in v) {
+            if ({}.hasOwnProperty.call(v, $98)) {
+              $97[$98] = v[$98];
             }
             ;
           }
           ;
-          $95.tool_choice = fromRight$prime(impossible)(fromJsonString2(tool_choice));
-          return $95;
+          $97.tool_choice = fromRight$prime(impossible)(fromJsonString2(tool_choice));
+          return $97;
         });
-      })])([option([value4(toJsonString2(inj24(unit)))])([text("auto")]), option([value4(toJsonString2(inj33(unit)))])([text("none")]), option([value4(toJsonString2(inj42(unit)))])([text("required")]), option([value4(toJsonString2(inj52("set_object_color")))])([text("named:set_object_color")]), option([value4(toJsonString2(inj52("set_object_position")))])([text("named:set_object_position")])])]), button([onClick($$const(inj62)(unit))])([text("submit")]), div2([style("whitespace: pre;")])([on12(function(v) {
+      })])([option([value4(toJsonString2(inj24(unit)))])([text("auto")]), option([value4(toJsonString2(inj33(unit)))])([text("none")]), option([value4(toJsonString2(inj42(unit)))])([text("required")]), option([value4(toJsonString2(inj52("set_object_color")))])([text("named:set_object_color")]), option([value4(toJsonString2(inj52("set_object_position")))])([text("named:set_object_position")])])]), button([onClick($$const(inj6)(unit))])([text("submit")]), div2([style("whitespace: pre;")])([on12(function(v) {
         return text("working...");
       })(on23(function(v) {
         return text(state3.output);
@@ -13637,7 +13855,7 @@ ${str(snapshot)}`);
     var initialState = function(v) {
       return {
         output: "",
-        status: inj72(unit),
+        status: inj7(unit),
         model: "command-r7b",
         tool_choice: inj24(unit)
       };
@@ -13651,56 +13869,48 @@ ${str(snapshot)}`);
         return modify_3(f);
       })(on4(submitIsSymbol)(function(v1) {
         return bind7(bind7(getHTMLElementRef("input"))(maybe(throwError4(error("impossible")))(pure7)))(function(input_elem) {
-          return bind7(maybe(throwError4(error("impossible")))(function($101) {
-            return liftEffect4(value3($101));
+          return bind7(maybe(throwError4(error("impossible")))(function($100) {
+            return liftEffect4(value3($100));
           })(fromHTMLElement(input_elem)))(function(input3) {
-            return discard3(assign2(prop5)(inj82(unit)))(function() {
+            return discard3(assign2(prop5)(inj8(unit)))(function() {
               return bind7(get3)(function(state3) {
-                return bind7(liftAff2(generate({
+                return bind7(liftAff2(generate_with_tools({
                   config: {
                     apiKey: "",
                     baseURL: "http://localhost:11434/v1",
                     model: state3.model
                   },
-                  messages: [wrap5(inj9({
+                  messages: [wrap5(inj92({
                     name: none4,
                     content: input3
                   }))],
-                  tools: [wrap5(inj10({
+                  tools: [wrap5(wrap5({
                     name: "set_object_color",
                     description: "Sets the object's color.",
-                    parameters: wrap5(fromFoldable6([new Tuple("color", wrap5(inj11({
+                    parameters: wrap5(inj102(wrap5(fromFoldable7([new Tuple("color", wrap5(inj112({
                       description: "The color to set the object's color to."
-                    })))]))
-                  })), wrap5(inj10({
+                    })))]))))
+                  })), wrap5(wrap5({
                     name: "set_object_position",
                     description: "Sets the object's position",
-                    parameters: wrap5(fromFoldable6([new Tuple("x", wrap5(inj122({
+                    parameters: wrap5(inj102(wrap5(fromFoldable7([new Tuple("x", wrap5(inj122({
                       description: "The new x-coordinate of the object."
                     }))), new Tuple("y", wrap5(inj122({
                       description: "The new y-coordinate of the object."
-                    })))]))
+                    })))]))))
                   }))],
                   tool_choice: state3.tool_choice
-                })))(function(result) {
-                  return discard3(function() {
-                    if (result instanceof Left) {
-                      return assign2(prop1)("error: " + result.value0);
-                    }
-                    ;
-                    if (result instanceof Right) {
-                      return discard3(assign2(prop1)(fromMaybe("undefined")(result.value0.content)))(function() {
-                        return traverse_4(function(tool_call) {
-                          return modifying2(prop1)(function(v2) {
-                            return v2 + ("\n \u2022 " + show4(unwrap4(tool_call)));
-                          });
-                        })(result.value0.tool_calls);
-                      });
-                    }
-                    ;
-                    throw new Error("Failed pattern match at Example.Basic (line 78, column 17 - line 84, column 84): " + [result.constructor.name]);
-                  }())(function() {
-                    return assign2(prop5)(inj72(unit));
+                })))(function(msg) {
+                  return discard3(assign2(prop1)(fromMaybe("undefined")(msg.content)))(function() {
+                    return discard3(traverse_12(function(tool_calls) {
+                      return traverse_22(function(tool_call) {
+                        return modifying2(prop1)(function(v2) {
+                          return v2 + ("\n \u2022 " + show3(unwrap4(tool_call)));
+                        });
+                      })(tool_calls);
+                    })(msg.tool_calls))(function() {
+                      return assign2(prop5)(inj7(unit));
+                    });
                   });
                 });
               });
@@ -13761,20 +13971,18 @@ ${str(snapshot)}`);
   var match3 = /* @__PURE__ */ match()()();
   var bind8 = /* @__PURE__ */ bind(bindHalogenM);
   var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindHalogenM);
+  var throwError5 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
   var pure8 = /* @__PURE__ */ pure(applicativeHalogenM);
   var discard4 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
+  var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
   var pure12 = /* @__PURE__ */ pure(applicativeMaybe);
   var inj14 = /* @__PURE__ */ inj2();
-  var inj15 = /* @__PURE__ */ inj14({
-    reflectSymbol: function() {
-      return "initialize";
-    }
-  });
-  var $$null5 = /* @__PURE__ */ $$null(foldableArray);
+  var $$null4 = /* @__PURE__ */ $$null(foldableArray);
   var map19 = /* @__PURE__ */ map(functorArray);
   var fold3 = /* @__PURE__ */ fold(foldableArray);
   var fold12 = /* @__PURE__ */ fold3(monoidString);
-  var fromFoldable7 = /* @__PURE__ */ fromFoldable2(foldableArray);
+  var fromFoldable8 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var unwrap6 = /* @__PURE__ */ unwrap();
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
@@ -13802,9 +14010,7 @@ ${str(snapshot)}`);
   var toUnfoldable6 = /* @__PURE__ */ toUnfoldable2(unfoldableArray);
   var map110 = /* @__PURE__ */ map(functorEffect);
   var liftAff3 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
-  var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
-  var foldr5 = /* @__PURE__ */ foldr(foldableArray);
+  var foldr6 = /* @__PURE__ */ foldr(foldableArray);
   var over3 = /* @__PURE__ */ over()();
   var update2 = /* @__PURE__ */ update(ordString);
   var modifying3 = /* @__PURE__ */ modifying(monadStateHalogenM);
@@ -13828,7 +14034,7 @@ ${str(snapshot)}`);
     }
   })()()(strongFn);
   var fold22 = /* @__PURE__ */ fold3(monoidArray);
-  var foldMap3 = /* @__PURE__ */ foldMap(foldableArray)(monoidArray);
+  var foldMap4 = /* @__PURE__ */ foldMap(foldableArray)(monoidArray);
   var prop9 = /* @__PURE__ */ prop2({
     reflectSymbol: function() {
       return "transcript";
@@ -13840,25 +14046,25 @@ ${str(snapshot)}`);
       return "story_step";
     }
   })(ordInt);
-  var inj25 = /* @__PURE__ */ inj14({
+  var inj15 = /* @__PURE__ */ inj14({
     reflectSymbol: function() {
       return "startStory";
     }
   });
-  var inj34 = /* @__PURE__ */ inj14({
+  var inj25 = /* @__PURE__ */ inj14({
     reflectSymbol: function() {
       return "submitChoice";
     }
   });
   var fromFoldable12 = /* @__PURE__ */ fromFoldable2(foldableList);
-  var inj43 = /* @__PURE__ */ inj14({
+  var inj34 = /* @__PURE__ */ inj14({
     reflectSymbol: function() {
       return "regenerateChoices";
     }
   });
-  var inj53 = /* @__PURE__ */ inj14(storyIsSymbol);
+  var inj43 = /* @__PURE__ */ inj14(storyIsSymbol);
   var none5 = /* @__PURE__ */ none(unfoldableList);
-  var none12 = /* @__PURE__ */ none(unfoldableArray);
+  var none1 = /* @__PURE__ */ none(unfoldableArray);
   var none22 = /* @__PURE__ */ none(unfoldableMaybe);
   var log5 = /* @__PURE__ */ log3(monadEffectHalogenM2);
   var prop10 = /* @__PURE__ */ prop2({
@@ -13869,61 +14075,60 @@ ${str(snapshot)}`);
   var Profile = function(x) {
     return x;
   };
-  var story_step_component = function(dictMonadThrow) {
-    var throwError6 = throwError(monadThrowHalogenM(dictMonadThrow));
-    return function(dictMonadEffect) {
-      var liftEffect12 = liftEffect(monadEffectHalogenM(dictMonadEffect));
-      var render = function(state3) {
-        return div2([ref2("target")])([state3.body]);
-      };
-      var initialState = function(input3) {
-        return {
-          body: input3.body
-        };
-      };
-      var handleAction = match3({
-        initialize: function(v) {
-          return bind8(bindFlipped5(maybe(throwError6(error("target doesn't exist")))(pure8))(getHTMLElementRef("target")))(function(e) {
-            return discard4(liftEffect12(scrollIntoView(toElement(e))))(function() {
-              return pure8(unit);
-            });
-          });
-        }
-      });
-      var $$eval = mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        initialize: pure12(inj15(unit)),
-        handleAction
-      });
-      return mkComponent({
-        initialState,
-        "eval": $$eval,
-        render
-      });
+  var story_step_component = /* @__PURE__ */ function() {
+    var render = function(state3) {
+      return div2([ref2("target")])([state3.body]);
     };
-  };
-  var story_step_component1 = /* @__PURE__ */ story_step_component(monadThrowAff)(monadEffectAff);
+    var initialState = function(input3) {
+      return {
+        body: input3.body
+      };
+    };
+    var handleAction = match3({
+      initialize: function(v) {
+        return bind8(bindFlipped5(maybe(throwError5(error("target doesn't exist")))(pure8))(getHTMLElementRef("target")))(function(e) {
+          return discard4(liftEffect5(scrollIntoView(toElement(e))))(function() {
+            return pure8(unit);
+          });
+        });
+      }
+    });
+    var $$eval = mkEval({
+      handleQuery: defaultEval.handleQuery,
+      receive: defaultEval.receive,
+      finalize: defaultEval.finalize,
+      initialize: pure12(inj14({
+        reflectSymbol: function() {
+          return "initialize";
+        }
+      })(unit)),
+      handleAction
+    });
+    return mkComponent({
+      initialState,
+      "eval": $$eval,
+      render
+    });
+  }();
   var renderProfileDiff = function(v) {
     return div2([style("display: flex; flex-direction: row; gap: 0.5em; font-size: 0.8em;")])(function() {
-      var $151 = !$$null5(v);
-      if ($151) {
+      var $145 = !$$null4(v);
+      if ($145) {
         return map19(function(v1) {
           return div2([style(fold12(["padding: 0.2em; ", function() {
-            var $153 = v1.value1 < 0;
-            if ($153) {
+            var $147 = v1.value1 < 0;
+            if ($147) {
               return "background-color: rgba(255, 0, 0, 0.5); ";
             }
             ;
-            var $154 = v1.value1 > 0;
-            if ($154) {
+            var $148 = v1.value1 > 0;
+            if ($148) {
               return "background-color: rgba(0, 255, 0, 0.5); ";
             }
             ;
             return "";
           }()]))])([text(fold12([v1.value0]))]);
-        })(fromFoldable7(v));
+        })(fromFoldable8(v));
       }
       ;
       return [div2([style("padding: 0.2em; background-color: rgba(0, 0, 255, 0.5);")])([text("neutral")])];
@@ -13935,8 +14140,8 @@ ${str(snapshot)}`);
   var magnitude_of_ProfileDiff = 0.1;
   var genre = "erotica";
   var getBasicPreamble = /* @__PURE__ */ bind8(get4)(function(env) {
-    return bind8(gets2(view(function($185) {
-      return prop12(prop32(onLens$prime1($185)));
+    return bind8(gets2(view(function($179) {
+      return prop12(prop32(onLens$prime1($179)));
     })))(function(story) {
       return pure8(wrap6(intercalate4("\n")(["You are a professional flash fiction writer and writing assistant who focuses on the " + (genre + " genre.")])));
     });
@@ -13990,8 +14195,8 @@ ${str(snapshot)}`);
     };
   };
   var getStoryPreamble = /* @__PURE__ */ bind8(get4)(function(env) {
-    return bind8(gets2(view(function($186) {
-      return prop12(prop32(onLens$prime1($186)));
+    return bind8(gets2(view(function($180) {
+      return prop12(prop32(onLens$prime1($180)));
     })))(function(story) {
       return pure8(wrap6(intercalate4("\n")(["The following are important points of context about the story:", "  - In the story, the main character's name is " + env.player.name, "  - The story is told from " + (env.player.name + "'s point of view."), "  - The premise of the story is: " + unwrap6(story.arc.premise), "  - " + (env.player.name + ("'s physicality is described as follows: " + unwrap6(env.player.physicality))), "  - " + (env.player.name + ("'s personality is described as follows: " + unwrap6(env.player.personality))), intercalate4("\n")(map19(function(v) {
         return "  - " + unwrap6(describeProfileFieldNameAndValue(v.value0)(v.value1));
@@ -14011,10 +14216,10 @@ ${str(snapshot)}`);
         ;
         return impossible(unit);
       };
-      var $165 = 0 < v;
-      if ($165) {
-        var $166 = v < 0.1;
-        if ($166) {
+      var $159 = 0 < v;
+      if ($159) {
+        var $160 = v < 0.1;
+        if ($160) {
           return wrap6("a slight increase");
         }
         ;
@@ -14023,10 +14228,10 @@ ${str(snapshot)}`);
       ;
       return v3(true);
     };
-    var $168 = -0.1 < v;
-    if ($168) {
-      var $169 = v < 0;
-      if ($169) {
+    var $162 = -0.1 < v;
+    if ($162) {
+      var $163 = v < 0;
+      if ($163) {
         return wrap6("a slight decrease");
       }
       ;
@@ -14041,7 +14246,7 @@ ${str(snapshot)}`);
     })(v)));
   };
   var default_Profile = /* @__PURE__ */ function() {
-    return wrap6(fromFoldable4(ordString)(foldableArray)([new Tuple("charm", 0.5), new Tuple("empathy", 0.5), new Tuple("confidence", 0.5), new Tuple("intelligence", 0.5), new Tuple("wisdom", 0.5)]));
+    return wrap6(fromFoldable5(ordString)(foldableArray)([new Tuple("arrogance", 0.5), new Tuple("emotiveness", 0.5), new Tuple("thoughtfulness", 0.5), new Tuple("sincereness", 0.5), new Tuple("sophistication", 0.5)]));
   }();
   var sampleProfileDiff = function(magnitude) {
     return function __do2() {
@@ -14050,8 +14255,8 @@ ${str(snapshot)}`);
         var i1 = randomInt(0)(4)();
         var k1 = fromMaybe$prime(impossible)(index2(ks)(i1));
         var i2 = map110(function(i22) {
-          var $174 = i22 < i1;
-          if ($174) {
+          var $168 = i22 < i1;
+          if ($168) {
             return i22;
           }
           ;
@@ -14067,21 +14272,21 @@ ${str(snapshot)}`);
   var config1 = {
     apiKey: "ollama",
     baseURL: "http://localhost:11434/v1",
-    model: "llama2-uncensored:latest"
+    model: "llama3.2"
   };
   var generateStoryChoiceFromProfileDiff = function(diff) {
     return bind8(get4)(function(env) {
-      return bind8(gets2(view(function($187) {
-        return prop12(prop32(onLens$prime1($187)));
+      return bind8(gets2(view(function($181) {
+        return prop12(prop32(onLens$prime1($181)));
       })))(function(story) {
         return bind8(getBasicPreamble)(function(basic_preamble) {
           return bind8(getStoryPreamble)(function(story_preamble) {
-            return bind8(liftAff3(generate_without_tools({
+            return bind8(liftAff3(generate_basic({
               config: config1,
-              messages: [mkSystemMessage(intercalate4("\n")([unwrap6(basic_preamble), "", unwrap6(story_preamble), "", intercalate4(" ")(["You are currently assisting the user in creative brainstorming for a story they are writing.", "You should help the user in the following way: the user will provide a high-level description of how they want the immediate next part of the story to reflect upon " + (env.player.name + (", and you should reply with a single high-level, vague, and concise sentence describing what " + (env.player.name + " could do next that would demonstrate what the user wants to be reflected."))), "It is critically important that you are creative in making the story interesting and thematic while also taking into account the user's instruction.", "MAKE SURE your reply is a SINGLE SHORT HIGH-LEVEL SENTENCE."]), "", "For context, the following is the story as written so far, right up to the point where the user is considering what should happen next:", "", "", intercalate4("\n\n")(map19(function($188) {
+              messages: [mkSystemMessage(intercalate4("\n")([unwrap6(basic_preamble), "", unwrap6(story_preamble), "", intercalate4(" ")(["You are currently assisting the user in creative brainstorming for a story they are writing.", "You should help the user in the following way: the user will provide a high-level description of how they want the immediate next part of the story to reflect upon " + (env.player.name + (", and you should reply with a single high-level, vague, and concise sentence describing what " + (env.player.name + " could do next that would demonstrate what the user wants to be reflected."))), "It is critically important that you are creative in making the story interesting and thematic while also taking into account the user's instruction.", "MAKE SURE your reply is a SINGLE SHORT HIGH-LEVEL SENTENCE."]), "", "For context, the following is the story as written so far, right up to the point where the user is considering what should happen next:", "", "", intercalate4("\n\n")(map19(function($182) {
                 return unwrap6(function(v) {
                   return v.reply;
-                }($188));
+                }($182));
               })(story.transcript))])), mkUserMessage(intercalate4(" ")([env.player.name + ("'s next action should reflect " + (unwrap6(describeProfileDiff(diff)) + "."))]))]
             })))(function(reply) {
               return pure8({
@@ -14101,11 +14306,11 @@ ${str(snapshot)}`);
   });
   var applyProfileDiff = function(v) {
     return function(p2) {
-      return foldr5(function(v1) {
-        return over3(Profile)(update2(function($189) {
+      return foldr6(function(v1) {
+        return over3(Profile)(update2(function($183) {
           return pure12(function(v2) {
             return v2 + v1.value1;
-          }($189));
+          }($183));
         })(v1.value0));
       })(p2)(v);
     };
@@ -14114,37 +14319,37 @@ ${str(snapshot)}`);
     return applyProfileDiff(choice.diff);
   };
   var applyStoryChoice = function(choice) {
-    return modifying3(function($190) {
-      return prop42(prop52($190));
+    return modifying3(function($184) {
+      return prop42(prop52($184));
     })(applyStoryChoiceToProfile(choice));
   };
   var updateStory = function(choice) {
     return discard4(applyStoryChoice(choice))(function() {
       return bind8(get4)(function(env) {
-        return bind8(gets2(view(function($191) {
-          return prop12(prop32(onLens$prime1($191)));
+        return bind8(gets2(view(function($185) {
+          return prop12(prop32(onLens$prime1($185)));
         })))(function(story) {
           return bind8(getBasicPreamble)(function(basic_preamble) {
             return bind8(getStoryPreamble)(function(story_preamble) {
-              return discard4(assign3(function($192) {
-                return prop62(prop7(onLens$prime22(prop8($192))));
+              return discard4(assign3(function($186) {
+                return prop62(prop7(onLens$prime22(prop8($186))));
               })(true))(function() {
-                return bind8(liftAff3(generate_without_tools({
+                return bind8(liftAff3(generate_basic({
                   config: config1,
-                  messages: fold22([[mkSystemMessage(intercalate4("\n")([unwrap6(basic_preamble), "", unwrap6(story_preamble), "", intercalate4(" ")(["You are currently writing a flash fiction story in collaboration with the user.", "The method of collaboration is this: you and the user will take turns, where the user provides a prompt for what should happen next in the story, and you should reply with a single paragraph narrating in prose the next portion of the story that matches the user's prompt.", "It is critical your writing respects the user's prompt while also flushing out the prose with all the details that make a good story to read."])]))], foldMap3(function(x) {
+                  messages: fold22([[mkSystemMessage(intercalate4("\n")([unwrap6(basic_preamble), "", unwrap6(story_preamble), "", intercalate4(" ")(["You are currently writing a flash fiction story in collaboration with the user.", "The method of collaboration is this: you and the user will take turns, where the user provides a prompt for what should happen next in the story, and you should reply with a single paragraph narrating in prose the next portion of the story that matches the user's prompt.", "It is critical your writing respects the user's prompt while also flushing out the prose with all the details that make a good story to read."])]))], foldMap4(function(x) {
                     return [mkUserMessage(unwrap6(x.choice.description)), mkAssistantMessage(unwrap6(x.reply))];
                   })(story.transcript), [mkUserMessage(unwrap6(choice.description))]])
                 })))(function(reply) {
-                  return discard4(modifying3(function($193) {
-                    return prop62(prop7(onLens$prime22(prop9($193))));
+                  return discard4(modifying3(function($187) {
+                    return prop62(prop7(onLens$prime22(prop9($187))));
                   })(function(v) {
                     return snoc2(v)({
                       choice,
                       reply: wrap6(reply)
                     });
                   }))(function() {
-                    return discard4(assign3(function($194) {
-                      return prop62(prop7(onLens$prime22(prop8($194))));
+                    return discard4(assign3(function($188) {
+                      return prop62(prop7(onLens$prime22(prop8($188))));
                     })(false))(function() {
                       return generateStoryChoices;
                     });
@@ -14180,20 +14385,20 @@ ${str(snapshot)}`);
             return [table([style("border-collapse: collapse;")])(map19(uncurry(mk_row))(toUnfoldable6(unwrap6(env.player.profile))))];
           }())]), div2([style("display: flex; flex-direction: row; gap: 1em;")])([div2([style("flex: 1; padding: 0.5em; box-shadow: 0 0 0 1px black; display: flex; flex-direction: column; gap: 1em;")])([div2([])([text("Transcript:")]), div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; height: 300px; overflow-y: scroll; display: flex; flex-direction: column; gap: 0.5em;")])(fold22([mapWithIndex4(function(i2) {
             return function(step3) {
-              return slot_2($$Proxy.value)(i2)(story_step_component1)({
+              return slot_2($$Proxy.value)(i2)(story_step_component)({
                 body: div2([style("display: flex; flex-direction: column; gap: 0.5em;")])([div2([style("padding: 0.5em; background-color: rgba(0, 0, 0, 0.2);")])([text(unwrap6(step3.choice.description))]), renderProfileDiff(step3.choice.diff), div2([])([text(unwrap6(step3.reply))])])
               });
             };
           })(story.transcript), function() {
-            var $180 = !story.generating_next_transcript_step;
-            if ($180) {
+            var $174 = !story.generating_next_transcript_step;
+            if ($174) {
               return [];
             }
             ;
             return [text("generating...")];
           }()]))]), div2([style("flex: 1; padding: 0.5em; box-shadow: 0 0 0 1px black; display: flex; flex-direction: column; gap: 1em;")])([div2([])([text("Choices:")]), div2([style("max-height: 300px; overflow-y: scroll; display: flex; flex-direction: column; gap: 1em; padding: 0.1em;")])(function() {
             if (story.choices instanceof Nothing) {
-              return [div2([])([button([onClick($$const(inj25(unit)))])([text("start")])])];
+              return [div2([])([button([onClick($$const(inj15(unit)))])([text("start")])])];
             }
             ;
             if (story.choices instanceof Just && story.choices.value0 instanceof Nothing) {
@@ -14202,11 +14407,11 @@ ${str(snapshot)}`);
             ;
             if (story.choices instanceof Just && story.choices.value0 instanceof Just) {
               return fold22([map19(function(choice) {
-                return div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; cursor: pointer;"), onClick($$const(inj34(choice)))])([renderStoryChoice(choice)]);
-              })(fromFoldable12(story.choices.value0.value0)), [button([onClick($$const(inj43(unit)))])([text("regenerate")])]]);
+                return div2([style("padding: 0.5em; box-shadow: 0 0 0 1px black; cursor: pointer;"), onClick($$const(inj25(choice)))])([renderStoryChoice(choice)]);
+              })(fromFoldable12(story.choices.value0.value0)), [button([onClick($$const(inj34(unit)))])([text("regenerate")])]]);
             }
             ;
-            throw new Error("Failed pattern match at Example.DatingSim (line 458, column 25 - line 477, column 32): " + [story.choices.constructor.name]);
+            throw new Error("Failed pattern match at Example.DatingSim (line 456, column 25 - line 475, column 32): " + [story.choices.constructor.name]);
           }())])])]);
         }
       })(env.world.stage);
@@ -14215,20 +14420,20 @@ ${str(snapshot)}`);
       return {
         player: {
           name: "John",
-          physicality: wrap6("John has blue eyes, long black hair, and a thin, athletic build, and a nice cock. He may be interested in sports or exercise as well."),
-          personality: wrap6("John is exploratory and open-minded and all things, from conversation topics to sex positions."),
+          physicality: wrap6("John is an athletic man with a muscular build and short brown hair that often falls into his eyes."),
+          personality: wrap6("John is known for being laid back, but also has an infectious laugh and a penchant for trying new things."),
           profile: default_Profile
         },
         world: {
-          stage: inj53({
+          stage: inj43({
             arc: {
               name: "simple example open-ended romance premise",
               premise: wrap6("On a rain-slicked city night, John finds himself caught in the gravitational pull of the enigmatic Penelope, knowing full well that whatever comes next will test the limits of his control\u2014and his fate."),
-              intro: wrap6("The night air is thick with the scent of rain on hot pavement as John watches Penelope step out of the cab, her dress clinging to the shape of her like ink bleeding into silk. The city hums around them\u2014neon flickering in puddles, the distant wail of a siren curling through the streets\u2014but all he can focus on is the way she moves, deliberate and unhurried, the sharp click of her heels against the sidewalk sending a shiver up his spine. When she reaches him, her perfume\u2014something dark, something floral, something that makes his throat tighten\u2014wraps around him, and she tilts her chin up, eyes glinting beneath the streetlights. \u201CReady?\u201D she murmurs, lips just shy of a smirk. John swallows, nods, and tells himself he\u2019s got this\u2014but the way her fingers graze his wrist as they start walking makes him feel like he\u2019s already losing control."),
+              intro: wrap6("The night air is thick with the scent of rain on hot pavement as John watches Penelope step out of the cab, her dress clinging to the shape of her like ink bleeding into silk. The city hums around them\u2014neon flickering in puddles, the distant wail of a siren curling through the streets\u2014but all he can focus on is the way she moves, deliberate and unhurried, the sharp click of her heels against the sidewalk sending a shiver up his spine. When she reaches him, her perfume\u2014something dark, something floral, something that makes his throat tighten\u2014wraps around him, and she tilts her chin up, eyes glinting beneath the streetlights. \u201CReady?\u201D she murmurs, lips just shy of a smirk. John swallows, nods, and tells himself he's got this\u2014but the way her fingers graze his wrist as they start walking makes him feel like he's already losing control."),
               arc_steps: none5
             },
             arc_step_index: 0,
-            transcript: none12,
+            transcript: none1,
             generating_next_transcript_step: false,
             choices: none22
           })
@@ -14238,24 +14443,24 @@ ${str(snapshot)}`);
     var handleAction = match3({
       startStory: function(v) {
         return discard4(log5("[action] startStory"))(function() {
-          return bind8(gets2(view(function($195) {
-            return prop12(prop32(onLens$prime1($195)));
+          return bind8(gets2(view(function($189) {
+            return prop12(prop32(onLens$prime1($189)));
           })))(function(story) {
-            return discard4(assign3(function($196) {
-              return prop62(prop7(onLens$prime22(prop9($196))));
+            return discard4(assign3(function($190) {
+              return prop62(prop7(onLens$prime22(prop9($190))));
             })([{
               choice: {
                 description: wrap6("Write the introduction to the story."),
-                diff: none12
+                diff: none1
               },
               reply: story.arc.intro
             }]))(function() {
-              return discard4(assign3(function($197) {
-                return prop62(prop7(onLens$prime22(prop10($197))));
+              return discard4(assign3(function($191) {
+                return prop62(prop7(onLens$prime22(prop10($191))));
               })(pure12(none22)))(function() {
                 return bind8(generateStoryChoices)(function(choices) {
-                  return discard4(assign3(function($198) {
-                    return prop62(prop7(onLens$prime22(prop10($198))));
+                  return discard4(assign3(function($192) {
+                    return prop62(prop7(onLens$prime22(prop10($192))));
                   })(pure12(pure12(choices))))(function() {
                     return pure8(unit);
                   });
@@ -14266,12 +14471,12 @@ ${str(snapshot)}`);
         });
       },
       regenerateChoices: function(v) {
-        return discard4(assign3(function($199) {
-          return prop62(prop7(onLens$prime22(prop10($199))));
+        return discard4(assign3(function($193) {
+          return prop62(prop7(onLens$prime22(prop10($193))));
         })(pure12(none22)))(function() {
           return bind8(generateStoryChoices)(function(choices) {
-            return discard4(assign3(function($200) {
-              return prop62(prop7(onLens$prime22(prop10($200))));
+            return discard4(assign3(function($194) {
+              return prop62(prop7(onLens$prime22(prop10($194))));
             })(pure12(pure12(choices))))(function() {
               return pure8(unit);
             });
@@ -14280,12 +14485,12 @@ ${str(snapshot)}`);
       },
       submitChoice: function(choice) {
         return discard4(log5("[action] submitChoice"))(function() {
-          return discard4(assign3(function($201) {
-            return prop62(prop7(onLens$prime22(prop10($201))));
+          return discard4(assign3(function($195) {
+            return prop62(prop7(onLens$prime22(prop10($195))));
           })(pure12(none22)))(function() {
             return bind8(updateStory(choice))(function(choices) {
-              return discard4(assign3(function($202) {
-                return prop62(prop7(onLens$prime22(prop10($202))));
+              return discard4(assign3(function($196) {
+                return prop62(prop7(onLens$prime22(prop10($196))));
               })(pure12(pure12(choices))))(function() {
                 return pure8(unit);
               });
@@ -14391,7 +14596,7 @@ ${str(snapshot)}`);
   var pure13 = /* @__PURE__ */ pure(applicativeEffect);
   var map21 = /* @__PURE__ */ map(functorEffect);
   var discard5 = /* @__PURE__ */ discard(discardUnit);
-  var throwError5 = /* @__PURE__ */ throwError(monadThrowAff);
+  var throwError6 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query2) {
     return bind9(liftEffect6(bindFlipped6(composeKleisliFlipped4(function() {
       var $16 = querySelector(query2);
@@ -14421,7 +14626,7 @@ ${str(snapshot)}`);
   });
   var awaitBody = /* @__PURE__ */ discard5(bindAff)(awaitLoad)(function() {
     return bind9(selectElement("body"))(function(body2) {
-      return maybe(throwError5(error("Could not find body")))(pure9)(body2);
+      return maybe(throwError6(error("Could not find body")))(pure9)(body2);
     });
   });
 
@@ -14515,8 +14720,8 @@ ${str(snapshot)}`);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard6 = /* @__PURE__ */ discard(discardUnit);
   var discard1 = /* @__PURE__ */ discard6(bindAff);
-  var traverse_12 = /* @__PURE__ */ traverse_(applicativeAff);
-  var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
+  var traverse_13 = /* @__PURE__ */ traverse_(applicativeAff);
+  var traverse_23 = /* @__PURE__ */ traverse_13(foldableList);
   var fork3 = /* @__PURE__ */ fork2(monadForkAff);
   var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var pure10 = /* @__PURE__ */ pure(applicativeAff);
@@ -14530,7 +14735,7 @@ ${str(snapshot)}`);
   var $$delete3 = /* @__PURE__ */ $$delete2(ordForkId);
   var unlessM2 = /* @__PURE__ */ unlessM(monadEffect);
   var insert12 = /* @__PURE__ */ insert3(ordForkId);
-  var traverse_32 = /* @__PURE__ */ traverse_12(foldableMaybe);
+  var traverse_32 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var lookup12 = /* @__PURE__ */ lookup3(ordForkId);
   var lookup22 = /* @__PURE__ */ lookup3(ordString);
   var foldFree2 = /* @__PURE__ */ foldFree(monadRecAff);
@@ -14567,7 +14772,7 @@ ${str(snapshot)}`);
       })(lchs)))(function() {
         return bind13(liftEffect7(f))(function(result) {
           return bind13(liftEffect7(read(lchs)))(function(v) {
-            return discard1(traverse_22(fork3)(v.finalizers))(function() {
+            return discard1(traverse_23(fork3)(v.finalizers))(function() {
               return discard1(parSequence_3(v.initializers))(function() {
                 return pure10(result);
               });
@@ -14797,9 +15002,9 @@ ${str(snapshot)}`);
   var traverse_6 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
   var fork4 = /* @__PURE__ */ fork2(monadForkAff);
   var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
-  var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
-  var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
-  var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
+  var traverse_14 = /* @__PURE__ */ traverse_(applicativeEffect);
+  var traverse_24 = /* @__PURE__ */ traverse_14(foldableMaybe);
+  var traverse_33 = /* @__PURE__ */ traverse_14(foldableMap);
   var discard22 = /* @__PURE__ */ discard7(bindAff);
   var parSequence_4 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect8 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -14835,7 +15040,7 @@ ${str(snapshot)}`);
   };
   var cleanupSubscriptionsAndForks = function(v) {
     return function __do2() {
-      bindFlipped8(traverse_23(traverse_33(unsubscribe)))(read(v.subscriptions))();
+      bindFlipped8(traverse_24(traverse_33(unsubscribe)))(read(v.subscriptions))();
       write(Nothing.value)(v.subscriptions)();
       bindFlipped8(traverse_33(function() {
         var $61 = killFiber(error("finalized"));
@@ -15011,7 +15216,7 @@ ${str(snapshot)}`);
                 return function __do3() {
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
-                  traverse_23(function() {
+                  traverse_24(function() {
                     var $76 = traverse_6(fork4);
                     return function($77) {
                       return handleAff($76(reverse($77)));
@@ -15360,12 +15565,13 @@ ${str(snapshot)}`);
   };
   var on24 = /* @__PURE__ */ on5(BasicIsSymbol);
   var slot_22 = /* @__PURE__ */ slot_3(BasicIsSymbol)(ordUnit);
-  var on32 = /* @__PURE__ */ on5({
+  var menuIsSymbol = {
     reflectSymbol: function() {
       return "menu";
     }
-  });
-  var inj17 = /* @__PURE__ */ inj16(DatingSimIsSymbol);
+  };
+  var on32 = /* @__PURE__ */ on5(menuIsSymbol);
+  var inj17 = /* @__PURE__ */ inj16(menuIsSymbol);
   var assign5 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop11 = /* @__PURE__ */ prop2({
     reflectSymbol: function() {
