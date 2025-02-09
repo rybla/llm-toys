@@ -40,6 +40,21 @@ import Web.HTML.HTMLElement as HTMLElement
 -- LLM config
 --------------------------------------------------------------------------------
 
+{-
+to use openai api, replace the definition of `config1` with the following:
+
+```
+config1 :: GenerateConfig
+config1 =
+  { apiKey: "{{API KEY}}"
+  , baseURL: "https://api.openai.com/v1/chat/completions"
+  , model: "{{MODEL}}"
+  }
+```
+
+and fill in your info
+-}
+
 config1 :: GenerateConfig
 config1 =
   { apiKey: "ollama"
