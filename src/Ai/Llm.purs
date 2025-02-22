@@ -38,9 +38,9 @@ import Utility (inj)
 --------------------------------------------------------------------------------
 
 type GenerateConfig =
-  { apiKey :: String
-  , baseURL :: String
+  { baseURL :: String
   , model :: String
+  , apiKey :: String
   }
 
 generate_basic

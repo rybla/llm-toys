@@ -2,6 +2,8 @@ module Utility where
 
 import Prelude
 
+import Control.Monad.Writer (Writer, execWriter, runWriter)
+import Data.Array as Array
 import Data.Identity (Identity)
 import Data.Lens (Lens')
 import Data.Lens.Record as Lens.Record
@@ -15,6 +17,7 @@ import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Data.Variant as V
 import Effect (Effect)
+import Halogen.HTML.Properties as HP
 import Partial.Unsafe (unsafeCrashWith)
 import Prim.Row (class Cons)
 import Type.Prelude (Proxy(..))
@@ -84,3 +87,5 @@ combinations n xs = do
 
 foreign import scrollIntoView :: Element -> Effect Unit
 
+css :: forall a w i. Writer (Array String) a -> HP.IProp (style :: String | w) i
+css m = HP.style (m # execWriter # Array.intercalate "; ")

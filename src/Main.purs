@@ -8,6 +8,8 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Example.Basic as Basic
 import Example.DatingSim as DatingSim
+import Example.DiscreteAdventure as DiscreteAdventure
+import Example.DiscreteAdventure.Engine1 as DiscreteAdventure.Engine1
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -25,10 +27,7 @@ appComponent :: forall query input output. H.Component query input output Aff
 appComponent = H.mkComponent { initialState, eval, render }
   where
   initialState _ =
-    { app:
-        -- inj @"DatingSim" unit
-        inj @"menu" unit
-    }
+    { app: inj @"menu" unit }
 
   eval = H.mkEval H.defaultEval
     { handleAction = \app -> do
@@ -43,10 +42,12 @@ appComponent = H.mkComponent { initialState, eval, render }
                   [ HP.style "display: flex; flex-direction: column; gap: 0.5em;" ]
                   [ menuButton @"Basic"
                   , menuButton @"DatingSim"
+                  , menuButton @"DiscreteAdventure:Engine1"
                   ]
             )
         # on @"Basic" (\_ -> HH.slot_ (Proxy @"Basic") unit Basic.component unit)
         # on @"DatingSim" (\_ -> HH.slot_ (Proxy @"DatingSim") unit DatingSim.main_component unit)
+        # on @"DiscreteAdventure:Engine1" (\_ -> HH.slot_ (Proxy @"DiscreteAdventure:Engine1") unit DiscreteAdventure.main_component { engine: DiscreteAdventure.Engine1.engine })
     )
 
 menuButton
