@@ -3,6 +3,7 @@ module Example.DiscreteAdventure where
 import Prelude
 
 import Ai2.Llm as Llm
+import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader (Reader, ask, runReader)
 import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
@@ -10,17 +11,20 @@ import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
+import Data.Int as Int
+import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
+import Effect.Aff as Aff
 import Effect.Class.Console as Console
 import Halogen (liftAff)
 import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Utility (css, inj)
+import Utility (css, inj, todo)
 
 --------------------------------------------------------------------------------
 -- types
@@ -34,8 +38,19 @@ type State world =
   { engine :: Engine world
   , world :: world
   , transcript :: Array (StoryEvent world)
-  , generating_StoryEvent :: Boolean
-  , choices :: Variant (generating :: Unit, waiting_for_story :: Unit, ok :: Array (StoryChoice world))
+  , generating_StoryEvent_status ::
+      Variant
+        ( generating :: Unit
+        , error :: String
+        , done :: Unit
+        )
+  , choices ::
+      Variant
+        ( generating :: Unit
+        , waiting_for_story :: Unit
+        , error :: String
+        , done :: Array (StoryChoice world)
+        )
   }
 
 type Engine world =
@@ -72,8 +87,8 @@ type Action world = Variant
 -- component
 --------------------------------------------------------------------------------
 
-main_width = 1000.0
-main_height = 600.0
+main_width = 1000
+main_height = 600
 
 main_component ∷ forall world query output. H.Component query (Input world) output Aff
 main_component = H.mkComponent { initialState, eval, render }
@@ -83,8 +98,8 @@ main_component = H.mkComponent { initialState, eval, render }
     { engine
     , world: engine.initial_world
     , transcript: engine.initial_transcript
-    , generating_StoryEvent: false
-    , choices: inj @"ok" engine.initial_choices
+    , generating_StoryEvent_status: inj @"done" unit
+    , choices: inj @"done" engine.initial_choices
     }
 
   eval = H.mkEval { handleAction, handleQuery: \_query -> pure none, receive: \_input -> none, initialize: none, finalize: none }
@@ -95,7 +110,7 @@ main_component = H.mkComponent { initialState, eval, render }
         -- generate StoryEvent
         do
           modify_ _
-            { generating_StoryEvent = true
+            { generating_StoryEvent_status = inj @"generating" unit
             , choices = inj @"waiting_for_story" unit
             }
           { engine, world, transcript } <- get
@@ -113,10 +128,17 @@ main_component = H.mkComponent { initialState, eval, render }
                     , [ Llm.mkUserMsg prompt_StoryEvent.user ]
                     ] # fold
                 } # liftAff
-            pure response.content
+            case response of
+              Left err -> do
+                modify_ _
+                  { generating_StoryEvent_status = inj @"error" err
+                  , choices = inj @"error" "error when generating next StoryEvent"
+                  }
+                throwError $ Aff.error $ err
+              Right { content } -> pure content
           modify_ \env -> env
             { transcript = env.transcript `Array.snoc` { choice, description }
-            , generating_StoryEvent = false
+            , generating_StoryEvent_status = inj @"done" unit
             , choices = inj @"generating" unit
             }
         -- generate StoryChoices
@@ -133,12 +155,16 @@ main_component = H.mkComponent { initialState, eval, render }
                     , Llm.mkUserMsg prompt_StoryChoices.user
                     ]
                 } # liftAff
-            pure $ response.parsed # decodeJson
+            case response of
+              Left err -> do
+                modify_ _ { choices = inj @"error" err }
+                throwError $ Aff.error $ err
+              Right { parsed } -> pure $ parsed # decodeJson
           case err_choices of
             Left err -> Console.error $ "Failed to generate choices: " <> printJsonDecodeError err
             Right { choices } ->
               modify_ _
-                { choices = inj @"ok" $ choices # map \{ long_description, short_description } ->
+                { choices = inj @"done" $ choices # map \{ long_description, short_description } ->
                     { description: long_description
                     , short_description
                     , update: { apply: identity, description: "TODO: update.description (at some point, the function that updates the world will be inferred from a text rule description given by the LLM)" }
@@ -174,37 +200,43 @@ type RenderM_Html world = RenderM world (Html world)
 
 renderMain :: forall world. RenderM_Html world
 renderMain = do
-  world <- renderWorld >>= renderMainBlock "world"
-  menu <- renderMenu >>= renderMainBlock "menu"
-  story <- renderStory >>= renderMainBlock "story"
+  world <- renderWorld >>= renderMainBlock { width: main_width / 3 # pure } "world"
+  menu <- renderMenu >>= renderMainBlock { width: main_width / 3 # pure } "menu"
+  story <- renderStory >>= renderMainBlock { width: none } "story"
   pure $
     HH.div
       [ css do
-          tell [ "margin: auto", "width: " <> show main_width <> "px" ]
-          tell [ "display: flex", "flex-direction: row", "flex-wrap: wrap" ]
+          tell [ "margin: auto" ]
+          tell [ "width: " <> show main_width <> "px", "height: " <> show main_height <> "px" ]
+          tell [ "display: flex", "flex-direction: row" ]
       ]
-      [ world
-      , menu
-      , story
-      ]
+      [ world, menu, story ]
 
-renderMainBlock :: forall world. String -> Html world -> RenderM_Html world
-renderMainBlock title body = do
+renderMainBlock :: forall world. { width :: Maybe Int } -> String -> Html world -> RenderM_Html world
+renderMainBlock opts title body = do
   pure $
     HH.div
       [ css do
-          tell [ "flex-grow: 0", "flex-shrink: 0" ]
-          tell [ "width: " <> show (main_width / 3.0) <> "px" ]
+          case opts.width of
+            Just width -> do
+              tell [ "flex-grow: 0", "flex-shrink: 0" ]
+              tell [ "width: " <> show width <> "px" ]
+            Nothing -> do
+              tell [ "flex-grow: 1", "flex-shrink: 0" ]
           tell [ "display: flex", "flex-direction: column" ]
       ]
       [ HH.div
           [ css do
+              tell [ "flex-grow: 0" ]
               tell [ "padding: 1em" ]
               tell [ "font-weight: bold", "background-color: black", "color: white" ]
           ]
           [ HH.text title ]
       , HH.div
-          [ css do tell [ "height: " <> show main_height <> "px", "overflow-y: scroll" ] ]
+          [ css do
+              tell [ "flex-grow: 1" ]
+              tell [ "overflow-y: scroll" ]
+          ]
           [ body ]
       ]
 
@@ -212,16 +244,25 @@ renderStory :: forall world. RenderM_Html world
 renderStory = do
   ctx <- ask
   transcript <- ctx.transcript # traverse renderStoryEvent
-  generating_StoryEvent <-
-    if not ctx.generating_StoryEvent then pure []
-    else pure $
-      [ HH.div
-          [ css do
-              tell [ "padding: 0.5em", "border-radius: 1em" ]
-              tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
-          ]
-          [ HH.text "generating..." ]
-      ]
+  generating_StoryEvent_status <- ctx.generating_StoryEvent_status # match
+    { generating: \_ -> pure
+        [ HH.div
+            [ css do
+                tell [ "padding: 0.5em", "border-radius: 1em" ]
+                tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
+            ]
+            [ HH.text "generating..." ]
+        ]
+    , error: \err -> pure
+        [ HH.div
+            [ css do
+                tell [ "padding: 0.5em", "border-radius: 1em" ]
+                tell [ "background-color: color-mix(in hsl, red, transparent 80%)" ]
+            ]
+            [ HH.text $ "error: " <> err ]
+        ]
+    , done: \_ -> pure []
+    }
   pure $
     HH.div
       [ css do
@@ -229,7 +270,7 @@ renderStory = do
           tell [ "display: flex", "flex-direction: column", "gap: 1em" ]
       ]
       ( [ transcript
-        , generating_StoryEvent
+        , generating_StoryEvent_status
         ] # fold
       )
 
@@ -265,7 +306,8 @@ renderMenu = do
   choices <- ctx.choices # match
     { generating: \_ -> pure $ [ HH.div [] [ HH.text "generating..." ] ]
     , waiting_for_story: \_ -> pure $ [ HH.div [] [ HH.text "waiting for story..." ] ]
-    , ok: traverse \choice -> do
+    , error: \err -> pure $ [ HH.div [ css do tell [ "color: red" ] ] [ HH.text err ] ]
+    , done: traverse \choice -> do
         html_choice <- choice # renderStoryChoice_short
         pure $
           HH.div

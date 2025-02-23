@@ -33,7 +33,7 @@ module Ai2.Llm
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, printJsonDecodeError, stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Array as Array
 import Data.Either (Either(..), either)
@@ -203,25 +203,29 @@ instance EncodeJson Schema where
 -- TODO: handle failure cases
 --------------------------------------------------------------------------------
 
-foreign import generate_ :: Json -> Effect (Promise Json)
+foreign import generate_
+  :: forall a
+   . { error :: String -> a, ok :: Json -> a }
+  -> Json
+  -> Effect (Promise a)
 
-generate :: { config :: Config, messages :: Array Msg } -> Aff TextAssistantMsg
+generate :: { config :: Config, messages :: Array Msg } -> Aff (String \/ TextAssistantMsg)
 generate args =
-  ( toAffE $ generate_ $ encodeJson
+  ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
       { baseURL: args.config.baseURL
       , model: args.config.model
       , apiKey: args.config.apiKey
       , messages: args.messages
       }
-  ) >>=
-    ( \response -> case response # decodeJson @{ content :: String } of
-        Right { content } -> pure { content }
-        Left err -> throwError $ Aff.error $ "generate: " <> printJsonDecodeError err
-    )
+  ) <#> case _ of
+    Left err -> Left $ "generate: " <> err
+    Right response -> case response # decodeJson @{ content :: String } of
+      Right { content } -> Right { content }
+      Left err -> Left $ "generate: " <> printJsonDecodeError err
 
-generate_tool :: { config :: Config, tools :: Array Tool, messages :: Array Msg } -> Aff (TextAssistantMsg \/ ToolAssistantMsg)
+generate_tool :: { config :: Config, tools :: Array Tool, messages :: Array Msg } -> Aff (String \/ (TextAssistantMsg \/ ToolAssistantMsg))
 generate_tool args =
-  ( toAffE $ generate_ $ encodeJson
+  ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
       { baseURL: args.config.baseURL
       , model: args.config.model
       , apiKey: args.config.apiKey
@@ -229,28 +233,29 @@ generate_tool args =
       , tool_choice: "auto"
       , messages: args.messages
       }
-  ) >>=
-    ( \response -> case response # decodeJson @{ content :: String, tool_calls :: Array ToolCall } of
-        Right { content, tool_calls } -> pure $ Right { content: Just content, toolCalls: tool_calls }
-        Left err1 -> case response # decodeJson @{ tool_calls :: Array ToolCall } of
-          Right { tool_calls } -> pure $ Right { content: Nothing, toolCalls: tool_calls }
-          Left err2 -> case response # decodeJson @{ content :: String } of
-            Right { content } -> pure $ Left { content }
-            Left err3 -> throwError $ Aff.error $ "generate_tool:\n" <> Array.intercalate "\n" ([ err1, err2, err3 ] # map printJsonDecodeError)
-    )
+  ) <#> case _ of
+    Left err -> Left $ "generate_tool: " <> err
+    Right response -> case response # decodeJson @{ content :: String, tool_calls :: Array ToolCall } of
+      Right { content, tool_calls } -> Right $ Right { content: Just content, toolCalls: tool_calls }
+      Left err1 -> case response # decodeJson @{ tool_calls :: Array ToolCall } of
+        Right { tool_calls } -> Right $ Right { content: Nothing, toolCalls: tool_calls }
+        Left err2 -> case response # decodeJson @{ content :: String } of
+          Right { content } -> Right $ Left { content }
+          Left err3 -> Left $ "generate_tool:\n" <> Array.intercalate "\n" ([ err1, err2, err3 ] # map printJsonDecodeError)
 
-generate_structure :: { config :: Config, schemaDef :: SchemaDef, messages :: Array Msg } -> Aff StructureAssistantMsg
+generate_structure :: { config :: Config, schemaDef :: SchemaDef, messages :: Array Msg } -> Aff (String \/ StructureAssistantMsg)
 generate_structure args =
-  ( toAffE $ generate_ $ encodeJson
+  ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
       { baseURL: args.config.baseURL
       , model: args.config.model
       , apiKey: args.config.apiKey
       , messages: args.messages
       , response_format: args.schemaDef # encodeJson
       }
-  ) >>=
-    ( \response -> case response # decodeJson @{ content :: String } of
-        Right { content } -> pure { parsed: parseJson content # either (\err -> bug $ "generate_structure: failed to parse content as JSON: " <> printJsonDecodeError err) identity }
-        Left err -> throwError $ Aff.error $ "generate_structure: " <> printJsonDecodeError err
-    )
-
+  ) <#> case _ of
+    Left err -> Left $ "generate_structure: " <> err
+    Right response -> case response # decodeJson @{ content :: String } of
+      Right { content } -> case parseJson content of
+        Left err -> Left $ printJsonDecodeError err
+        Right parsed -> Right { parsed }
+      Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
