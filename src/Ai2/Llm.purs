@@ -1,4 +1,23 @@
-module Ai2.Llm where
+module Ai2.Llm
+  ( Config
+  , Msg(..)
+  , SystemMsg
+  , UserMsg
+  , AssistantMsg
+  , ToolMsg
+  , TextAssistantMsg
+  , StructureAssistantMsg
+  , ToolAssistantMsg
+  , ToolCall
+  , Tool(..)
+  , FunctionTool
+  , ToolChoice(..)
+  , SchemaDef(..)
+  , Schema(..)
+  , generate
+  , generate_tool
+  , generate_structure
+  ) where
 
 import Prelude
 
@@ -141,6 +160,7 @@ instance EncodeJson Schema where
 
 --------------------------------------------------------------------------------
 -- endpoints
+-- TODO: handle failure cases
 --------------------------------------------------------------------------------
 
 foreign import generate_ :: Json -> Effect (Promise Json)
@@ -189,10 +209,6 @@ generate_structure args =
       , response_format: args.schemaDef # encodeJson
       }
   ) >>=
-    -- ( \response -> case response # decodeJson @{ parsed :: Json } of
-    --     Right { parsed } -> pure { parsed }
-    --     Left err -> throwError $ Aff.error $ "generate_structure: " <> printJsonDecodeError err
-    -- )
     ( \response -> case response # decodeJson @{ content :: String } of
         Right { content } -> pure { parsed: parseJson content # either (\err -> bug $ "generate_structure: failed to parse content as JSON: " <> printJsonDecodeError err) identity }
         Left err -> throwError $ Aff.error $ "generate_structure: " <> printJsonDecodeError err
