@@ -24,6 +24,7 @@ import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
 import Utility (css, inj, todo)
 
 --------------------------------------------------------------------------------
@@ -40,7 +41,7 @@ type State world =
   , transcript :: Array (StoryEvent world)
   , generating_StoryEvent_status ::
       Variant
-        ( generating :: Unit
+        ( generating :: StoryChoice world
         , error :: String
         , done :: Unit
         )
@@ -87,7 +88,7 @@ type Action world = Variant
 -- component
 --------------------------------------------------------------------------------
 
-main_width = 1000
+main_width = 1200
 main_height = 600
 
 main_component ∷ forall world query output. H.Component query (Input world) output Aff
@@ -110,7 +111,7 @@ main_component = H.mkComponent { initialState, eval, render }
         -- generate StoryEvent
         do
           modify_ _
-            { generating_StoryEvent_status = inj @"generating" unit
+            { generating_StoryEvent_status = inj @"generating" choice
             , choices = inj @"waiting_for_story" unit
             }
           { engine, world, transcript } <- get
@@ -188,7 +189,7 @@ prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
   "story_choices"
   { choices: Llm.mkArraySchema $ Llm.mkObjectSchema
       { long_description: Llm.mkStringSchema { description: "A long and detailed description of what the player could do next." # pure }
-      , short_description: Llm.mkStringSchema { description: "A short and high-level description of the long_description." # pure }
+      , short_description: Llm.mkStringSchema { description: "A short, high-level, 1-sentence summary of the long_description." # pure }
       }
   }
 
@@ -200,14 +201,15 @@ type RenderM_Html world = RenderM world (Html world)
 
 renderMain :: forall world. RenderM_Html world
 renderMain = do
-  world <- renderWorld >>= renderMainBlock { width: main_width / 3 # pure } "world"
-  menu <- renderMenu >>= renderMainBlock { width: main_width / 3 # pure } "menu"
+  world <- renderWorld >>= renderMainBlock { width: 250 # pure } "world"
+  menu <- renderMenu >>= renderMainBlock { width: 250 # pure } "menu"
   story <- renderStory >>= renderMainBlock { width: none } "story"
   pure $
     HH.div
       [ css do
           tell [ "margin: auto" ]
           tell [ "width: " <> show main_width <> "px", "height: " <> show main_height <> "px" ]
+          tell [ "box-shadow: 0 0 0 1px black" ]
           tell [ "display: flex", "flex-direction: row" ]
       ]
       [ world, menu, story ]
@@ -221,8 +223,7 @@ renderMainBlock opts title body = do
             Just width -> do
               tell [ "flex-grow: 0", "flex-shrink: 0" ]
               tell [ "width: " <> show width <> "px" ]
-            Nothing -> do
-              tell [ "flex-grow: 1", "flex-shrink: 0" ]
+            Nothing -> pure unit
           tell [ "display: flex", "flex-direction: column" ]
       ]
       [ HH.div
@@ -234,7 +235,7 @@ renderMainBlock opts title body = do
           [ HH.text title ]
       , HH.div
           [ css do
-              tell [ "flex-grow: 1" ]
+              -- tell [ "flex-grow: 1" ]
               tell [ "overflow-y: scroll" ]
           ]
           [ body ]
@@ -245,20 +246,19 @@ renderStory = do
   ctx <- ask
   transcript <- ctx.transcript # traverse renderStoryEvent
   generating_StoryEvent_status <- ctx.generating_StoryEvent_status # match
-    { generating: \_ -> pure
-        [ HH.div
-            [ css do
-                tell [ "padding: 0.5em", "border-radius: 1em" ]
-                tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
-            ]
-            [ HH.text "generating..." ]
-        ]
+    { generating: \choice -> do
+        html_choice <- choice # renderStoryChoice_short
+        pure
+          [ HH.div
+              [ HP.classes [ HH.ClassName "column-item", HH.ClassName "story-item", HH.ClassName "choice" ] ]
+              [ html_choice ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "column-item", HH.ClassName "story-item", HH.ClassName "generating" ] ]
+              [ HH.text "generating..." ]
+          ]
     , error: \err -> pure
         [ HH.div
-            [ css do
-                tell [ "padding: 0.5em", "border-radius: 1em" ]
-                tell [ "background-color: color-mix(in hsl, red, transparent 80%)" ]
-            ]
+            [ HP.classes [ HH.ClassName "column-item", HH.ClassName "story-item", HH.ClassName "error" ] ]
             [ HH.text $ "error: " <> err ]
         ]
     , done: \_ -> pure []
@@ -281,15 +281,10 @@ renderStoryEvent event = do
     HH.div
       [ css do tell [ "display: flex", "flex-direction: column", "gap: 1em" ] ]
       [ HH.div
-          [ css do
-              tell [ "padding: 0.5em", "border-radius: 1em" ]
-              tell [ "background-color: color-mix(in hsl, black, transparent 80%)" ]
-          ]
+          [ HP.classes [ HH.ClassName "column-item", HH.ClassName "story-item", HH.ClassName "choice" ] ]
           [ choice ]
       , HH.div
-          [ css do
-              tell [ "padding: 0.5em" ]
-          ]
+          [ HP.classes [ HH.ClassName "column-item", HH.ClassName "story-item", HH.ClassName "description" ] ]
           [ HH.text event.description ]
       ]
 
@@ -304,17 +299,26 @@ renderMenu :: forall world. RenderM_Html world
 renderMenu = do
   ctx <- ask
   choices <- ctx.choices # match
-    { generating: \_ -> pure $ [ HH.div [] [ HH.text "generating..." ] ]
-    , waiting_for_story: \_ -> pure $ [ HH.div [] [ HH.text "waiting for story..." ] ]
-    , error: \err -> pure $ [ HH.div [ css do tell [ "color: red" ] ] [ HH.text err ] ]
+    { generating: \_ -> pure $
+        [ HH.div
+            [ HP.classes [ HH.ClassName "column-item", HH.ClassName "menu-item", HH.ClassName "generating" ] ]
+            [ HH.text "generating..." ]
+        ]
+    , waiting_for_story: \_ -> pure $
+        [ HH.div
+            [ HP.classes [ HH.ClassName "column-item", HH.ClassName "menu-item", HH.ClassName "waiting_for_story" ] ]
+            [ HH.text "waiting for story..." ]
+        ]
+    , error: \err -> pure $
+        [ HH.div
+            [ HP.classes [ HH.ClassName "column-item", HH.ClassName "menu-item", HH.ClassName "error" ] ]
+            [ HH.text err ]
+        ]
     , done: traverse \choice -> do
         html_choice <- choice # renderStoryChoice_short
         pure $
           HH.div
-            [ css do
-                tell [ "padding: 0.5em", "border-radius: 1em" ]
-                tell [ "cursor: pointer", "user-select: none" ]
-                tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
+            [ HP.classes [ HH.ClassName "column-item", HH.ClassName "menu-item", HH.ClassName "choice" ]
             , HE.onClick $ const $ inj @"submit_choice" choice
             ]
             [ html_choice ]
