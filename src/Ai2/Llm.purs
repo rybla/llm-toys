@@ -2,18 +2,29 @@ module Ai2.Llm
   ( Config
   , Msg(..)
   , SystemMsg
+  , mkSystemMsg
   , UserMsg
+  , mkUserMsg
   , AssistantMsg
-  , ToolMsg
   , TextAssistantMsg
+  , mkTextAssistantMsg
   , StructureAssistantMsg
+  , mkStructureAssistantMsg
   , ToolAssistantMsg
+  , mkToolAssistantMsg
+  , ToolMsg
   , ToolCall
   , Tool(..)
   , FunctionTool
   , ToolChoice(..)
   , SchemaDef(..)
+  , mkSchemaDef
   , Schema(..)
+  , mkObjectSchema
+  , mkArraySchema
+  , mkStringSchema
+  , mkNumberSchema
+  -- generate functions
   , generate
   , generate_tool
   , generate_structure
@@ -21,19 +32,22 @@ module Ai2.Llm
 
 import Prelude
 
-import Control.Category (identity)
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, printJsonDecodeError, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Array as Array
-import Data.Either (Either(..), either, fromRight')
+import Data.Either (Either(..), either)
 import Data.Either.Nested (type (\/))
 import Data.Maybe (Maybe(..))
+import Data.Unfoldable (none)
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
 import Foreign.Object (Object)
 import Foreign.Object as Object
+import Record as R
+import Record as Record
+import Type.Row.Homogeneous (class Homogeneous)
 import Utility (bug)
 
 --------------------------------------------------------------------------------
@@ -64,7 +78,10 @@ instance EncodeJson Msg where
 
 type SystemMsg = { content :: String }
 
+mkSystemMsg content = SystemMsg { content }
+
 type UserMsg = { content :: String }
+mkUserMsg content = UserMsg { content }
 
 data AssistantMsg
   = TextAssistantMsg TextAssistantMsg
@@ -78,9 +95,15 @@ instance EncodeJson AssistantMsg where
 
 type TextAssistantMsg = { content :: String }
 
+mkTextAssistantMsg content = AssistantMsg $ TextAssistantMsg { content }
+
 type StructureAssistantMsg = { parsed :: Json }
 
+mkStructureAssistantMsg parsed = AssistantMsg $ StructureAssistantMsg { parsed }
+
 type ToolAssistantMsg = { content :: Maybe String, toolCalls :: Array ToolCall }
+
+mkToolAssistantMsg content toolCalls = AssistantMsg $ ToolAssistantMsg { content, toolCalls }
 
 data ToolCall =
   FunctionToolCall { id :: String, name :: String, args :: Json }
@@ -133,22 +156,39 @@ data ToolChoice
 
 -- SchemaDef 
 
-data SchemaDef = SchemaDef { name :: String, schema :: Schema }
+data SchemaDef = SchemaDef { name :: String, schema :: Object Schema }
+
+mkSchemaDef ∷ forall r. Homogeneous r Schema ⇒ String → Record r → SchemaDef
+mkSchemaDef name schema = SchemaDef { name, schema: Object.fromHomogeneous schema }
 
 instance EncodeJson SchemaDef where
   encodeJson (SchemaDef schemaDef) = encodeJson
     { type: "json_schema"
     , json_schema:
         { name: schemaDef.name
-        , schema: schemaDef.schema # encodeJson
+        , schema: ObjectSchema schemaDef.schema
         }
     }
 
+-- TODO: make this intrinsically typed
 data Schema
   = ObjectSchema (Object Schema)
   | ArraySchema Schema
   | StringSchema (Maybe String)
   | NumberSchema (Maybe String)
+
+mkObjectSchema :: forall r. Homogeneous r Schema => Record r -> Schema
+mkObjectSchema r = ObjectSchema $ Object.fromHomogeneous r
+
+mkArraySchema = ArraySchema
+
+mkStringSchema args_ = StringSchema args.description
+  where
+  args = args_ `R.merge` { description: Nothing @String }
+
+mkNumberSchema args_ = NumberSchema args.description
+  where
+  args = args_ `R.merge` { description: Nothing @String }
 
 instance EncodeJson Schema where
   encodeJson (ObjectSchema properties) = encodeJson { type: "object", additionalProperties: false, required: properties # Object.keys, properties: properties # map encodeJson }
@@ -165,7 +205,7 @@ instance EncodeJson Schema where
 
 foreign import generate_ :: Json -> Effect (Promise Json)
 
-generate :: { config :: Config, messages :: Array Msg } -> Aff AssistantMsg
+generate :: { config :: Config, messages :: Array Msg } -> Aff TextAssistantMsg
 generate args =
   ( toAffE $ generate_ $ encodeJson
       { baseURL: args.config.baseURL
@@ -175,7 +215,7 @@ generate args =
       }
   ) >>=
     ( \response -> case response # decodeJson @{ content :: String } of
-        Right { content } -> pure $ TextAssistantMsg { content }
+        Right { content } -> pure { content }
         Left err -> throwError $ Aff.error $ "generate: " <> printJsonDecodeError err
     )
 

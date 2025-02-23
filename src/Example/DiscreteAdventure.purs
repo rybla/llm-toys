@@ -2,12 +2,12 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
-import Ai.Llm (Structure(..), StructureFields(..))
-import Ai.Llm as Ai.Llm
+import Ai2.Llm (Schema(..))
+import Ai2.Llm as Llm
 import Control.Monad.Reader (Reader, ask, runReader)
 import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
-import Data.Argonaut.Decode (JsonDecodeError, decodeJson, fromJsonString, printJsonDecodeError)
+import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
@@ -18,12 +18,13 @@ import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
 import Effect.Class.Console as Console
+import Foreign.Object as Object
 import Halogen (liftAff)
 import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Utility (css, inj)
+import Utility (css, inj, todo)
 
 --------------------------------------------------------------------------------
 -- types
@@ -42,7 +43,7 @@ type State world =
   }
 
 type Engine world =
-  { config :: Ai.Llm.GenerateConfig
+  { config :: Llm.Config
   , initial_world :: world
   , renderWorld :: world -> PlainHTML
   , initial_transcript :: Array (StoryEvent world)
@@ -103,18 +104,20 @@ main_component = H.mkComponent { initialState, eval, render }
             }
           { engine, world, transcript } <- get
           prompt_StoryEvent <- engine.prompt_StoryEvent world choice # liftAff
-          description <-
-            Ai.Llm.generate_basic
-              { config: engine.config
-              , messages:
-                  [ [ Ai.Llm.mkSystemMessage prompt_StoryEvent.system ]
-                  , transcript # foldMap \event ->
-                      [ Ai.Llm.mkUserMessage event.choice.description
-                      , Ai.Llm.mkAssistantMessage event.description
-                      ]
-                  , [ Ai.Llm.mkUserMessage prompt_StoryEvent.user ]
-                  ] # fold
-              } # liftAff
+          description <- do
+            response <-
+              Llm.generate
+                { config: engine.config
+                , messages:
+                    [ [ Llm.mkSystemMsg prompt_StoryEvent.system ]
+                    , transcript # foldMap \event ->
+                        [ Llm.mkUserMsg event.choice.description
+                        , Llm.mkTextAssistantMsg event.description
+                        ]
+                    , [ Llm.mkUserMsg prompt_StoryEvent.user ]
+                    ] # fold
+                } # liftAff
+            pure response.content
           modify_ \env -> env
             { transcript = env.transcript `Array.snoc` { choice, description }
             , generating_StoryEvent = false
@@ -125,19 +128,19 @@ main_component = H.mkComponent { initialState, eval, render }
           { engine, world, transcript } <- get
           prompt_StoryChoices <- engine.prompt_StoryChoices world transcript # liftAff
           err_choices :: Either JsonDecodeError Prompt_StoryChoices_Structure <- do
-            reply <-
-              Ai.Llm.generate_with_format
+            response <-
+              Llm.generate_structure
                 { config: engine.config
-                , structure: prompt_StoryChoices_structure
+                , schemaDef: prompt_StoryChoices_schemaDef
                 , messages:
-                    [ Ai.Llm.mkSystemMessage prompt_StoryChoices.system
-                    , Ai.Llm.mkUserMessage prompt_StoryChoices.user
+                    [ Llm.mkSystemMsg prompt_StoryChoices.system
+                    , Llm.mkUserMsg prompt_StoryChoices.user
                     ]
                 } # liftAff
-            reply # decodeJson # pure
+            pure $ response.parsed # decodeJson
           case err_choices of
             Left err -> Console.error $ "Failed to generate choices: " <> printJsonDecodeError err
-            Right choices ->
+            Right { choices } ->
               modify_ _
                 { choices = inj @"ok" $ choices # map \{ long_description, short_description } ->
                     { description: long_description
@@ -151,16 +154,21 @@ main_component = H.mkComponent { initialState, eval, render }
   render :: State world -> Html world
   render = runReader renderMain
 
-type Prompt_StoryChoices_Structure = Array
-  { long_description :: String
-  , short_description :: String
+type Prompt_StoryChoices_Structure =
+  { choices ::
+      Array
+        { long_description :: String
+        , short_description :: String
+        }
   }
 
-prompt_StoryChoices_structure =
-  Structure $ inj @"array" $ Structure $ inj @"object" $ StructureFields $ Map.fromFoldable
-    [ Tuple "long_description" $ Structure $ inj @"string" { description: "A long and detailed description of what the player could do next." }
-    , Tuple "short_description" $ Structure $ inj @"string" { description: "A short and high-level description of the long_description." }
-    ]
+prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
+  "story_choices"
+  { choices: Llm.mkArraySchema $ Llm.mkObjectSchema
+      { long_description: Llm.mkStringSchema { description: "A long and detailed description of what the player could do next." # pure }
+      , short_description: Llm.mkStringSchema { description: "A short and high-level description of the long_description." # pure }
+      }
+  }
 
 type RenderM world = Reader (State world)
 

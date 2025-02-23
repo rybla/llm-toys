@@ -42,7 +42,7 @@ main = launchAff_ do
   when false do
     Llm.generate_structure
       { config
-      , schemaDef: Llm.SchemaDef { name: "birthday_party_locations", schema: ObjectSchema (Object.fromFoldable [ "birthday_party_locations" /\ ArraySchema (StringSchema ("A single birthday party location" # pure)) ]) }
+      , schemaDef: Llm.SchemaDef { name: "birthday_party_locations", schema: Object.fromFoldable [ "birthday_party_locations" /\ ArraySchema (StringSchema ("A single birthday party location" # pure)) ] }
       , messages: [ Llm.UserMsg { content: "Make a list of reasonable locations to hold a birthday party. Just say the general kinds of places, no need to be super specific." } ]
       }
       >>= \reply -> Console.log $ "Llm.generate_structure ==> " <> (reply # encodeJson # stringifyWithIndent 4)

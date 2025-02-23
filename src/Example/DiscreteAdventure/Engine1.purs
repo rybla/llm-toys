@@ -18,7 +18,7 @@ type World =
 
 engine :: Engine World
 engine =
-  { config: Ai.Llm.Config.config."openai"."gpt-4-turbo"
+  { config: Ai.Llm.Config.config."openai"."gpt-4o"
   , initial_world:
       { player_name: "Glorbax" }
   , renderWorld: \world ->
@@ -66,8 +66,9 @@ Your written descriptions of what's happening should be from the point of view o
             [ """
 You are a game master for a role-playing game with the player.
 The user will provide the transcript of the story so far that describes the game session.
-You should respond, in a structured format, with exactly 3 different choices that the player gets to choose from of what to do immediately next in the game given their current situation.
+You should respond, in a structured format, with 3-5 different choices that the player gets to choose from of what to do immediately next in the game given their current situation.
 The choices should be very distinct and reflect different types of attitudes that the player could take towards their current situation.
+For example, you could include an aggressive choice, an emotional choice, a strategic choice, a weird choice, a choice to proceed with the current objective, a choice to pursue alternative objectives, or other kinds of choices that make sense given the player's current circumstances.
 """
             , templateWorldNotes world
             ]
