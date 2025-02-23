@@ -6,7 +6,7 @@
   "scripts": {
     "build": "spago build",
     "bundle": "spago bundle --bundle-type app --outfile dist/main.js",
-    "bundle.DiscreteAdventure.Engine1": "spago bundle --bundle-type app --module Example.DiscreteAdventure.Engine1 --outfile dist/DiscreteAdventure/Engine1/main.js",
+    "bundle.Example.DiscreteAdventure.Engine1": "spago bundle --bundle-type app --module Example.DiscreteAdventure.Engine1 --outfile dist/Example/DiscreteAdventure/Engine1/main.js",
     "serve": "bun run --hot server.ts"
   },
   "keywords": [],
