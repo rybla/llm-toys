@@ -4,15 +4,22 @@ import Prelude
 
 import Control.Monad.Writer (Writer, execWriter, runWriter)
 import Data.Array as Array
+import Data.Foldable (foldl)
+import Data.Function (applyFlipped)
+import Data.Function as Function
 import Data.Identity (Identity)
 import Data.Lens (Lens')
 import Data.Lens.Record as Lens.Record
 import Data.List (List(..), (:))
 import Data.List as List
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Newtype (unwrap)
 import Data.Profunctor (dimap)
 import Data.Profunctor.Strong (class Strong)
+import Data.String as String
 import Data.Symbol (class IsSymbol)
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Data.Variant as V
@@ -20,11 +27,12 @@ import Effect (Effect)
 import Halogen.HTML.Properties as HP
 import Partial.Unsafe (unsafeCrashWith)
 import Prim.Row (class Cons)
+import Prim.TypeError (class Warn, Text)
 import Type.Prelude (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM (Element)
 
-todo :: forall a. String -> a
+todo :: forall a. Warn (Text "contains TODOs") => String -> a
 todo msg = unsafeCrashWith $ "[[TODO]]\n" <> msg
 
 bug :: forall a. String -> a
@@ -89,3 +97,19 @@ foreign import scrollIntoView :: Element -> Effect Unit
 
 css :: forall a w i. Writer (Array String) a -> HP.IProp (style :: String | w) i
 css m = HP.style (m # execWriter # Array.intercalate "; ")
+
+replaceFormatVars :: Map String String -> String -> String
+replaceFormatVars sigma = go (Map.toUnfoldable sigma)
+  where
+  go Nil s = s
+  go ((k /\ v) : sigma') s = go sigma' $ String.replace (String.Pattern $ "{{" <> k <> "}}") (String.Replacement v) s
+
+paragraph :: String -> String
+paragraph = identity
+  >>> String.trim
+  >>> String.replaceAll (String.Pattern "\\n") (String.Replacement " ")
+
+paragraphs :: Array String -> String
+paragraphs = map paragraph >>> String.joinWith "\n\n"
+
+infixr 0 Function.apply as $$

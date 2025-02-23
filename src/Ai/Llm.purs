@@ -70,11 +70,25 @@ generate_with_tools { config: { apiKey, baseURL, model }, messages, tools, tool_
 generate_with_format
   :: { config :: GenerateConfig
      , messages :: Array Message
-     , format :: Structure
+     , structure :: Structure
      }
   -> Aff String
-generate_with_format { config: { apiKey, baseURL, model }, messages, format } = do
-  generate_raw (encodeJson { apiKey, baseURL, model, messages, format }) >>= case _ of
+generate_with_format { config: { apiKey, baseURL, model }, messages, structure } = do
+  generate_raw
+    ( encodeJson
+        { apiKey
+        , baseURL
+        , model
+        , messages
+        , response_format:
+            { "type": "json_schema"
+            , "json_schema":
+                { "schema": structure
+                , "strict": true
+                }
+            }
+        }
+    ) >>= case _ of
     { content: Nothing } -> throwError $ Aff.error $ "no content"
     { content: Just content } -> pure content
 
@@ -217,16 +231,16 @@ derive newtype instance Show Tool
 instance EncodeJson Tool where
   encodeJson = unwrap >>> \tool -> encodeJson { "type": "function", function: tool }
 
-instance DecodeJson Tool where
-  decodeJson json | Right { "type": "function", function } <- decodeJson @{ "type" :: String, function :: Json } json = do
-    function' <- json # decodeJson @FunctionDefinition
-    pure $ wrap function'
-  decodeJson json = throwError $ UnexpectedValue json
+-- TODO: where is this needed?
+-- instance DecodeJson Tool where
+--   decodeJson json | Right { "type": "function", function } <- decodeJson @{ "type" :: String, function :: Json } json = do
+--     function' <- json # decodeJson @FunctionDefinition
+--     pure $ wrap function'
+--   decodeJson json = throwError $ UnexpectedValue json
 
 newtype FunctionDefinition = FunctionDefinition
   { name :: String
   , description :: String
-  -- , parameters :: StructureFields
   , parameters :: Structure
   }
 
@@ -238,18 +252,18 @@ instance EncodeJson FunctionDefinition where
   encodeJson (FunctionDefinition def) = encodeJson
     { "name": def.name
     , "description": def.description
-    -- , "parameters": Structure $ inj @"object" def.parameters
     , "parameters": def.parameters
     , "strict": true
     }
 
-instance DecodeJson FunctionDefinition where
-  decodeJson json | Right x <- decodeJson @{ name :: Json, description :: Json, parameters :: Json, required :: Json } json = do
-    name <- x.name # decodeJson
-    description <- x.description # decodeJson
-    parameters <- x.parameters # decodeJson
-    pure $ FunctionDefinition { name, description, parameters }
-  decodeJson json = throwError $ UnexpectedValue json
+-- TODO: where is this needed?
+-- instance DecodeJson FunctionDefinition where
+--   decodeJson json | Right x <- decodeJson @{ name :: Json, description :: Json, parameters :: Json, required :: Json } json = do
+--     name <- x.name # decodeJson
+--     description <- x.description # decodeJson
+--     parameters <- x.parameters # decodeJson
+--     pure $ FunctionDefinition { name, description, parameters }
+--   decodeJson json = throwError $ UnexpectedValue json
 
 newtype StructureFields = StructureFields (Map String Structure)
 
@@ -277,23 +291,31 @@ instance DecodeJson StructureFields where
     pure $ StructureFields $ Map.fromFoldable $ (Object.toUnfoldable parameters' :: List _)
   decodeJson json = throwError $ UnexpectedValue json
 
-newtype Structure = Structure
+data Structure = Structure
   ( Variant
       ( object :: StructureFields
+      , array :: Structure
       , string :: { description :: String }
       , number :: { description :: String }
       )
   )
 
-derive instance Newtype Structure _
-derive newtype instance Show Structure
+derive instance Generic Structure _
+
+instance Show Structure where
+  show x = genericShow x
 
 instance EncodeJson Structure where
-  encodeJson = unwrap >>> match
+  encodeJson (Structure v) = v # match
     { object: \properties -> encodeJson
         { "type": "object"
         , "properties": properties # encodeJson
         , "required": properties # unwrap # Map.keys # Array.fromFoldable
+        , "additionalProperties": false
+        }
+    , array: \struct -> encodeJson
+        { "type": "array"
+        , "items": struct
         }
     , string: \{ description } -> encodeJson { "type": "string", description }
     , number: \{ description } -> encodeJson { "type": "number", description }
@@ -305,9 +327,12 @@ fromMapJsonToObjectJson m = (m # Map.toUnfoldable :: List _) # Object.fromFoldab
 instance DecodeJson Structure where
   decodeJson json | Right { "type": "object", properties } <- decodeJson @{ "type" :: String, "properties" :: Json } json = do
     properties' <- properties # decodeJson
-    pure $ wrap $ inj @"object" $ properties'
-  decodeJson json | Right { "type": "string", description } <- decodeJson @{ "type" :: String, "description" :: String } json = pure $ wrap $ inj @"string" { description }
-  decodeJson json | Right { "type": "number", description } <- decodeJson @{ "type" :: String, "description" :: String } json = pure $ wrap $ inj @"number" { description }
+    pure $ Structure $ inj @"object" $ properties'
+  decodeJson json | Right { "type": "array", items } <- decodeJson @{ "type" :: String, "items" :: Json } json = do
+    items' <- items # decodeJson
+    pure $ Structure $ inj @"array" items'
+  decodeJson json | Right { "type": "string", description } <- decodeJson @{ "type" :: String, "description" :: String } json = pure $ Structure $ inj @"string" { description }
+  decodeJson json | Right { "type": "number", description } <- decodeJson @{ "type" :: String, "description" :: String } json = pure $ Structure $ inj @"number" { description }
   decodeJson json = throwError $ UnexpectedValue json
 
 newtype ToolChoice = ToolChoice

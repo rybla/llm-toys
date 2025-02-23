@@ -2,11 +2,19 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
-import Ai.Llm as Llm
-import Ai.Llm.Config as Ai.Llm.Config
+import Ai.Llm (Structure(..), StructureFields(..))
+import Ai.Llm as Ai.Llm
 import Control.Monad.Reader (Reader, ask, runReader)
+import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
+import Data.Argonaut.Decode (JsonDecodeError, fromJsonString)
+import Data.Array as Array
+import Data.Either (Either(..), either)
+import Data.Foldable (fold, foldMap)
+import Data.Map as Map
 import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
@@ -30,18 +38,18 @@ type State world =
   { engine :: Engine world
   , world :: world
   , transcript :: Array (StoryEvent world)
-  , choices ::
-      Variant
-        ( generating :: Unit
-        , ok :: Array (StoryChoice world)
-        )
+  , generating_StoryEvent :: Boolean
+  , choices :: Variant (generating :: Unit, ok :: Array (StoryChoice world))
   }
 
 type Engine world =
-  { initial_world :: world
+  { config :: Ai.Llm.GenerateConfig
+  , initial_world :: world
   , renderWorld :: world -> PlainHTML
   , initial_transcript :: Array (StoryEvent world)
   , initial_choices :: Array (StoryChoice world)
+  , prompt_StoryEvent :: world -> StoryChoice world -> Aff { system :: String, user :: String }
+  , prompt_StoryChoices :: world -> Array (StoryEvent world) -> Aff { system :: String, user :: String }
   }
 
 type StoryEvent world =
@@ -51,7 +59,7 @@ type StoryEvent world =
 
 type StoryChoice world =
   { short_description :: String
-  , full_description :: String
+  , description :: String
   , update :: WorldUpdate world
   }
 
@@ -71,8 +79,6 @@ type Action world = Variant
 main_width = 1000.0
 main_height = 600.0
 
-config = Ai.Llm.Config.config."openai"."gpt-4-turbo"
-
 main_component ∷ forall world query output. H.Component query (Input world) output Aff
 main_component = H.mkComponent { initialState, eval, render }
   where
@@ -81,6 +87,7 @@ main_component = H.mkComponent { initialState, eval, render }
     { engine
     , world: engine.initial_world
     , transcript: engine.initial_transcript
+    , generating_StoryEvent: false
     , choices: inj @"ok" engine.initial_choices
     }
 
@@ -89,12 +96,71 @@ main_component = H.mkComponent { initialState, eval, render }
   handleAction = match
     { submit_choice: \choice -> do
         Console.log $ "submit_choice: " <> show choice.short_description
-        _ <- Llm.generate_basic { config, messages: [] } # liftAff
-        pure unit
+        -- generate StoryEvent
+        do
+          modify_ _
+            { generating_StoryEvent = true
+            , choices = inj @"generating" unit
+            }
+          { engine, world, transcript } <- get
+          prompt_StoryEvent <- engine.prompt_StoryEvent world choice # liftAff
+          description <-
+            Ai.Llm.generate_basic
+              { config: engine.config
+              , messages:
+                  [ [ Ai.Llm.mkSystemMessage prompt_StoryEvent.system ]
+                  , transcript # foldMap \event ->
+                      [ Ai.Llm.mkUserMessage event.choice.description
+                      , Ai.Llm.mkAssistantMessage event.description
+                      ]
+                  , [ Ai.Llm.mkUserMessage prompt_StoryEvent.user ]
+                  ] # fold
+              } # liftAff
+          modify_ \env -> env
+            { transcript = env.transcript `Array.snoc` { choice, description }
+            , generating_StoryEvent = false
+            }
+        -- generate StoryChoices
+        do
+          { engine, world, transcript } <- get
+          prompt_StoryChoices <- engine.prompt_StoryChoices world transcript # liftAff
+          err_choices :: Either JsonDecodeError Prompt_StoryChoices_Structure <- do
+            reply <-
+              Ai.Llm.generate_with_format
+                { config: engine.config
+                , structure: prompt_StoryChoices_structure
+                , messages:
+                    [ Ai.Llm.mkSystemMessage prompt_StoryChoices.system
+                    , Ai.Llm.mkUserMessage prompt_StoryChoices.user
+                    ]
+                } # liftAff
+            reply # fromJsonString # pure --- either ?a pure
+          case err_choices of
+            Left err -> pure unit
+            Right choices ->
+              modify_ _
+                { choices = inj @"ok" $ choices # map \{ long_description, short_description } ->
+                    { description: long_description
+                    , short_description
+                    , update: { apply: identity, description: "TODO: update.description" }
+                    }
+                }
+          pure unit
     }
 
   render :: State world -> Html world
   render = runReader renderMain
+
+type Prompt_StoryChoices_Structure = Array
+  { long_description :: String
+  , short_description :: String
+  }
+
+prompt_StoryChoices_structure =
+  Structure $ inj @"array" $ Structure $ inj @"object" $ StructureFields $ Map.fromFoldable
+    [ Tuple "long_description" $ Structure $ inj @"string" { description: "A long and detailed description of what the player could do next." }
+    , Tuple "short_description" $ Structure $ inj @"string" { description: "A short and high-level description of the long_description." }
+    ]
 
 type RenderM world = Reader (State world)
 
@@ -142,13 +208,26 @@ renderStory :: forall world. RenderM_Html world
 renderStory = do
   ctx <- ask
   transcript <- ctx.transcript # traverse renderStoryEvent
+  generating_StoryEvent <-
+    if not ctx.generating_StoryEvent then pure []
+    else pure $
+      [ HH.div
+          [ css do
+              tell [ "padding: 0.5em", "border-radius: 1em" ]
+              tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
+          ]
+          [ HH.text "generating..." ]
+      ]
   pure $
     HH.div
       [ css do
           tell [ "padding: 1.0em" ]
           tell [ "display: flex", "flex-direction: column", "gap: 1em" ]
       ]
-      transcript
+      ( [ transcript
+        , generating_StoryEvent
+        ] # fold
+      )
 
 renderStoryEvent :: forall world. StoryEvent world -> RenderM_Html world
 renderStoryEvent event = do
