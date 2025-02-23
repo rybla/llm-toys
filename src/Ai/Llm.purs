@@ -62,6 +62,7 @@ generate_with_tools
   -> Aff
        { content :: Maybe String
        , tool_calls :: Maybe (Array ToolCall)
+       , parsed :: Maybe Json
        }
 generate_with_tools { config: { apiKey, baseURL, model }, messages, tools, tool_choice } =
   generate_raw $ encodeJson
@@ -72,7 +73,7 @@ generate_with_format
      , messages :: Array Message
      , structure :: Structure
      }
-  -> Aff String
+  -> Aff Json
 generate_with_format { config: { apiKey, baseURL, model }, messages, structure } = do
   generate_raw
     ( encodeJson
@@ -89,8 +90,8 @@ generate_with_format { config: { apiKey, baseURL, model }, messages, structure }
             }
         }
     ) >>= case _ of
-    { content: Nothing } -> throwError $ Aff.error $ "no content"
-    { content: Just content } -> pure content
+    { parsed: Nothing } -> throwError $ Aff.error $ "no parsed"
+    { parsed: Just parsed } -> pure parsed
 
 --------------------------------------------------------------------------------
 -- generate_raw
@@ -101,6 +102,7 @@ generate_raw
   -> Aff
        { content :: Maybe String
        , tool_calls :: Maybe (Array ToolCall)
+       , parsed :: Maybe Json
        }
 generate_raw args = do
   Console.log $ "[generate input]\n" <> stringifyWithIndent 4 args
@@ -155,7 +157,11 @@ newtype Message = Message
       )
   )
 
-type AssistantMessage = { content :: Maybe String, tool_calls :: Maybe (Array ToolCall) }
+type AssistantMessage =
+  { content :: Maybe String
+  , tool_calls :: Maybe (Array ToolCall)
+  , parsed :: Maybe Json
+  }
 
 mkSystemMessage :: String -> Message
 mkSystemMessage content = inj @"system" { name: none, content } # wrap
@@ -164,13 +170,13 @@ mkUserMessage :: String -> Message
 mkUserMessage content = inj @"user" { name: none, content } # wrap
 
 mkAssistantMessage :: String -> Message
-mkAssistantMessage content = inj @"assistant" { content: content # pure, tool_calls: none } # wrap
+mkAssistantMessage content = inj @"assistant" { content: content # pure, tool_calls: none, parsed: none } # wrap
 
 mkToolMessage :: String -> String -> String -> Message
 mkToolMessage name tool_call_id content = inj @"tool" { name, tool_call_id, content } # wrap
 
 derive instance Newtype Message _
-derive newtype instance Show Message
+-- derive newtype instance Show Message
 
 instance EncodeJson Message where
   encodeJson = unwrap >>> match
@@ -185,18 +191,17 @@ instance DecodeJson Message where
     pure $ wrap $ inj @"system" { name: name # Optional.toMaybe, content }
   decodeJson json | Right (PartialRecord { role: "user", name, content }) <- decodeJson @(PartialRecord ("role" :: String, "name" :: Optional String, content :: String)) json = do
     pure $ wrap $ inj @"user" { name: name # Optional.toMaybe, content }
-  decodeJson json | Right (PartialRecord { role: "assistant", content, tool_calls }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional String, tool_calls :: Json)) json = do
-    tool_calls' <- tool_calls # decodeJson
-    pure $ wrap $ inj @"assistant" { content: content # Optional.toMaybe, tool_calls: tool_calls' }
+  decodeJson json | Right msg <- decodeJson_Message_assistant json =
+    pure $ wrap $ inj @"assistant" msg
   decodeJson json | Right (PartialRecord { name, role: "tool", tool_call_id, content }) <- decodeJson @(PartialRecord ("role" :: String, name :: String, tool_call_id :: String, content :: String)) json = do
     pure $ wrap $ inj @"tool" { name, tool_call_id, content }
   decodeJson json = throwError $ UnexpectedValue json
 
 decodeJson_Message_assistant :: Json -> JsonDecodeError \/ AssistantMessage
-decodeJson_Message_assistant json | Right (PartialRecord { role: "assistant", content, tool_calls }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional Json, tool_calls :: Optional Json)) json = do
+decodeJson_Message_assistant json | Right (PartialRecord { role: "assistant", content, tool_calls, parsed }) <- decodeJson @(PartialRecord ("role" :: String, content :: Optional Json, tool_calls :: Optional Json, parsed :: Optional Json)) json = do
   content' <- content # traverse decodeJson
   tool_calls' <- tool_calls # traverse decodeJson
-  pure { content: content' # Optional.toMaybe, tool_calls: tool_calls' # Optional.toMaybe }
+  pure { content: content' # Optional.toMaybe, tool_calls: tool_calls' # Optional.toMaybe, parsed: parsed # Optional.toMaybe }
 decodeJson_Message_assistant json = throwError $ UnexpectedValue json
 
 newtype ToolCall = ToolCall

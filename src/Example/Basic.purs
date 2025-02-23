@@ -2,7 +2,7 @@ module Example.Basic where
 
 import Prelude
 
-import Ai.Llm (ToolChoice(..))
+import Ai.Llm (Structure(..), ToolChoice(..))
 import Ai.Llm as Llm
 import Control.Monad.State (get, modify_)
 import Data.Argonaut.Decode (fromJsonString)
@@ -59,17 +59,17 @@ component = H.mkComponent { initialState, eval, render }
                         [ wrap $ wrap $
                             { name: "set_object_color"
                             , description: "Sets the object's color."
-                            , parameters: wrap $ inj @"object" $ wrap $ Map.fromFoldable
-                                [ Tuple "color" $ wrap $ inj @"string" { description: "The color to set the object's color to." }
+                            , parameters: Structure $ inj @"object" $ wrap $ Map.fromFoldable
+                                [ Tuple "color" $ Structure $ inj @"string" { description: "The color to set the object's color to." }
                                 ]
                             }
 
                         , wrap $ wrap $
                             { name: "set_object_position"
                             , description: "Sets the object's position"
-                            , parameters: wrap $ inj @"object" $ wrap $ Map.fromFoldable
-                                [ Tuple "x" $ wrap $ inj @"number" { description: "The new x-coordinate of the object." }
-                                , Tuple "y" $ wrap $ inj @"number" { description: "The new y-coordinate of the object." }
+                            , parameters: Structure $ inj @"object" $ wrap $ Map.fromFoldable
+                                [ Tuple "x" $ Structure $ inj @"number" { description: "The new x-coordinate of the object." }
+                                , Tuple "y" $ Structure $ inj @"number" { description: "The new y-coordinate of the object." }
                                 ]
                             }
 

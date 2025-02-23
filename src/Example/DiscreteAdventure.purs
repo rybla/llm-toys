@@ -7,14 +7,13 @@ import Ai.Llm as Ai.Llm
 import Control.Monad.Reader (Reader, ask, runReader)
 import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
-import Data.Argonaut.Decode (JsonDecodeError, fromJsonString)
+import Data.Argonaut.Decode (JsonDecodeError, decodeJson, fromJsonString, printJsonDecodeError)
 import Data.Array as Array
-import Data.Either (Either(..), either)
+import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
 import Data.Map as Map
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
@@ -39,7 +38,7 @@ type State world =
   , world :: world
   , transcript :: Array (StoryEvent world)
   , generating_StoryEvent :: Boolean
-  , choices :: Variant (generating :: Unit, ok :: Array (StoryChoice world))
+  , choices :: Variant (generating :: Unit, waiting_for_story :: Unit, ok :: Array (StoryChoice world))
   }
 
 type Engine world =
@@ -100,7 +99,7 @@ main_component = H.mkComponent { initialState, eval, render }
         do
           modify_ _
             { generating_StoryEvent = true
-            , choices = inj @"generating" unit
+            , choices = inj @"waiting_for_story" unit
             }
           { engine, world, transcript } <- get
           prompt_StoryEvent <- engine.prompt_StoryEvent world choice # liftAff
@@ -119,6 +118,7 @@ main_component = H.mkComponent { initialState, eval, render }
           modify_ \env -> env
             { transcript = env.transcript `Array.snoc` { choice, description }
             , generating_StoryEvent = false
+            , choices = inj @"generating" unit
             }
         -- generate StoryChoices
         do
@@ -134,15 +134,15 @@ main_component = H.mkComponent { initialState, eval, render }
                     , Ai.Llm.mkUserMessage prompt_StoryChoices.user
                     ]
                 } # liftAff
-            reply # fromJsonString # pure --- either ?a pure
+            reply # decodeJson # pure
           case err_choices of
-            Left err -> pure unit
+            Left err -> Console.error $ "Failed to generate choices: " <> printJsonDecodeError err
             Right choices ->
               modify_ _
                 { choices = inj @"ok" $ choices # map \{ long_description, short_description } ->
                     { description: long_description
                     , short_description
-                    , update: { apply: identity, description: "TODO: update.description" }
+                    , update: { apply: identity, description: "TODO: update.description (at some point, the function that updates the world will be inferred from a text rule description given by the LLM)" }
                     }
                 }
           pure unit
@@ -260,6 +260,7 @@ renderMenu = do
   ctx <- ask
   choices <- ctx.choices # match
     { generating: \_ -> pure $ [ HH.div [] [ HH.text "generating..." ] ]
+    , waiting_for_story: \_ -> pure $ [ HH.div [] [ HH.text "waiting for story..." ] ]
     , ok: traverse \choice -> do
         html_choice <- choice # renderStoryChoice_short
         pure $
@@ -267,7 +268,7 @@ renderMenu = do
             [ css do
                 tell [ "padding: 0.5em", "border-radius: 1em" ]
                 tell [ "cursor: pointer", "user-select: none" ]
-                tell [ "background-color: rgba(0, 0, 0, 0.2)" ]
+                tell [ "background-color: color-mix(in hsl, blue, transparent 80%)" ]
             , HE.onClick $ const $ inj @"submit_choice" choice
             ]
             [ html_choice ]

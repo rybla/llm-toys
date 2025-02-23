@@ -31,7 +31,7 @@ generate_basic_agent (BasicAgent agent) = do
     Tuple
       ( BasicAgent agent
           { messages = agent.messages `Array.snoc`
-              (wrap $ inj @"assistant" { content: pure reply, tool_calls: none })
+              (wrap $ inj @"assistant" { content: pure reply, tool_calls: none, parsed: none })
           }
       )
       reply

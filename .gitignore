@@ -9,5 +9,6 @@ generated-docs/
 .purs*
 .psa*
 .spago
-src/Ai/Llm/Config.js
 dist/
+src/Ai/Llm/Config.js
+src/Secret.js
