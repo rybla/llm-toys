@@ -2,7 +2,6 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
-import Ai2.Llm (Schema(..))
 import Ai2.Llm as Llm
 import Control.Monad.Reader (Reader, ask, runReader)
 import Control.Monad.State (get, modify_)
@@ -11,20 +10,17 @@ import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
-import Data.Map as Map
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
 import Effect.Class.Console as Console
-import Foreign.Object as Object
 import Halogen (liftAff)
 import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Utility (css, inj, todo)
+import Utility (css, inj)
 
 --------------------------------------------------------------------------------
 -- types
