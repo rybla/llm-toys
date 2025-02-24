@@ -683,21 +683,6 @@
     };
     return Just2;
   }();
-  var maybe$prime = function(v) {
-    return function(v1) {
-      return function(v2) {
-        if (v2 instanceof Nothing) {
-          return v(unit);
-        }
-        ;
-        if (v2 instanceof Just) {
-          return v1(v2.value0);
-        }
-        ;
-        throw new Error("Failed pattern match at Data.Maybe (line 250, column 1 - line 250, column 62): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
-      };
-    };
-  };
   var maybe = function(v) {
     return function(v1) {
       return function(v2) {
@@ -14116,7 +14101,6 @@ ${str(snapshot)}`);
     }
   });
   var bind12 = /* @__PURE__ */ bind(bindHalogenM);
-  var throwError2 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
   var pure32 = /* @__PURE__ */ pure(applicativeHalogenM);
   var discard23 = /* @__PURE__ */ discard3(bindHalogenM);
   var monadEffectHalogenM3 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
@@ -14127,6 +14111,7 @@ ${str(snapshot)}`);
     }
   });
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
+  var throwError2 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
   var assign3 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop6 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -14219,7 +14204,7 @@ ${str(snapshot)}`);
             return pure1(unit);
           }
           ;
-          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 284, column 11 - line 288, column 33): " + [opts.width.constructor.name]);
+          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 286, column 11 - line 290, column 33): " + [opts.width.constructor.name]);
         }())(function() {
           return tell3(["display: flex", "flex-direction: column"]);
         }))])([div2([css(discard12(tell3(["flex-grow: 0"]))(function() {
@@ -14306,19 +14291,25 @@ ${str(snapshot)}`);
         }))])([world, menu2, story]), slot2($$Proxy.value)(unit)(component)({
           providerCategory: "Main",
           providers: providers_with_tools
-        })(function($170) {
-          return inj42(pure23($170));
+        })(function($172) {
+          return inj42(pure23($172));
         })]));
       });
     });
   });
   var main_component = /* @__PURE__ */ function() {
-    var scrollDownStory = bind12(bind12(getHTMLElementRef(ref_lastStoryItem))(maybe$prime(function(v) {
-      return throwError2(error("element at ref_lastStoryItem doesn't exist"));
-    })(pure32)))(function(e) {
-      return discard23(liftEffect5(scrollIntoView(toElement(e))))(function() {
+    var scrollDownStory = bind12(getHTMLElementRef(ref_lastStoryItem))(function(v) {
+      if (v instanceof Nothing) {
         return pure32(unit);
-      });
+      }
+      ;
+      if (v instanceof Just) {
+        return discard23(liftEffect5(scrollIntoView(toElement(v.value0))))(function() {
+          return pure32(unit);
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Example.DiscreteAdventure (line 124, column 47 - line 128, column 18): " + [v.constructor.name]);
     });
     var render = runReader(renderMain);
     var initialState = function(v) {
@@ -14349,17 +14340,17 @@ ${str(snapshot)}`);
       submit_choice: function(choice) {
         return discard23(log5("submit_choice: " + show12(choice.short_description)))(function() {
           return discard23(discard23(modify_4(function(v) {
-            var $131 = {};
-            for (var $132 in v) {
-              if ({}.hasOwnProperty.call(v, $132)) {
-                $131[$132] = v[$132];
+            var $133 = {};
+            for (var $134 in v) {
+              if ({}.hasOwnProperty.call(v, $134)) {
+                $133[$134] = v[$134];
               }
               ;
             }
             ;
-            $131.generating_StoryEvent_status = inj6(choice);
-            $131.choices = inj7(unit);
-            return $131;
+            $133.generating_StoryEvent_status = inj6(choice);
+            $133.choices = inj7(unit);
+            return $133;
           }))(function() {
             return discard23(scrollDownStory)(function() {
               return bind12(get4)(function(v) {
@@ -14373,17 +14364,17 @@ ${str(snapshot)}`);
                     })))(function(response) {
                       if (response instanceof Left) {
                         return discard23(modify_4(function(v1) {
-                          var $136 = {};
-                          for (var $137 in v1) {
-                            if ({}.hasOwnProperty.call(v1, $137)) {
-                              $136[$137] = v1[$137];
+                          var $138 = {};
+                          for (var $139 in v1) {
+                            if ({}.hasOwnProperty.call(v1, $139)) {
+                              $138[$139] = v1[$139];
                             }
                             ;
                           }
                           ;
-                          $136.generating_StoryEvent_status = inj8(response.value0);
-                          $136.choices = inj8("error when generating next StoryEvent");
-                          return $136;
+                          $138.generating_StoryEvent_status = inj8(response.value0);
+                          $138.choices = inj8("error when generating next StoryEvent");
+                          return $138;
                         }))(function() {
                           return discard23(scrollDownStory)(function() {
                             return throwError2(error(response.value0));
@@ -14395,24 +14386,24 @@ ${str(snapshot)}`);
                         return pure32(response.value0.content);
                       }
                       ;
-                      throw new Error("Failed pattern match at Example.DiscreteAdventure (line 155, column 13 - line 163, column 48): " + [response.constructor.name]);
+                      throw new Error("Failed pattern match at Example.DiscreteAdventure (line 157, column 13 - line 165, column 48): " + [response.constructor.name]);
                     }))(function(description) {
                       return discard23(modify_4(function(env) {
-                        var $142 = {};
-                        for (var $143 in env) {
-                          if ({}.hasOwnProperty.call(env, $143)) {
-                            $142[$143] = env[$143];
+                        var $144 = {};
+                        for (var $145 in env) {
+                          if ({}.hasOwnProperty.call(env, $145)) {
+                            $144[$145] = env[$145];
                           }
                           ;
                         }
                         ;
-                        $142.transcript = snoc(env.transcript)({
+                        $144.transcript = snoc(env.transcript)({
                           choice,
                           description
                         });
-                        $142.generating_StoryEvent_status = inj52(unit);
-                        $142.choices = inj6(unit);
-                        return $142;
+                        $144.generating_StoryEvent_status = inj52(unit);
+                        $144.choices = inj6(unit);
+                        return $144;
                       }))(function() {
                         return discard23(scrollDownStory)(function() {
                           return pure32(unit);
@@ -14434,16 +14425,16 @@ ${str(snapshot)}`);
                   })))(function(response) {
                     if (response instanceof Left) {
                       return discard23(modify_4(function(v1) {
-                        var $150 = {};
-                        for (var $151 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $151)) {
-                            $150[$151] = v1[$151];
+                        var $152 = {};
+                        for (var $153 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $153)) {
+                            $152[$153] = v1[$153];
                           }
                           ;
                         }
                         ;
-                        $150.choices = inj8(response.value0);
-                        return $150;
+                        $152.choices = inj8(response.value0);
+                        return $152;
                       }))(function() {
                         return throwError2(error(response.value0));
                       });
@@ -14453,7 +14444,7 @@ ${str(snapshot)}`);
                       return pure32(decodeJson2(response.value0.parsed));
                     }
                     ;
-                    throw new Error("Failed pattern match at Example.DiscreteAdventure (line 186, column 13 - line 190, column 61): " + [response.constructor.name]);
+                    throw new Error("Failed pattern match at Example.DiscreteAdventure (line 188, column 13 - line 192, column 61): " + [response.constructor.name]);
                   }))(function(v1) {
                     return discard23(function() {
                       if (v1 instanceof Left) {
@@ -14462,15 +14453,15 @@ ${str(snapshot)}`);
                       ;
                       if (v1 instanceof Right) {
                         return modify_4(function(v2) {
-                          var $162 = {};
-                          for (var $163 in v2) {
-                            if ({}.hasOwnProperty.call(v2, $163)) {
-                              $162[$163] = v2[$163];
+                          var $164 = {};
+                          for (var $165 in v2) {
+                            if ({}.hasOwnProperty.call(v2, $165)) {
+                              $164[$165] = v2[$165];
                             }
                             ;
                           }
                           ;
-                          $162.choices = inj52(map24(function(v3) {
+                          $164.choices = inj52(map24(function(v3) {
                             return {
                               description: v3.long_description,
                               short_description: v3.short_description,
@@ -14480,11 +14471,11 @@ ${str(snapshot)}`);
                               }
                             };
                           })(v1.value0.choices));
-                          return $162;
+                          return $164;
                         });
                       }
                       ;
-                      throw new Error("Failed pattern match at Example.DiscreteAdventure (line 191, column 11 - line 200, column 18): " + [v1.constructor.name]);
+                      throw new Error("Failed pattern match at Example.DiscreteAdventure (line 193, column 11 - line 202, column 18): " + [v1.constructor.name]);
                     }())(function() {
                       return pure32(unit);
                     });
