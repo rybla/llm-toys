@@ -113,3 +113,6 @@ paragraphs :: Array String -> String
 paragraphs = map paragraph >>> String.joinWith "\n\n"
 
 infixr 0 Function.apply as $$
+
+foreign import downloadMarkdownTextFile :: { filename :: String, text :: String } -> Effect Unit
+

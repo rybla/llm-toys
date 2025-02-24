@@ -2,7 +2,6 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
-import Web.HTML.HTMLElement as Web.HTML.HTMLElement
 import Ai2.Llm (Config)
 import Ai2.Llm as Llm
 import Ai2.Widget.Provider as Provider
@@ -14,15 +13,11 @@ import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Const (Const)
 import Data.Either (Either(..))
-import Data.Foldable (fold, foldMap, length)
-import Data.Int as Int
+import Data.Foldable (fold, foldMap)
 import Data.Lens ((.=))
-import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe, maybe, maybe')
+import Data.Maybe (Maybe(..), maybe')
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
-import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
@@ -32,11 +27,11 @@ import Halogen (liftAff, liftEffect)
 import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
-import Halogen.HTML.Elements.Keyed as HHK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
-import Utility (css, inj, prop, scrollIntoView, todo)
+import Utility (css, downloadMarkdownTextFile, inj, prop, scrollIntoView)
+import Web.HTML.HTMLElement as Web.HTML.HTMLElement
 
 --------------------------------------------------------------------------------
 -- types
@@ -73,6 +68,7 @@ type Engine world =
   , initial_choices :: Array (StoryChoice world)
   , prompt_StoryEvent :: world -> StoryChoice world -> Aff { system :: String, user :: String }
   , prompt_StoryChoices :: world -> Array (StoryEvent world) -> Aff { system :: String, user :: String }
+  , printStory :: world -> Array (StoryEvent world) -> String
   }
 
 type StoryEvent world =
@@ -94,6 +90,8 @@ type WorldUpdate world =
 type Action world = Variant
   ( submit_choice :: StoryChoice world
   , set_config :: Maybe Config
+  , save_story :: Unit
+  , load_story :: Unit
   )
 
 --------------------------------------------------------------------------------
@@ -120,7 +118,7 @@ main_component = H.mkComponent { initialState, eval, render }
 
   getConfig = get >>= \{ config } -> case config of
     Nothing -> throwError $ Aff.error "you must configure your AI provider first"
-    Just config -> pure config
+    Just config' -> pure config'
 
   scrollDownStory = do
     e <- H.getHTMLElementRef ref_lastStoryItem >>= maybe' (\_ -> throwError $ Aff.error $ "element at ref_lastStoryItem doesn't exist") pure
@@ -201,6 +199,11 @@ main_component = H.mkComponent { initialState, eval, render }
                     }
                 }
           pure unit
+    , save_story: \_ -> do
+        state <- get
+        let text = state.engine.printStory state.world state.transcript
+        downloadMarkdownTextFile { filename: "story.md", text } # liftEffect
+    , load_story: \_ -> Console.error "unimplemented: load_story"
     }
 
   render :: State world -> Html world
@@ -235,7 +238,25 @@ renderMain :: forall world. RenderM_Html world
 renderMain = do
   world <- renderWorld >>= renderMainBlock { width: 350 # pure, controls: [] } "World"
   menu <- renderMenu >>= renderMainBlock { width: 250 # pure, controls: [] } "Menu"
-  story <- renderStory >>= renderMainBlock { width: none, controls: [] } "Story"
+  story <- renderStory >>= renderMainBlock
+    { width: none
+    , controls:
+        let
+          btn action title =
+            HH.div
+              [ HE.onClick \_ -> action
+              , css do
+                  tell [ "cursor: pointer", "user-select: none" ]
+                  tell [ "background-color: rgb(0, 89, 95)", "color: white" ]
+                  tell [ "border-radius: 0.5em", "padding: 0 0.5em" ]
+              ]
+              [ HH.text title ]
+        in
+          [ btn (inj @"save_story" unit) "Save"
+          , btn (inj @"load_story" unit) "Load"
+          ]
+    }
+    "Story"
   pure $
     HH.div
       [ css do
@@ -270,10 +291,21 @@ renderMainBlock opts title body = do
       [ HH.div
           [ css do
               tell [ "flex-grow: 0" ]
-              tell [ "padding: 1em" ]
               tell [ "font-weight: bold", "background-color: black", "color: white" ]
+              tell [ "display: flex", "flex-direction: row", "gap: 1em", "justify-content: space-between" ]
           ]
-          [ HH.text title ]
+          [ HH.div
+              [ css do
+                  tell [ "padding: 1em" ]
+              ]
+              [ HH.text title ]
+          , HH.div
+              [ css do
+                  tell [ "display: flex", "flex-direction: row", "gap: 1em", "flex-wrap: wrap" ]
+                  tell [ "padding: 1em" ]
+              ]
+              opts.controls
+          ]
       , HH.div
           [ css do
               -- tell [ "flex-grow: 1" ]

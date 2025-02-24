@@ -3,6 +3,8 @@ module Example.DiscreteAdventure.Engine1 where
 import Prelude
 
 import Control.Monad.Writer (tell)
+import Data.Array as Array
+import Data.Foldable (foldMap)
 import Data.Map as Map
 import Data.String as String
 import Data.Tuple (Tuple(..))
@@ -117,6 +119,13 @@ For example, you could include an aggressive choice, an emotional choice, a stra
             ]
         , user: paragraphs $ events # map _.description
         }
+  , printStory: \world events -> Array.intercalate "\n\n"
+      [ "# Story"
+      , "## World"
+      , show world
+      , "## Transcript"
+      , events # foldMap (\{ choice, description } -> [ "> " <> choice.short_description, description ]) # paragraphs
+      ]
   }
 
 templateWorldNotes :: World -> String
@@ -127,10 +136,12 @@ templateWorldNotes world =
         , Tuple "player_description" world.player_description
         , Tuple "player_strengths" $ String.joinWith ", " world.player_strengths
         , Tuple "player_weaknesses" $ String.joinWith ", " world.player_weaknesses
+        , Tuple "setting_description" $ world.setting_description
         ]
     ) $ paragraph
     """
 The following are notes about the current state of the game world:
+- The setting: {{setting_description}}
 - The player:
   - The player's name is {{player_name}}
   - {{player_name}} is described as follows: {{player_description}}
