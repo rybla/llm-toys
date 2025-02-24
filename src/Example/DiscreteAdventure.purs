@@ -2,6 +2,7 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
+import Web.HTML.HTMLElement as Web.HTML.HTMLElement
 import Ai2.Llm (Config)
 import Ai2.Llm as Llm
 import Ai2.Widget.Provider as Provider
@@ -13,26 +14,29 @@ import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Const (Const)
 import Data.Either (Either(..))
-import Data.Foldable (fold, foldMap)
+import Data.Foldable (fold, foldMap, length)
 import Data.Int as Int
 import Data.Lens ((.=))
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe, maybe, maybe')
 import Data.Traversable (traverse)
+import Data.TraversableWithIndex (traverseWithIndex)
+import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
 import Effect.Aff as Aff
 import Effect.Class.Console as Console
-import Halogen (liftAff)
+import Halogen (liftAff, liftEffect)
 import Halogen as H
 import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
+import Halogen.HTML.Elements.Keyed as HHK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
-import Utility (css, inj, prop, todo)
+import Utility (css, inj, prop, scrollIntoView, todo)
 
 --------------------------------------------------------------------------------
 -- types
@@ -118,6 +122,11 @@ main_component = H.mkComponent { initialState, eval, render }
     Nothing -> throwError $ Aff.error "you must configure your AI provider first"
     Just config -> pure config
 
+  scrollDownStory = do
+    e <- H.getHTMLElementRef ref_lastStoryItem >>= maybe' (\_ -> throwError $ Aff.error $ "element at ref_lastStoryItem doesn't exist") pure
+    e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
+    pure unit
+
   handleAction = match
     { set_config: (prop @"config" .= _)
     , submit_choice: \choice -> do
@@ -128,6 +137,7 @@ main_component = H.mkComponent { initialState, eval, render }
             { generating_StoryEvent_status = inj @"generating" choice
             , choices = inj @"waiting_for_story" unit
             }
+          scrollDownStory
           { engine, world, transcript } <- get
           config <- getConfig
           prompt_StoryEvent <- engine.prompt_StoryEvent world choice # liftAff
@@ -150,6 +160,7 @@ main_component = H.mkComponent { initialState, eval, render }
                   { generating_StoryEvent_status = inj @"error" err
                   , choices = inj @"error" "error when generating next StoryEvent"
                   }
+                scrollDownStory
                 throwError $ Aff.error $ err
               Right { content } -> pure content
           modify_ \env -> env
@@ -157,6 +168,8 @@ main_component = H.mkComponent { initialState, eval, render }
             , generating_StoryEvent_status = inj @"done" unit
             , choices = inj @"generating" unit
             }
+          scrollDownStory
+          pure unit
         -- generate StoryChoices
         do
           { engine, world, transcript } <- get
@@ -220,9 +233,9 @@ type RenderM_Html world = RenderM world (Html world)
 
 renderMain :: forall world. RenderM_Html world
 renderMain = do
-  world <- renderWorld >>= renderMainBlock { width: 350 # pure } "World"
-  menu <- renderMenu >>= renderMainBlock { width: 250 # pure } "Menu"
-  story <- renderStory >>= renderMainBlock { width: none } "Story"
+  world <- renderWorld >>= renderMainBlock { width: 350 # pure, controls: [] } "World"
+  menu <- renderMenu >>= renderMainBlock { width: 250 # pure, controls: [] } "Menu"
+  story <- renderStory >>= renderMainBlock { width: none, controls: [] } "Story"
   pure $
     HH.div
       [ css do
@@ -239,18 +252,10 @@ renderMain = do
               tell [ "display: flex", "flex-direction: row" ]
           ]
           [ world, menu, story ]
-      , HH.slot (Proxy @"provider") unit Provider.component
-          { providerCategory: "Main"
-          , providers: Map.fromFoldable
-              [ "openai" /\ Provider.mkOpenaiProvider "gpt-4o"
-              , "ollama / command-r7b:latest" /\ Provider.mkOllamaProvider "command-r7b:latest"
-              , "ollama / llama3-groq-tool-use:latest" /\ Provider.mkOllamaProvider "llama3-groq-tool-use:latest"
-              ]
-          }
-          (inj @"set_config" <<< pure)
+      , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_tools } (inj @"set_config" <<< pure)
       ]
 
-renderMainBlock :: forall world. { width :: Maybe Int } -> String -> Html world -> RenderM_Html world
+renderMainBlock :: forall world. { width :: Maybe Int, controls :: Array (Html world) } -> String -> Html world -> RenderM_Html world
 renderMainBlock opts title body = do
   pure $
     HH.div
@@ -277,10 +282,13 @@ renderMainBlock opts title body = do
           [ body ]
       ]
 
+ref_lastStoryItem = H.RefLabel "lastStoryItem"
+
 renderStory :: forall world. RenderM_Html world
 renderStory = do
   ctx <- ask
-  transcript <- ctx.transcript # traverse renderStoryEvent
+  -- let n = ctx.transcript # length
+  transcript <- ctx.transcript # traverseWithIndex renderStoryEvent
   generating_StoryEvent_status <- ctx.generating_StoryEvent_status # match
     { generating: \choice -> do
         html_choice <- choice # renderStoryChoice_short
@@ -307,11 +315,12 @@ renderStory = do
       ]
       ( [ transcript
         , generating_StoryEvent_status
+        , [ HH.div [ HP.ref ref_lastStoryItem ] [] ]
         ] # fold
       )
 
-renderStoryEvent :: forall world. StoryEvent world -> RenderM_Html world
-renderStoryEvent event = do
+renderStoryEvent :: forall world. Int -> StoryEvent world -> RenderM_Html world
+renderStoryEvent _i event = do
   choice <- event.choice # renderStoryChoice_short
   pure $
     HH.div

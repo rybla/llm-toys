@@ -50,9 +50,9 @@ type ProviderConfig =
 
 providers_with_tools :: Map String Provider
 providers_with_tools = Map.fromFoldable
-  [ "openai / gpt-4o" /\ { baseURL: "https://api.openai.com/v1", model: "gpt-4o" }
-  , "ollama / llama3-groq-tool-use:latest" /\ { baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
-  , "ollama / command-r7b:latest" /\ { baseURL: "http://localhost:11434/v1", model: "command-r7b:latest" }
+  [ "openai / gpt-4o" /\ mkOpenaiProvider "gpt-4o"
+  , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
+  , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
   ]
 
 component
