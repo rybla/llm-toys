@@ -2,16 +2,20 @@ module Example.DiscreteAdventure where
 
 import Prelude
 
+import Ai2.Llm (Config)
 import Ai2.Llm as Llm
+import Ai2.Widget.Provider as Provider
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader (Reader, ask, runReader)
 import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
 import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
+import Data.Const (Const)
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
 import Data.Int as Int
+import Data.Lens ((.=))
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
 import Data.Unfoldable (none)
@@ -25,7 +29,8 @@ import Halogen.HTML (PlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Utility (css, inj, todo)
+import Type.Proxy (Proxy(..))
+import Utility (css, inj, prop, todo)
 
 --------------------------------------------------------------------------------
 -- types
@@ -36,7 +41,8 @@ type Input world =
   }
 
 type State world =
-  { engine :: Engine world
+  { config :: Maybe Llm.Config
+  , engine :: Engine world
   , world :: world
   , transcript :: Array (StoryEvent world)
   , generating_StoryEvent_status ::
@@ -55,8 +61,7 @@ type State world =
   }
 
 type Engine world =
-  { config :: Llm.Config
-  , initial_world :: world
+  { initial_world :: world
   , renderWorld :: world -> PlainHTML
   , initial_transcript :: Array (StoryEvent world)
   , initial_choices :: Array (StoryChoice world)
@@ -82,6 +87,7 @@ type WorldUpdate world =
 
 type Action world = Variant
   ( submit_choice :: StoryChoice world
+  , set_config :: Maybe Config
   )
 
 --------------------------------------------------------------------------------
@@ -96,7 +102,8 @@ main_component = H.mkComponent { initialState, eval, render }
   where
   initialState :: _ -> State world
   initialState { engine } =
-    { engine
+    { config: none
+    , engine
     , world: engine.initial_world
     , transcript: engine.initial_transcript
     , generating_StoryEvent_status: inj @"done" unit
@@ -105,8 +112,13 @@ main_component = H.mkComponent { initialState, eval, render }
 
   eval = H.mkEval { handleAction, handleQuery: \_query -> pure none, receive: \_input -> none, initialize: none, finalize: none }
 
+  getConfig = get >>= \{ config } -> case config of
+    Nothing -> throwError $ Aff.error "you must configure your AI provider first"
+    Just config -> pure config
+
   handleAction = match
-    { submit_choice: \choice -> do
+    { set_config: (prop @"config" .= _)
+    , submit_choice: \choice -> do
         Console.log $ "submit_choice: " <> show choice.short_description
         -- generate StoryEvent
         do
@@ -115,11 +127,12 @@ main_component = H.mkComponent { initialState, eval, render }
             , choices = inj @"waiting_for_story" unit
             }
           { engine, world, transcript } <- get
+          config <- getConfig
           prompt_StoryEvent <- engine.prompt_StoryEvent world choice # liftAff
           description <- do
             response <-
               Llm.generate
-                { config: engine.config
+                { config: config
                 , messages:
                     [ [ Llm.mkSystemMsg prompt_StoryEvent.system ]
                     , transcript # foldMap \event ->
@@ -145,11 +158,12 @@ main_component = H.mkComponent { initialState, eval, render }
         -- generate StoryChoices
         do
           { engine, world, transcript } <- get
+          config <- getConfig
           prompt_StoryChoices <- engine.prompt_StoryChoices world transcript # liftAff
           err_choices :: Either JsonDecodeError Prompt_StoryChoices_Structure <- do
             response <-
               Llm.generate_structure
-                { config: engine.config
+                { config: config
                 , schemaDef: prompt_StoryChoices_schemaDef
                 , messages:
                     [ Llm.mkSystemMsg prompt_StoryChoices.system
@@ -195,7 +209,10 @@ prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
 
 type RenderM world = Reader (State world)
 
-type Html world = H.ComponentHTML (Action world) () Aff
+type Html world = H.ComponentHTML
+  (Action world)
+  (provider :: H.Slot (Const Void) Config Unit)
+  Aff
 
 type RenderM_Html world = RenderM world (Html world)
 
@@ -208,11 +225,20 @@ renderMain = do
     HH.div
       [ css do
           tell [ "margin: auto" ]
-          tell [ "width: " <> show main_width <> "px", "height: " <> show main_height <> "px" ]
+          tell [ "width: " <> show main_width <> "px" ]
           tell [ "box-shadow: 0 0 0 1px black" ]
-          tell [ "display: flex", "flex-direction: row" ]
+          tell [ "display: flex", "flex-direction: column" ]
       ]
-      [ world, menu, story ]
+      [ HH.div
+          [ css do
+              tell [ "margin: auto" ]
+              tell [ "width: " <> show main_width <> "px", "height: " <> show main_height <> "px" ]
+              tell [ "box-shadow: 0 0 0 1px black" ]
+              tell [ "display: flex", "flex-direction: row" ]
+          ]
+          [ world, menu, story ]
+      , HH.slot (Proxy @"provider") unit Provider.component { providers: Provider.providers_with_tools } (inj @"set_config" <<< pure)
+      ]
 
 renderMainBlock :: forall world. { width :: Maybe Int } -> String -> Html world -> RenderM_Html world
 renderMainBlock opts title body = do

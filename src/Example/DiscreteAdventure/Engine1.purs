@@ -2,7 +2,6 @@ module Example.DiscreteAdventure.Engine1 where
 
 import Prelude
 
-import Ai.Llm.Config as Ai.Llm.Config
 import Control.Monad.Writer (tell)
 import Data.Map as Map
 import Data.String as String
@@ -23,8 +22,7 @@ type World =
 
 engine :: Engine World
 engine =
-  { config: Ai.Llm.Config.config."openai"."gpt-4o"
-  , initial_world:
+  { initial_world:
       { player_name: "Glorbax"
       , player_description: "Glorbax, a pilot in the private security force AetherSec, navigates the neon-drenched skies with a blend of military precision and reckless abandon. His expertise in piloting sleek, armored craft makes him a legend in high-speed pursuits, often turning the tide in critical missions for the corporation. Though his thrill-seeking nature frequently tests the boundaries of protocol, his unmatched strengths render him indispensable to the force."
       , player_strengths: [ "Vehicle Operation", "Navigation", "Mechanic Skills", "Combat Driving", "Sensor Operation" ]
