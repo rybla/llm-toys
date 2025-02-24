@@ -13,7 +13,7 @@ import Data.Argonaut.Decode (JsonDecodeError, decodeJson, printJsonDecodeError)
 import Data.Array as Array
 import Data.Const (Const)
 import Data.Either (Either(..))
-import Data.Foldable (fold, foldMap)
+import Data.Foldable (fold, foldMap, length)
 import Data.Lens ((.=))
 import Data.Maybe (Maybe(..), maybe')
 import Data.Traversable (traverse)
@@ -123,9 +123,7 @@ main_component = H.mkComponent { initialState, eval, render }
   scrollDownStory = do
     H.getHTMLElementRef ref_lastStoryItem >>= case _ of
       Nothing -> pure unit
-      Just e -> do
-        e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
-        pure unit
+      Just e -> e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
 
   handleAction = match
     { set_config: (prop @"config" .= _)
@@ -231,7 +229,9 @@ type RenderM world = Reader (State world)
 
 type Html world = H.ComponentHTML
   (Action world)
-  (provider :: H.Slot (Const Void) Config Unit)
+  ( provider :: H.Slot (Const Void) Config Unit
+  , storyBottom :: H.Slot (Const Void) Void Int
+  )
   Aff
 
 type RenderM_Html world = RenderM world (Html world)
@@ -349,7 +349,8 @@ renderStory = do
       ]
       ( [ transcript
         , generating_StoryEvent_status
-        , [ HH.div [ HP.ref ref_lastStoryItem ] [] ]
+        -- , [ HH.div [ HP.ref ref_lastStoryItem ] [] ]
+        , [ HH.slot_ (Proxy @"storyBottom") (3 * (ctx.transcript # length) + (ctx.generating_StoryEvent_status # match { done: \_ -> 0, generating: \_ -> 1, error: \_ -> 2 })) scrollIntoViewOnInitialize unit ]
         ] # fold
       )
 
@@ -417,4 +418,17 @@ renderWorld = do
     HH.div
       []
       [ ctx.world # ctx.engine.renderWorld # HH.fromPlainHTML ]
+
+scrollIntoViewOnInitialize = H.mkComponent { initialState, eval, render }
+  where
+  this = H.RefLabel "this"
+  initialState _ = {}
+  eval = H.mkEval H.defaultEval
+    { initialize = pure unit
+    , handleAction = \_ -> do
+        H.getHTMLElementRef this >>= case _ of
+          Nothing -> pure unit
+          Just e -> e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
+    }
+  render _ = HH.div [ HP.ref this ] []
 

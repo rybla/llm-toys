@@ -1,3 +1,60 @@
+module Example.DiscreteAdventure.Engine1.Compile where
+
+import Prelude
+
+import Compile.Common (base_href, dist_path, writeTextFile)
+import Data.Array as Array
+import Data.String as String
+import Effect (Effect)
+import Node.ChildProcess as CP
+
+main :: Effect Unit
+main = compile # void
+
+compile :: Effect { label :: String, href :: String }
+compile = do
+  let label = "Example.DiscreteAdventure.Engine1"
+  let engine_localpath = "Example/DiscreteAdventure/Engine1/"
+  let app_module_name = "Example.DiscreteAdventure.Engine1.App"
+
+  let index_href = base_href <> engine_localpath <> "index.html"
+  let index_path = dist_path <> engine_localpath <> "index.html"
+  let main_path = dist_path <> engine_localpath <> "main.js"
+
+  writeTextFile index_path index_html
+
+  CP.execSync
+    ( [ "bun spago bundle"
+      , "--bundle-type app"
+      , "--module " <> app_module_name
+      , " --outfile " <> main_path
+      ] # Array.intercalate " "
+    ) # void
+
+  pure { label, href: index_href }
+
+index_html ∷ String
+index_html =
+  """
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>llm-toys | Discrete Adventure | Engine1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap" rel="stylesheet">
+
+<style>
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Merienda", serif;
+}
+
 .column-item {
   padding: 0.5em;
   border-radius: 0.5em;
@@ -20,7 +77,7 @@
 }
 
 .story-item.description {
-  background-color: rgba(0, 30, 255, 0.167);
+  background-color: rgba(208, 0, 255, 0.062);
 }
 
 .menu-item {}
@@ -68,3 +125,16 @@
     background-position-x: 200%;
   }
 }
+</style>
+
+<link rel="stylesheet" href="main.css">
+<script src="main.js"></script>
+</head>
+
+<body>
+
+</body>
+
+</html>
+""" # String.trim
+

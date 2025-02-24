@@ -1,4 +1,4 @@
-module Example.DiscreteAdventure.Engine1 where
+module Example.DiscreteAdventure.Engine1.Common where
 
 import Prelude
 
@@ -8,11 +8,8 @@ import Data.Foldable (foldMap)
 import Data.Map as Map
 import Data.String as String
 import Data.Tuple (Tuple(..))
-import Effect (Effect)
-import Example.DiscreteAdventure (Engine, main_component)
-import Halogen.Aff as HA
+import Example.DiscreteAdventure (Engine)
 import Halogen.HTML as HH
-import Halogen.VDom.Driver as HVD
 import Utility (css, paragraph, paragraphs, replaceFormatVars)
 
 type World =
@@ -148,9 +145,3 @@ The following are notes about the current state of the game world:
   - {{player_name}} has the following strengths: {{player_strengths}}
   - {{player_name}} has the following weaknesses: {{player_weaknesses}}
 """
-
---------------------------------------------------------------------------------
-
-main :: Effect Unit
-main = HA.runHalogenAff (HVD.runUI main_component { engine } =<< HA.awaitBody)
-

@@ -11,6 +11,8 @@ package:
     - halogen
     - lists
     - maybe
+    - node-child-process
+    - node-fs
     - prelude
     - profunctor-lenses
     - random

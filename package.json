@@ -1,15 +1,11 @@
 {
   "name": "llm-toys",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "build": "spago build",
-    "bundle.Example.DiscreteAdventure.Engine1": "spago bundle --bundle-type app --module Example.DiscreteAdventure.Engine1 --outfile docs/Example/DiscreteAdventure/Engine1/main.js",
+    "compile": "rm -rf docs/ && spago run -m Compile",
     "serve": "bun run --hot server.ts"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Henry Blanchette",
   "license": "ISC",
   "dependencies": {
     "@types/bun": "^1.1.16",
