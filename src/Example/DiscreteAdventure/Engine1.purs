@@ -18,6 +18,7 @@ type World =
   , player_description :: String
   , player_strengths :: Array String
   , player_weaknesses :: Array String
+  , setting_description :: String
   }
 
 engine :: Engine World
@@ -27,6 +28,7 @@ engine =
       , player_description: "Glorbax, a pilot in the private security force AetherSec, navigates the neon-drenched skies with a blend of military precision and reckless abandon. His expertise in piloting sleek, armored craft makes him a legend in high-speed pursuits, often turning the tide in critical missions for the corporation. Though his thrill-seeking nature frequently tests the boundaries of protocol, his unmatched strengths render him indispensable to the force."
       , player_strengths: [ "Vehicle Operation", "Navigation", "Mechanic Skills", "Combat Driving", "Sensor Operation" ]
       , player_weaknesses: [ "Overconfidence in Flight", "Cybernetic Dependency", "Haunted by a Past Failure", "Substance Abuse", "Corporate Loyalty Blindspot", "Chronic Injury", "Technological Overreliance", "Fear of Ground Combat" ]
+      , setting_description: "New Amsterdam is a city of electric ghosts and restless ambition, where rain slicks the streets in neon reflections and the air buzzes with a thousand whispered deals. Its skyline is a jagged circuit board of corporate monoliths and black-market warrens, pulsing with the desperate glow of those buying and selling futures—some digital, some flesh, some stolen. The streets pulse with life both organic and synthetic, where rogue AIs barter in darkened alleys and mercs with mirrored eyes hunt fortunes measured in crypto and blood. Here, escape is a product, danger a currency, and the only law that matters is the one you can enforce."
       }
   , renderWorld: \world ->
       HH.div
@@ -36,24 +38,32 @@ engine =
         ]
         [ HH.div
             [ css do tell [ "display: flex", "flex-direction: column", "gap: 0.5em" ] ]
-            [ HH.div [ css do tell [ "font-weight: bold" ] ] [ HH.text "Player" ]
-            , HH.div
-                [ css do
-                    tell [ "display: flex", "flex-direction: column", "gap: 0.5em" ]
-                    tell [ "padding-left: 1em" ]
-                ]
-                let
-                  item title value = HH.div []
-                    [ HH.span [ css do tell [ "font-weight: bold" ] ] [ HH.text $ title <> ": " ]
-                    , HH.text value
-                    ]
-                in
+            let
+              item title value =
+                HH.div []
+                  [ HH.span [ css do tell [ "font-weight: bold" ] ] [ HH.text $ title <> ": " ]
+                  , HH.text value
+                  ]
+              items xs =
+                HH.div
+                  [ css do
+                      tell [ "display: flex", "flex-direction: column", "gap: 0.5em" ]
+                      tell [ "padding-left: 1em" ]
+                  ]
+                  xs
+            in
+              [ HH.div [ css do tell [ "font-weight: bold" ] ] [ HH.text "Setting" ]
+              , items
+                  [ item "Description" $ world.setting_description
+                  ]
+              , HH.div [ css do tell [ "font-weight: bold" ] ] [ HH.text "Player" ]
+              , items
                   [ item "Name" $ world.player_name
                   , item "Description" $ world.player_description
                   , item "Strengths" $ String.joinWith ", " world.player_strengths
                   , item "Weaknesses" $ String.joinWith ", " world.player_weaknesses
                   ]
-            ]
+              ]
 
         ]
   , initial_transcript:

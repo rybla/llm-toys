@@ -16,8 +16,10 @@ import Data.Either (Either(..))
 import Data.Foldable (fold, foldMap)
 import Data.Int as Int
 import Data.Lens ((.=))
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Data.Variant (Variant, match)
 import Effect.Aff (Aff)
@@ -218,9 +220,9 @@ type RenderM_Html world = RenderM world (Html world)
 
 renderMain :: forall world. RenderM_Html world
 renderMain = do
-  world <- renderWorld >>= renderMainBlock { width: 250 # pure } "world"
-  menu <- renderMenu >>= renderMainBlock { width: 250 # pure } "menu"
-  story <- renderStory >>= renderMainBlock { width: none } "story"
+  world <- renderWorld >>= renderMainBlock { width: 350 # pure } "World"
+  menu <- renderMenu >>= renderMainBlock { width: 250 # pure } "Menu"
+  story <- renderStory >>= renderMainBlock { width: none } "Story"
   pure $
     HH.div
       [ css do
@@ -237,7 +239,15 @@ renderMain = do
               tell [ "display: flex", "flex-direction: row" ]
           ]
           [ world, menu, story ]
-      , HH.slot (Proxy @"provider") unit Provider.component { providers: Provider.providers_with_tools } (inj @"set_config" <<< pure)
+      , HH.slot (Proxy @"provider") unit Provider.component
+          { providerCategory: "Main"
+          , providers: Map.fromFoldable
+              [ "openai" /\ Provider.mkOpenaiProvider "gpt-4o"
+              , "ollama / command-r7b:latest" /\ Provider.mkOllamaProvider "command-r7b:latest"
+              , "ollama / llama3-groq-tool-use:latest" /\ Provider.mkOllamaProvider "llama3-groq-tool-use:latest"
+              ]
+          }
+          (inj @"set_config" <<< pure)
       ]
 
 renderMainBlock :: forall world. { width :: Maybe Int } -> String -> Html world -> RenderM_Html world

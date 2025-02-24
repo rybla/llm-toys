@@ -6,19 +6,21 @@ import Prelude
 import Ai2.Llm as Llm
 import Control.Monad.State (get, modify_)
 import Control.Monad.Writer (tell)
-import Data.Argonaut (encodeJson, stringifyWithIndent)
+import DOM.HTML.Indexed.InputType (InputType(..))
+import Data.Argonaut (JsonDecodeError, encodeJson, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString, printJsonDecodeError)
 import Data.Argonaut.Encode (toJsonString)
-import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Either.Nested (type (\/))
 import Data.Foldable (fold)
 import Data.Lens ((.=))
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe')
+import Data.Maybe (Maybe(..))
 import Data.String as String
 import Data.Tuple.Nested ((/\))
 import Data.Variant (match)
+import Effect.Aff (Aff)
 import Effect.Class.Console as Console
 import Halogen (liftEffect)
 import Halogen as H
@@ -26,33 +28,52 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import LocalStorage as LocalStorage
-import Utility (bug, css, inj, prop, todo)
+import Utility (css, inj, prop)
 
 type Input =
-  { providers :: Map String Provider
+  { providerCategory :: String
+  , providers :: Map String Provider
   }
 
 type Provider =
   { baseURL :: String
-  , models :: Array String
+  , model :: String
+  }
+
+mkOpenaiProvider model = { baseURL: "https://api.openai.com/v1", model } :: Provider
+mkOllamaProvider model = { baseURL: "http://localhost:11434/v1", model } :: Provider
+
+type ProviderConfig =
+  { name :: String
+  , config :: Llm.Config
   }
 
 providers_with_tools :: Map String Provider
 providers_with_tools = Map.fromFoldable
-  [ "openai" /\ { baseURL: "https://api.openai.com/v1", models: [ "gpt-4o" ] }
-  , "ollama" /\ { baseURL: "http://localhost:11434/v1", models: [ "llama3-groq-tool-use:latest", "command-r7b:latest" ] }
+  [ "openai / gpt-4o" /\ { baseURL: "https://api.openai.com/v1", model: "gpt-4o" }
+  , "ollama / llama3-groq-tool-use:latest" /\ { baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
+  , "ollama / command-r7b:latest" /\ { baseURL: "http://localhost:11434/v1", model: "command-r7b:latest" }
   ]
 
+component
+  ∷ ∀ (query ∷ Type -> Type)
+  . H.Component
+      query
+      { providerCategory ∷ String, providers ∷ Map String { baseURL :: String, model :: String } }
+      { apiKey ∷ String, baseURL ∷ String, model ∷ String }
+      Aff
 component = H.mkComponent { initialState, eval, render }
   where
 
   initialState :: Input -> _
-  initialState { providers } =
-    { providers
+  initialState { providerCategory, providers } =
+    { providerCategory
+    , providerConfig_localStorageKey: "AiProvider_" <> providerCategory
+    , savedProviderConfigs_localStorageKey: "SavedAiProviders_" <> providerCategory
+    , providers
     , status: "waiting for input"
     , open: true
     , provider: ""
-    , model: ""
     , apiKey: ""
     }
 
@@ -60,31 +81,65 @@ component = H.mkComponent { initialState, eval, render }
     { initialize = pure $ inj @"initialize" unit
     , handleAction = match
         { initialize: \_ -> do
-            LocalStorage.load "LlmConfig" # liftEffect >>= case _ of
+            getProviderConfig >>= case _ of
               Nothing -> pure unit
-              Just string_config -> do
-                case string_config # fromJsonString :: _ Llm.Config of
-                  Left err -> modify_ _
-                    { status = "Error when decoding saved config: " <> printJsonDecodeError err <> "."
-                    }
-                  Right config -> do
-                    modify_ _
-                      { status = "Successfully loaded saved config."
-                      , open = false
-                      }
-                    H.raise config
-                    pure unit
+              Just providerConfig -> do
+                modify_ _
+                  { status = "Successfully loaded saved provider: " <> providerConfig.name
+                  , provider = providerConfig.name
+                  , apiKey = providerConfig.config.apiKey
+                  , open = false
+                  }
+                H.raise providerConfig.config
         , set_open: (prop @"open" .= _)
-        , set_provider: (prop @"provider" .= _)
-        , set_model:
-            ( \model -> do
-                Console.log $ "set_model " <> show model
-                pure model
-            ) >=> (prop @"model" .= _)
+        , set_provider: setProvider
         , set_apiKey: (prop @"apiKey" .= _) >=> \_ -> submit
         , submit: \_ -> submit
         }
     }
+
+  getSavedProviderConfigs :: _ (Map String Llm.Config)
+  getSavedProviderConfigs = do
+    state <- get
+    LocalStorage.load state.savedProviderConfigs_localStorageKey # liftEffect >>= case _ of
+      Nothing -> pure Map.empty
+      Just savedProviderConfigs_string -> case savedProviderConfigs_string # fromJsonString of
+        Left _ -> pure Map.empty
+        Right savedProviderConfigs -> pure savedProviderConfigs
+
+  insertSavedProviderConfig provider config = do
+    savedProviderConfigs <- getSavedProviderConfigs
+    state <- get
+    LocalStorage.save state.savedProviderConfigs_localStorageKey (toJsonString (savedProviderConfigs # Map.insert provider config)) # liftEffect
+
+  setProvider provider = do
+    modify_ _ { provider = provider }
+    savedProviderConfigs <- getSavedProviderConfigs
+    case savedProviderConfigs # Map.lookup provider of
+      Nothing -> modify_ _
+        { apiKey = "" }
+      Just config -> modify_ _
+        { apiKey = config.apiKey
+        , status = "Successfully loaded saved provider: " <> provider
+        }
+
+  getProviderConfig :: _ (Maybe ProviderConfig)
+  getProviderConfig = do
+    state <- get
+    LocalStorage.load state.providerConfig_localStorageKey # liftEffect >>= case _ of
+      Nothing -> pure Nothing
+      Just string_providerConfig -> do
+        case string_providerConfig # fromJsonString :: JsonDecodeError \/ ProviderConfig of
+          Left err -> do
+            modify_ _ { status = "Error when decoding saved provider: " <> printJsonDecodeError err <> "." }
+            pure Nothing
+          Right providerConfig -> do
+            pure $ Just providerConfig
+
+  setProviderConfig :: ProviderConfig -> _ Unit
+  setProviderConfig providerConfig = do
+    state <- get
+    LocalStorage.save state.providerConfig_localStorageKey (toJsonString providerConfig) # liftEffect
 
   submit = do
     state <- get
@@ -94,21 +149,21 @@ component = H.mkComponent { initialState, eval, render }
       Just provider -> do
         if String.null state.apiKey then
           modify_ _ { status = "you must provide an apiKey" }
-        else if String.null state.model then
-          modify_ _ { status = "you must select a model" }
         else if String.null state.provider then
           modify_ _ { status = "you must select a provider" }
         else do
-          let config = { baseURL: provider.baseURL, model: state.model, apiKey: state.apiKey } :: Llm.Config
-          Console.log $ stringifyWithIndent 4 $ encodeJson { config }
-          LocalStorage.save "LlmConfig" (toJsonString config) # liftEffect
+          let config = { baseURL: provider.baseURL, model: provider.model, apiKey: state.apiKey } :: Llm.Config
+          let providerConfig = { name: state.provider, config } :: ProviderConfig
+          Console.log $ "new provider for " <> state.providerCategory <> ": " <> (stringifyWithIndent 4 $ encodeJson providerConfig)
+          insertSavedProviderConfig state.provider config
+          setProviderConfig providerConfig
           modify_ _
-            { status = "successfully saved new config"
+            { status = "successfully saved new provider config: " <> state.provider
             , open = false
             }
           H.raise config
 
-  render { providers, status, open, provider, model } =
+  render { providerCategory, providers, status, open, provider, apiKey } =
     if not open then
       HH.div
         [ HE.onClick \_ -> inj @"set_open" true
@@ -116,14 +171,14 @@ component = H.mkComponent { initialState, eval, render }
             tell [ "background-color: black", "color: white", "user-select: none", "cursor: pointer" ]
             tell [ "padding: 0.5em" ]
         ]
-        [ HH.text "Configure AI Arovider" ]
+        [ HH.text $ "Configure AI Provider for " <> providerCategory ]
     else
       HH.div
         [ css do
             tell [ "display: flex", "flex-direction: column", "gap: 0.5em" ]
             tell [ "padding: 0.5em" ]
         ]
-        [ HH.div [] [ bold "Configure AI Provider" ]
+        [ HH.div [] [ bold $ "Configure AI Provider for " <> providerCategory ]
         , HH.div [] [ HH.text "Your configuration will be saved to localStorage, and will be loaded automatically when you return to this page." ]
 
         , HH.div [] [ bold "Status: ", HH.text status ]
@@ -136,36 +191,21 @@ component = H.mkComponent { initialState, eval, render }
                 ] $ fold
                 [ [ HH.option
                       [ HP.disabled true
-                      , HP.selected true
+                      , HP.value ""
                       ]
                       [ HH.text "select a provider" ]
                   ]
-                , providers # Map.toUnfoldable # map \(provider' /\ _) -> HH.option [ HP.value provider' ] [ HH.text provider' ]
+                , providers # Map.toUnfoldable # map \(name /\ _) -> HH.option [ HP.value name ] [ HH.text name ]
                 ]
             ]
 
         , HH.div []
-            [ bold "Model: "
-            , case providers # Map.lookup provider of
-                Nothing -> HH.div [] [ HH.text "waiting for provider choice" ]
-                Just { models } ->
-                  HH.select
-                    [ HP.value model
-                    , HE.onValueChange $ inj @"set_model"
-                    ] $ fold $
-                    [ [ HH.option
-                          [ HP.disabled true
-                          , HP.selected true
-                          ]
-                          [ HH.text "select a model" ]
-                      ]
-                    , models # map \model' -> HH.option [ HP.value model' ] [ HH.text model' ]
-                    ]
-            ]
-
-        , HH.div []
             [ bold "API Key: "
-            , HH.input [ HE.onValueChange $ inj @"set_apiKey" ]
+            , HH.input
+                [ HP.value apiKey
+                , HE.onValueChange $ inj @"set_apiKey"
+                , HP.type_ InputPassword
+                ]
             ]
 
         , HH.div
