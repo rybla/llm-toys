@@ -121,9 +121,11 @@ main_component = H.mkComponent { initialState, eval, render }
     Just config' -> pure config'
 
   scrollDownStory = do
-    e <- H.getHTMLElementRef ref_lastStoryItem >>= maybe' (\_ -> throwError $ Aff.error $ "element at ref_lastStoryItem doesn't exist") pure
-    e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
-    pure unit
+    H.getHTMLElementRef ref_lastStoryItem >>= case _ of
+      Nothing -> pure unit
+      Just e -> do
+        e # Web.HTML.HTMLElement.toElement # scrollIntoView # liftEffect
+        pure unit
 
   handleAction = match
     { set_config: (prop @"config" .= _)
