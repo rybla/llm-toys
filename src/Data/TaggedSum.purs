@@ -13,6 +13,8 @@ import Type.Proxy (Proxy(..))
 newtype TaggedSum (x :: Symbol) a b = TaggedSum (a \/ b)
 
 derive instance Newtype (TaggedSum x a b) _
+derive newtype instance (Show a, Show b) => Show (TaggedSum x a b)
+derive newtype instance (Eq a, Eq b) => Eq (TaggedSum x a b)
 
 instance EncodeJson_TaggedSumRight (TaggedSum x a b) => EncodeJson (TaggedSum x a b) where
   encodeJson ts = encodeJson $ encodeJson_TaggedSumRight ts
@@ -48,9 +50,13 @@ instance DecodeJson_TaggedSumRight Void where
 
 --------------------------------------------------------------------------------
 
--- class ToTaggedSum a x t u | a -> x t u where
---   toTaggedSum :: a -> TaggedSum x t u
+class ToTaggedSum a b | a -> b where
+  toTaggedSum :: a -> b
 
--- instance ToTaggedSum b => ToTaggedSum (Sum (Constructor x a) b) x a b where
---   toTaggedSum (Inl (Constructor a)) = TaggedSum $ Left a
---   toTaggedSum (Inr b) = ?a
+instance ToTaggedSum b b' => ToTaggedSum (Sum (Constructor x a) b) (TaggedSum x a b') where
+  toTaggedSum (Inl (Constructor a)) = TaggedSum $ Left a
+  toTaggedSum (Inr b) = TaggedSum $ Right $ toTaggedSum b
+
+instance ToTaggedSum (Constructor x a) (TaggedSum x a Void) where
+  toTaggedSum (Constructor a) = TaggedSum $ Left a
+
