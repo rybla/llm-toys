@@ -2,18 +2,18 @@ module Main where
 
 import Prelude
 
-import Data.Argonaut (encodeJson, stringify)
-import Data.Argonaut.AsTaggedSum (AsTaggedSum(..))
-import Data.Argonaut.Encode (toJsonString)
+import Data.Argonaut as Argonaut
+import Data.Argonaut.ToJsonSchema (class ToJsonSchema, generic_toJsonSchema, toJsonSchema)
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep as Generic
-import Data.TaggedSum (toTaggedSum)
 import Effect (Effect)
 import Effect.Class.Console as Console
 
 data MyType = MyString String | MyInt Int | MyBoolean Boolean
 
 derive instance Generic MyType _
+
+instance ToJsonSchema MyType where
+  toJsonSchema = generic_toJsonSchema @MyType
 
 main :: Effect Unit
 main = do
@@ -25,4 +25,4 @@ main = do
   -- let v = MyString "hello world"
   -- Console.log $ toJsonString $ AsTaggedSum v
 
-  pure unit
+  Console.log $ Argonaut.stringify $ toJsonSchema @MyType

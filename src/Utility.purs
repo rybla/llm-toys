@@ -38,7 +38,7 @@ todo msg = unsafeCrashWith $ "[[TODO]]\n" <> msg
 bug :: forall a. String -> a
 bug msg = unsafeCrashWith $ "[[BUG]]\n" <> msg
 
-impossible :: forall a. Unit -> a
+impossible :: forall @a. Unit -> a
 impossible _ = bug "impossible"
 
 expandCons :: forall @k @v @r_ r. Cons k v r_ r => Variant r_ -> Variant r
