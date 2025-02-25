@@ -5,7 +5,7 @@ import Prelude
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
-import Data.Generic.Rep (Constructor(..), Sum(..))
+import Data.Generic.Rep (Argument(..), Constructor(..), Sum(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Type.Proxy (Proxy(..))
@@ -29,12 +29,20 @@ instance DecodeJson_TaggedSumRight (TaggedSum x a b) => DecodeJson (TaggedSum x 
 class EncodeJson_TaggedSumRight a where
   encodeJson_TaggedSumRight :: a -> { tag :: String, value :: Json }
 
-instance (IsSymbol x, EncodeJson a, EncodeJson_TaggedSumRight b) => EncodeJson_TaggedSumRight (TaggedSum x a b) where
-  encodeJson_TaggedSumRight (TaggedSum (Left a)) = { tag: reflectSymbol (Proxy @x), value: encodeJson a }
+instance (IsSymbol x, EncodeJson' a, EncodeJson_TaggedSumRight b) => EncodeJson_TaggedSumRight (TaggedSum x a b) where
+  encodeJson_TaggedSumRight (TaggedSum (Left a)) = { tag: reflectSymbol (Proxy @x), value: encodeJson' a }
   encodeJson_TaggedSumRight (TaggedSum (Right b)) = encodeJson_TaggedSumRight b
 
 instance EncodeJson_TaggedSumRight Void where
   encodeJson_TaggedSumRight = absurd
+
+--------------------------------------------------------------------------------
+
+class EncodeJson' a where
+  encodeJson' :: a -> Json
+
+instance EncodeJson a => EncodeJson' (Argument a) where
+  encodeJson' (Argument a) = encodeJson a
 
 --------------------------------------------------------------------------------
 
