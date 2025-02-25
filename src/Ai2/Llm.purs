@@ -20,10 +20,12 @@ module Ai2.Llm
   , SchemaDef(..)
   , mkSchemaDef
   , Schema(..)
+  , StringRestriction
   , mkObjectSchema
   , mkArraySchema
   , mkStringSchema
   , mkNumberSchema
+  , mkBooleanSchema
   -- generate functions
   , generate
   , generate_tool
@@ -33,22 +35,22 @@ module Ai2.Llm
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, printJsonDecodeError, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Array as Array
-import Data.Either (Either(..), either)
+import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (none)
 import Effect (Effect)
-import Effect.Aff (Aff, throwError)
-import Effect.Aff as Aff
+import Effect.Aff (Aff)
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Record as R
-import Record as Record
 import Type.Row.Homogeneous (class Homogeneous)
-import Utility (bug)
 
 --------------------------------------------------------------------------------
 -- types
@@ -174,29 +176,54 @@ instance EncodeJson SchemaDef where
 data Schema
   = ObjectSchema (Object Schema)
   | ArraySchema Schema
-  | StringSchema (Maybe String)
-  | NumberSchema (Maybe String)
+  | StringSchema { description :: Maybe String, restriction :: Maybe StringRestriction }
+  | NumberSchema { description :: Maybe String }
+  | BooleanSchema { description :: Maybe String }
+  | UnionSchema (Map String Schema)
+
+data StringRestriction
+  = EnumStringRestriction (Array String)
+  | ConstStringRestriction String
 
 mkObjectSchema :: forall r. Homogeneous r Schema => Record r -> Schema
 mkObjectSchema r = ObjectSchema $ Object.fromHomogeneous r
 
 mkArraySchema = ArraySchema
 
-mkStringSchema args_ = StringSchema args.description
+mkStringSchema args_ = StringSchema args
+  where
+  args = args_ `R.merge` { description: Nothing @String, restriction: Nothing @StringRestriction }
+
+mkNumberSchema args_ = NumberSchema args
   where
   args = args_ `R.merge` { description: Nothing @String }
 
-mkNumberSchema args_ = NumberSchema args.description
+mkBooleanSchema args_ = BooleanSchema args
   where
   args = args_ `R.merge` { description: Nothing @String }
 
 instance EncodeJson Schema where
   encodeJson (ObjectSchema properties) = encodeJson { type: "object", additionalProperties: false, required: properties # Object.keys, properties: properties # map encodeJson }
+
   encodeJson (ArraySchema items) = encodeJson { type: "array", items }
-  encodeJson (StringSchema Nothing) = encodeJson { type: "string" }
-  encodeJson (StringSchema (Just description)) = encodeJson { type: "string", description }
-  encodeJson (NumberSchema Nothing) = encodeJson { type: "number" }
-  encodeJson (NumberSchema (Just description)) = encodeJson { type: "number", description }
+
+  encodeJson (StringSchema { description: Nothing, restriction: Nothing }) = encodeJson { type: "string" }
+  encodeJson (StringSchema { description: Nothing, restriction: Just (EnumStringRestriction enum) }) = encodeJson { type: "string", enum }
+  encodeJson (StringSchema { description: Nothing, restriction: Just (ConstStringRestriction const) }) = encodeJson { type: "string", const }
+  encodeJson (StringSchema { description: Just description, restriction: Nothing }) = encodeJson { type: "string", description }
+  encodeJson (StringSchema { description: Just description, restriction: Just (EnumStringRestriction enum) }) = encodeJson { type: "string", enum, description }
+  encodeJson (StringSchema { description: Just description, restriction: Just (ConstStringRestriction const) }) = encodeJson { type: "string", const, description }
+
+  encodeJson (NumberSchema { description: Nothing }) = encodeJson { type: "number" }
+  encodeJson (NumberSchema { description: Just description }) = encodeJson { type: "number", description }
+
+  encodeJson (BooleanSchema { description: Nothing }) = encodeJson { type: "boolean" }
+  encodeJson (BooleanSchema { description: Just description }) = encodeJson { type: "boolean", description }
+
+  encodeJson (UnionSchema forms) = encodeJson
+    { anyOf: forms # (Map.toUnfoldable :: _ -> Array _) # map \(tag /\ value) ->
+        ObjectSchema $ Object.fromHomogeneous { tag: StringSchema { description: none, restriction: Just (ConstStringRestriction tag) }, value }
+    }
 
 --------------------------------------------------------------------------------
 -- endpoints

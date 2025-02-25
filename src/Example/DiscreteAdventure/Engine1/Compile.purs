@@ -2,7 +2,7 @@ module Example.DiscreteAdventure.Engine1.Compile where
 
 import Prelude
 
-import Compile.Common (base_href, dist_path, writeTextFile)
+import Compile.Common (Compile, base_href, dist_path, writeTextFile)
 import Data.Array as Array
 import Data.String as String
 import Effect (Effect)
@@ -11,7 +11,7 @@ import Node.ChildProcess as CP
 main :: Effect Unit
 main = compile # void
 
-compile :: Effect { label :: String, href :: String }
+compile :: Compile
 compile = do
   let label = "Example.DiscreteAdventure.Engine1"
   let engine_localpath = "Example/DiscreteAdventure/Engine1/"
