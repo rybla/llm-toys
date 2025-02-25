@@ -17,4 +17,8 @@ function check<ZodInput extends ZodType>(schema: ZodInput) {
 // OK
 // check(z.intersection(z.object({ x: z.number() }), z.object({ y: z.string() })))
 
-check(z.literal("hello"))
+// OK
+// check(z.literal("hello"))
+
+// OK
+// check(z.tuple([z.string(), z.string(), z.string()]))
