@@ -11965,7 +11965,7 @@ ${str(snapshot)}`);
   var decodeJson4 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(decodeJsonJson));
   var throwError2 = /* @__PURE__ */ throwError(monadThrowEither);
   var map19 = /* @__PURE__ */ map(functorEither);
-  var decodeJson7 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeArray2(decodeJsonJson));
+  var decodeJson6 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeArray2(decodeJsonJson));
   var traverse3 = /* @__PURE__ */ traverse(traversableArray)(applicativeEither);
   var lmap4 = /* @__PURE__ */ lmap(bifunctorEither);
   var apply3 = /* @__PURE__ */ apply(applyEither);
@@ -12044,7 +12044,7 @@ ${str(snapshot)}`);
   };
   var decodeJsonFromSchemaArray = function(dictDecodeJsonFromSchema) {
     return {
-      decodeJsonFromSchema: composeKleisli2(decodeJson7)(traverse3(decodeJsonFromSchema(dictDecodeJsonFromSchema)))
+      decodeJsonFromSchema: composeKleisli2(decodeJson6)(traverse3(decodeJsonFromSchema(dictDecodeJsonFromSchema)))
     };
   };
   var decodeJsonFromSchema_RowL1 = function(dictIsSymbol) {
@@ -12068,7 +12068,7 @@ ${str(snapshot)}`);
                   return lmap4(AtKey.create(x))(apply3(map19(insert9($$Proxy.value))(decodeJsonFromSchema1(v.value0)))(decodeJsonFromSchema_Row1(o)));
                 }
                 ;
-                throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 144, column 32 - line 149, column 45): " + [v.constructor.name]);
+                throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 143, column 32 - line 148, column 45): " + [v.constructor.name]);
               }
             };
           };
