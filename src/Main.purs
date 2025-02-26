@@ -34,24 +34,25 @@ main = do
         Left err -> Console.error err
         Right a -> Console.logShow a
 
-    -- test $ Llm.generate_structure @(name :: String, age :: Int)
-    --   { config: { apiKey: "ollama", baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
-    --   , name: "person"
-    --   , messages: [ Llm.mkUserMsg "Generate a person with a cool-sounding name and a reasonable age." ]
-    --   }
-
-    -- test $ Llm.generate_structure @(people :: Array { name :: String, age :: Int })
-    --   { config: { apiKey: "ollama", baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
-    --   , name: "people"
-    --   , messages: [ Llm.mkUserMsg "Generate 10 people with assorted names and ages." ]
-    --   }
-
-    Console.log $ stringifyWithIndent 4 $ toJsonSchema @WarningLevel
-
-    test $ Llm.generate_structure @(warning :: WarningLevel)
+    Console.log $ stringifyWithIndent 4 $ toJsonSchema @{ name :: String, age :: Int }
+    test $ Llm.generate_structure @(name :: String, age :: Int)
       { config: { apiKey: "ollama", baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
+      , name: "person"
+      , messages: [ Llm.mkUserMsg "Generate a person with a cool-sounding name and a reasonable age." ]
+      }
+
+    Console.log $ stringifyWithIndent 4 $ toJsonSchema @{ people :: Array { name :: String, age :: Int } }
+    test $ Llm.generate_structure @(people :: Array { name :: String, age :: Int })
+      { config: { apiKey: "ollama", baseURL: "http://localhost:11434/v1", model: "llama3-groq-tool-use:latest" }
+      , name: "people"
+      , messages: [ Llm.mkUserMsg "Generate 10 people with assorted names and ages." ]
+      }
+
+    Console.log $ stringifyWithIndent 4 $ toJsonSchema @{ warning :: WarningLevel }
+    test $ Llm.generate_structure @(warning :: WarningLevel)
+      { config: { apiKey: "ollama", baseURL: "http://localhost:11434/v1", model: "command-r7b:latest" }
       , name: "WarningLevel"
       , messages: [ Llm.mkUserMsg "Choose a random WarningLevel." ]
       }
-    pure unit
 
+    pure unit
