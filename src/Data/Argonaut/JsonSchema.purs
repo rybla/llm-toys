@@ -38,6 +38,9 @@ instance ToJsonSchema Int where
 instance ToJsonSchema Boolean where
   toJsonSchema = encodeJson { type: "boolean" }
 
+instance ToJsonSchema a => ToJsonSchema (Array a) where
+  toJsonSchema = encodeJson { type: "array", items: toJsonSchema @a }
+
 instance (RowToList r l, ToJsonSchema_RowList r l) => ToJsonSchema (Record r) where
   toJsonSchema = encodeJson
     { type: "object"

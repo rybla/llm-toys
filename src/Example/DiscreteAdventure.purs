@@ -173,23 +173,17 @@ main_component = H.mkComponent { initialState, eval, render }
           { engine, world, transcript } <- get
           config <- getConfig
           prompt_StoryChoices <- engine.prompt_StoryChoices world transcript # liftAff
-          err_choices :: Either JsonDecodeError Prompt_StoryChoices_Structure <- do
-            response <-
-              Llm.generate_structure
-                { config: config
-                , schemaDef: prompt_StoryChoices_schemaDef
-                , messages:
-                    [ Llm.mkSystemMsg prompt_StoryChoices.system
-                    , Llm.mkUserMsg prompt_StoryChoices.user
-                    ]
-                } # liftAff
-            case response of
-              Left err -> do
-                modify_ _ { choices = inj @"error" err }
-                throwError $ Aff.error $ err
-              Right { parsed } -> pure $ parsed # decodeJson
+          err_choices :: _ { choices :: Array { long_description :: String, short_description :: String } } <-
+            Llm.generate_structure
+              { config: config
+              , name: "story_choices"
+              , messages:
+                  [ Llm.mkSystemMsg prompt_StoryChoices.system
+                  , Llm.mkUserMsg prompt_StoryChoices.user
+                  ]
+              } # liftAff
           case err_choices of
-            Left err -> Console.error $ "Failed to generate choices: " <> printJsonDecodeError err
+            Left err -> Console.error $ "Failed to generate choices: " <> err
             Right { choices } ->
               modify_ _
                 { choices = inj @"done" $ choices # map \{ long_description, short_description } ->
@@ -217,13 +211,13 @@ type Prompt_StoryChoices_Structure =
         }
   }
 
-prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
-  "story_choices"
-  { choices: Llm.mkArraySchema $ Llm.mkObjectSchema
-      { long_description: Llm.mkStringSchema { description: "A long and detailed description of what the player could do next." # pure }
-      , short_description: Llm.mkStringSchema { description: "A short, high-level, 1-sentence summary of the long_description." # pure }
-      }
-  }
+-- prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
+--   "story_choices"
+--   { choices: Llm.mkArraySchema $ Llm.mkObjectSchema
+--       { long_description: Llm.mkStringSchema { description: "A long and detailed description of what the player could do next." # pure }
+--       , short_description: Llm.mkStringSchema { description: "A short, high-level, 1-sentence summary of the long_description." # pure }
+--       }
+--   }
 
 type RenderM world = Reader (State world)
 
