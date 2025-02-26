@@ -30,23 +30,27 @@ module Ai2.Llm
   , generate
   , generate_tool
   , generate_structure
+  , generate_structure'
   ) where
 
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify, stringifyWithIndent)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
+import Data.Argonaut.JsonSchema (class DecodeJsonFromSchema, class ToJsonSchema, decodeJsonFromSchema, toJsonSchema)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
+import Debug as Debug
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Effect.Class.Console as Console
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Record as R
@@ -286,3 +290,40 @@ generate_structure args =
         Left err -> Left $ printJsonDecodeError err
         Right parsed -> Right { parsed }
       Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
+
+generate_structure'
+  :: forall @r
+   . ToJsonSchema (Record r)
+  => DecodeJsonFromSchema (Record r)
+  => { config :: Config, name :: String, messages :: Array Msg }
+  -> Aff (String \/ Record r)
+generate_structure' args = do
+  Debug.traceM $ "schema: " <> stringifyWithIndent 4 (toJsonSchema @(Record r))
+  ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
+      { baseURL: args.config.baseURL
+      , model: args.config.model
+      , apiKey: args.config.apiKey
+      , messages: args.messages
+      , response_format: encodeJson $
+          { type: "json_schema"
+          , json_schema:
+              { name: args.name
+              , strict: true
+              , schema: toJsonSchema @(Record r)
+              }
+          }
+      }
+  ) <#> case _ of
+    Left err -> Left $ "generate_structure: " <> err
+    Right response -> case response # decodeJson @{ content :: String } of
+      Right { content } -> do
+        Debug.traceM $ "generated content: " <> content
+        case parseJson content of
+          Left err -> Left $ printJsonDecodeError err
+          Right parsed -> do
+            Debug.traceM $ "successfully generated parsed json: " <> stringifyWithIndent 4 parsed
+            case parsed # decodeJsonFromSchema of
+              Left err -> Left $ printJsonDecodeError err
+              Right a -> pure a
+      Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
+
