@@ -173,8 +173,8 @@ main_component = H.mkComponent { initialState, eval, render }
           { engine, world, transcript } <- get
           config <- getConfig
           prompt_StoryChoices <- engine.prompt_StoryChoices world transcript # liftAff
-          err_choices :: _ { choices :: Array { long_description :: String, short_description :: String } } <-
-            Llm.generate_structure
+          err_choices <-
+            Llm.generate_structure @(choices :: Array { long_description :: String, short_description :: String })
               { config: config
               , name: "story_choices"
               , messages:

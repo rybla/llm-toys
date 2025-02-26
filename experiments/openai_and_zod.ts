@@ -13,4 +13,5 @@ function check<ZodInput extends ZodType>(schema: ZodInput) {
 // check(z.literal("hello"))
 // check(z.tuple([z.string(), z.string(), z.string()]))
 // check(z.boolean())
-check(z.object({ arg: z.array(z.string()) }))
+// check(z.object({ arg: z.array(z.string()) }))
+check(z.object({ arg: z.nullable(z.string()) }))
