@@ -8,14 +8,17 @@
   "author": "Henry Blanchette",
   "license": "ISC",
   "dependencies": {
-    "@types/bun": "^1.1.16",
+    "@google/generative-ai": "^0.22.0",
     "esbuild": "^0.24.2",
     "openai": "^4.77.4",
-    "zod": "^3.24.2"
+    "together-ai": "^0.13.0",
+    "zod": "^3.24.2",
+    "zod-to-json-schema": "^3.24.3"
   },
   "devDependencies": {
     "purescript": "^0.15.16-4",
-    "spago": "^0.93.41"
+    "spago": "^0.93.41",
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

@@ -14,12 +14,12 @@ main = compile # void
 compile :: Compile
 compile = do
   let label = "Example.DiscreteAdventure.Engine1"
-  let engine_localpath = "Example/DiscreteAdventure/Engine1/"
+  let localpath = "Example/DiscreteAdventure/Engine1/"
   let app_module_name = "Example.DiscreteAdventure.Engine1.App"
 
-  let index_href = base_href <> engine_localpath <> "index.html"
-  let index_path = dist_path <> engine_localpath <> "index.html"
-  let main_path = dist_path <> engine_localpath <> "main.js"
+  let index_href = base_href <> localpath <> "index.html"
+  let index_path = dist_path <> localpath <> "index.html"
+  let main_path = dist_path <> localpath <> "main.js"
 
   writeTextFile index_path index_html
 

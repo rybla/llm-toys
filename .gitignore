@@ -10,3 +10,4 @@ generated-docs/
 .psa*
 .spago
 secrets.md
+.env

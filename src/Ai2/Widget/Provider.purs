@@ -41,6 +41,7 @@ type Provider =
   }
 
 mkOpenaiProvider model = { baseURL: "https://api.openai.com/v1", model } :: Provider
+mkGoogleProvider model = { baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", model } :: Provider
 mkOllamaProvider model = { baseURL: "http://localhost:11434/v1", model } :: Provider
 
 type ProviderConfig =
@@ -48,11 +49,40 @@ type ProviderConfig =
   , config :: Llm.Config
   }
 
+providers :: Map String Provider
+providers = Map.fromFoldable
+  [ "openai / gpt-4o" /\ mkOpenaiProvider "gpt-4o"
+  , "openai / gpt-4o-mini" /\ mkOpenaiProvider "gpt-4o-mini"
+  , "openai / o1" /\ mkOpenaiProvider "o1"
+  , "openai / o1-mini" /\ mkOpenaiProvider "o1-mini"
+  , "openai / o3-mini" /\ mkOpenaiProvider "o3-mini"
+  , "openai / o3-preview" /\ mkOpenaiProvider "o3-preview"
+  , "openai / gpt-4-turbo" /\ mkOpenaiProvider "gpt-4-turbo"
+  , "openai / gpt-4" /\ mkOpenaiProvider "gpt-4"
+  , "openai / gpt-3.5-turbo" /\ mkOpenaiProvider "gpt-3.5-turbo"
+  , "openai / gpt-3.5-turbo-instruct" /\ mkOpenaiProvider "gpt-3.5-turbo-instruct"
+  , "ollama / gemma2:9b" /\ mkOllamaProvider "gemma2:9b"
+  , "ollama / deepseek-r1:14b" /\ mkOllamaProvider "deepseek-r1:14b"
+  , "ollama / deepscalar:latest" /\ mkOllamaProvider "deepscalar:latest"
+  , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
+  , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
+  , "google / gemini-2.0-flash" /\ mkGoogleProvider "gemini-2.0-flash"
+  ]
+
+providers_with_structured_output :: Map String Provider
+providers_with_structured_output = Map.fromFoldable
+  [ "openai / gpt-4o" /\ mkOpenaiProvider "gpt-4o"
+  , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
+  , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
+  , "google / gemini-2.0-flash" /\ mkGoogleProvider "gemini-2.0-flash"
+  ]
+
 providers_with_tools :: Map String Provider
 providers_with_tools = Map.fromFoldable
   [ "openai / gpt-4o" /\ mkOpenaiProvider "gpt-4o"
   , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
   , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
+  , "google / gemini-2.0-flash" /\ mkGoogleProvider "gemini-2.0-flash"
   ]
 
 component

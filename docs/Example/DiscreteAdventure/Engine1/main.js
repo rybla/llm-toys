@@ -11955,8 +11955,8 @@ ${str(snapshot)}`);
       return "additionalProperties";
     }
   })())());
-  var gEncodeJsonCons3 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJson);
-  var encodeJson22 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(gEncodeJsonCons1)({
+  var gEncodeJsonCons22 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJson);
+  var encodeJson22 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons22(gEncodeJsonCons1)({
     reflectSymbol: function() {
       return "items";
     }
@@ -12078,8 +12078,8 @@ ${str(snapshot)}`);
   };
 
   // output/Ai2.Llm/index.js
-  var gEncodeJsonCons4 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
-  var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonNil);
+  var gEncodeJsonCons3 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
+  var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons3(gEncodeJsonNil);
   var nameIsSymbol = {
     reflectSymbol: function() {
       return "name";
@@ -12090,7 +12090,7 @@ ${str(snapshot)}`);
       return "arguments";
     }
   };
-  var gEncodeJsonCons22 = /* @__PURE__ */ gEncodeJsonCons12({
+  var gEncodeJsonCons23 = /* @__PURE__ */ gEncodeJsonCons12({
     reflectSymbol: function() {
       return "type";
     }
@@ -12105,9 +12105,9 @@ ${str(snapshot)}`);
       return "function";
     }
   };
-  var encodeJson3 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons12(nameIsSymbol)())(argumentsIsSymbol)())())(/* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonCons22)(idIsSymbol)())(functionIsSymbol)())());
+  var encodeJson3 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons12(nameIsSymbol)())(argumentsIsSymbol)())())(/* @__PURE__ */ gEncodeJsonCons3(gEncodeJsonCons23)(idIsSymbol)())(functionIsSymbol)())());
   var gEncodeJsonCons32 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJson);
-  var gEncodeJsonCons42 = /* @__PURE__ */ gEncodeJsonCons32(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJBoolean)(gEncodeJsonNil)({
+  var gEncodeJsonCons4 = /* @__PURE__ */ gEncodeJsonCons32(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJBoolean)(gEncodeJsonNil)({
     reflectSymbol: function() {
       return "strict";
     }
@@ -12123,18 +12123,18 @@ ${str(snapshot)}`);
       return "content";
     }
   };
-  var encodeJson23 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonCons5)(contentIsSymbol)())());
+  var encodeJson23 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(gEncodeJsonCons5)(contentIsSymbol)())());
   var tool_callsIsSymbol = {
     reflectSymbol: function() {
       return "tool_calls";
     }
   };
-  var encodeJson32 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonCons5)({
+  var encodeJson32 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonCons5)({
     reflectSymbol: function() {
       return "parsed";
     }
   })())(contentIsSymbol)())());
-  var encodeJson4 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons12({
+  var encodeJson4 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons12({
     reflectSymbol: function() {
       return "tool_call_id";
     }
@@ -12163,11 +12163,11 @@ ${str(snapshot)}`);
     }
   };
   var decodeJson1 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(contentIsSymbol)()())());
-  var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons42({
+  var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons4({
     reflectSymbol: function() {
       return "schema";
     }
-  })())(nameIsSymbol)())())(gEncodeJsonCons22)({
+  })())(nameIsSymbol)())())(gEncodeJsonCons23)({
     reflectSymbol: function() {
       return "json_schema";
     }
@@ -12255,7 +12255,7 @@ ${str(snapshot)}`);
       });
     }
   };
-  var encodeJson6 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonMaybe(encodeJsonJString))(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonToolCall))(gEncodeJsonNil)(tool_callsIsSymbol)())(roleIsSymbol)())(contentIsSymbol)())());
+  var encodeJson6 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonMaybe(encodeJsonJString))(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonToolCall))(gEncodeJsonNil)(tool_callsIsSymbol)())(roleIsSymbol)())(contentIsSymbol)())());
   var encodeJsonAssistantMsg = {
     encodeJson: function(v) {
       if (v instanceof TextAssistantMsg) {
@@ -12318,12 +12318,12 @@ ${str(snapshot)}`);
     }
   };
   var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMsg));
-  var encodeJson9 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonNil)({
+  var encodeJson9 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonNil)({
     reflectSymbol: function() {
       return "response_format";
     }
   })())(modelIsSymbol)())(messagesIsSymbol)())(baseURLIsSymbol)())(apiKeyIsSymbol)())());
-  var encodeJson10 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons12(modelIsSymbol)())(messagesIsSymbol)())(baseURLIsSymbol)())(apiKeyIsSymbol)())());
+  var encodeJson10 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons12(modelIsSymbol)())(messagesIsSymbol)())(baseURLIsSymbol)())(apiKeyIsSymbol)())());
   var mkUserMsg = function(content3) {
     return new UserMsg({
       content: content3
@@ -13810,6 +13810,7 @@ ${str(snapshot)}`);
   });
 
   // output/Ai2.Widget.Provider/index.js
+  var fromFoldable7 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
   var tell2 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
   var bind6 = /* @__PURE__ */ bind(bindHalogenM);
   var get3 = /* @__PURE__ */ get(monadStateHalogenM);
@@ -13906,8 +13907,14 @@ ${str(snapshot)}`);
       model
     };
   };
+  var mkGoogleProvider = function(model) {
+    return {
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
+      model
+    };
+  };
   var providers_with_tools = /* @__PURE__ */ function() {
-    return fromFoldable3(ordString)(foldableArray)([new Tuple("openai / gpt-4o", mkOpenaiProvider("gpt-4o")), new Tuple("ollama / llama3-groq-tool-use:latest", mkOllamaProvider("llama3-groq-tool-use:latest")), new Tuple("ollama / command-r7b:latest", mkOllamaProvider("command-r7b:latest"))]);
+    return fromFoldable7([new Tuple("openai / gpt-4o", mkOpenaiProvider("gpt-4o")), new Tuple("ollama / llama3-groq-tool-use:latest", mkOllamaProvider("llama3-groq-tool-use:latest")), new Tuple("ollama / command-r7b:latest", mkOllamaProvider("command-r7b:latest")), new Tuple("google / gemini-2.0-flash", mkGoogleProvider("gemini-2.0-flash"))]);
   }();
   var bold = function(s) {
     return span3([css(tell2(["font-weight: bold"]))])([text(s)]);
@@ -13966,10 +13973,10 @@ ${str(snapshot)}`);
             return pure7(v1.value0);
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 106, column 43 - line 108, column 64): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 136, column 43 - line 138, column 64): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 104, column 83 - line 108, column 64): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 134, column 83 - line 138, column 64): " + [v.constructor.name]);
       });
     });
     var insertSavedProviderConfig = function(provider) {
@@ -14063,7 +14070,7 @@ ${str(snapshot)}`);
         });
       }
       ;
-      throw new Error("Failed pattern match at Ai2.Widget.Provider (line 146, column 5 - line 164, column 25): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Ai2.Widget.Provider (line 176, column 5 - line 194, column 25): " + [v.constructor.name]);
     });
     var setProvider = function(provider) {
       return discard22(modify_3(function(v) {
@@ -14111,7 +14118,7 @@ ${str(snapshot)}`);
             });
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 118, column 5 - line 124, column 10): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 148, column 5 - line 154, column 10): " + [v.constructor.name]);
         });
       });
     };
@@ -14144,10 +14151,10 @@ ${str(snapshot)}`);
             return pure7(new Just(v1.value0));
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 132, column 9 - line 137, column 39): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 162, column 9 - line 167, column 39): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 129, column 77 - line 137, column 39): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 159, column 77 - line 167, column 39): " + [v.constructor.name]);
       });
     });
     var $$eval = mkEval({
@@ -14186,7 +14193,7 @@ ${str(snapshot)}`);
               });
             }
             ;
-            throw new Error("Failed pattern match at Ai2.Widget.Provider (line 84, column 35 - line 93, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Ai2.Widget.Provider (line 114, column 35 - line 123, column 46): " + [v2.constructor.name]);
           });
         },
         set_open: function(v1) {
@@ -14767,7 +14774,7 @@ ${str(snapshot)}`);
   }();
 
   // output/Example.DiscreteAdventure.Engine1.Common/index.js
-  var fromFoldable7 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
+  var fromFoldable8 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
   var discard4 = /* @__PURE__ */ discard(discardUnit)(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var tell4 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
   var identity14 = /* @__PURE__ */ identity(categoryFn);
@@ -14798,7 +14805,7 @@ ${str(snapshot)}`);
   })(showString))(showArray2))(showArray2))(showString))(showString)));
   var foldMap4 = /* @__PURE__ */ foldMap(foldableArray)(monoidArray);
   var templateWorldNotes = function(world) {
-    return replaceFormatVars(fromFoldable7([new Tuple("player_name", world.player_name), new Tuple("player_description", world.player_description), new Tuple("player_strengths", joinWith(", ")(world.player_strengths)), new Tuple("player_weaknesses", joinWith(", ")(world.player_weaknesses)), new Tuple("setting_description", world.setting_description)]))(paragraph("\nThe following are notes about the current state of the game world:\n- The setting: {{setting_description}}\n- The player:\n  - The player's name is {{player_name}}\n  - {{player_name}} is described as follows: {{player_description}}\n  - {{player_name}} has the following strengths: {{player_strengths}}\n  - {{player_name}} has the following weaknesses: {{player_weaknesses}}\n"));
+    return replaceFormatVars(fromFoldable8([new Tuple("player_name", world.player_name), new Tuple("player_description", world.player_description), new Tuple("player_strengths", joinWith(", ")(world.player_strengths)), new Tuple("player_weaknesses", joinWith(", ")(world.player_weaknesses)), new Tuple("setting_description", world.setting_description)]))(paragraph("\nThe following are notes about the current state of the game world:\n- The setting: {{setting_description}}\n- The player:\n  - The player's name is {{player_name}}\n  - {{player_name}} is described as follows: {{player_description}}\n  - {{player_name}} has the following strengths: {{player_strengths}}\n  - {{player_name}} has the following weaknesses: {{player_weaknesses}}\n"));
   };
   var engine = {
     initial_world: {

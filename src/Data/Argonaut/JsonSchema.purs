@@ -34,7 +34,7 @@ instance ToJsonSchema Number where
   toJsonSchema = encodeJson { type: "number" }
 
 instance ToJsonSchema Int where
-  toJsonSchema = encodeJson { type: "integer", format: "int46" }
+  toJsonSchema = encodeJson { type: "integer" }
 
 instance ToJsonSchema Boolean where
   toJsonSchema = encodeJson { type: "boolean" }
