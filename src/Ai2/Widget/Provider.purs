@@ -41,7 +41,8 @@ type Provider =
   }
 
 mkOpenaiProvider model = { baseURL: "https://api.openai.com/v1", model } :: Provider
-mkGoogleProvider model = { baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", model } :: Provider
+-- mkGoogleProvider model = { baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", model } :: Provider
+mkGoogleProvider model = { baseURL: "http://localhost:8013/llm-toys/google", model } :: Provider
 mkOllamaProvider model = { baseURL: "http://localhost:11434/v1", model } :: Provider
 
 type ProviderConfig =

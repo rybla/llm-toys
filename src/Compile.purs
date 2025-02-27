@@ -16,7 +16,9 @@ main :: Effect Unit
 main = do
   let index_path = dist_path <> "index.html"
 
-  labels_hrefs <- sequence [ Example.DiscreteAdventure.Engine1.Compile.compile ]
+  labels_hrefs <- sequence
+    [ Example.DiscreteAdventure.Engine1.Compile.compile
+    ]
 
   writeTextFile index_path $
     index_html

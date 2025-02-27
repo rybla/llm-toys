@@ -8151,7 +8151,7 @@ ${str(snapshot)}`);
   var openai_default = OpenAI;
 
   // output/Ai2.Llm/foreign.js
-  var DEBUG = false;
+  var DEBUG = true;
   var generate_ = ({ ok, error: error6 }) => (args) => async () => {
     try {
       if (DEBUG) console.log("request", JSON.stringify(args, void 0, 4));
@@ -8163,7 +8163,7 @@ ${str(snapshot)}`);
       delete args.apiKey;
       delete args.baseURL;
       const completion = await openai.chat.completions.create(args);
-      if (DEBUG) console.log("response", JSON.stringify(completion.choices[0], void 0, 4));
+      if (DEBUG) console.log("completion", JSON.stringify(completion, void 0, 4));
       return ok(completion.choices[0].message);
     } catch (e) {
       return error6(e.toString());
@@ -13909,11 +13909,11 @@ ${str(snapshot)}`);
   };
   var mkGoogleProvider = function(model) {
     return {
-      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
+      baseURL: "http://localhost:8013/llm-toys/google",
       model
     };
   };
-  var providers_with_tools = /* @__PURE__ */ function() {
+  var providers_with_structured_output = /* @__PURE__ */ function() {
     return fromFoldable7([new Tuple("openai / gpt-4o", mkOpenaiProvider("gpt-4o")), new Tuple("ollama / llama3-groq-tool-use:latest", mkOllamaProvider("llama3-groq-tool-use:latest")), new Tuple("ollama / command-r7b:latest", mkOllamaProvider("command-r7b:latest")), new Tuple("google / gemini-2.0-flash", mkGoogleProvider("gemini-2.0-flash"))]);
   }();
   var bold = function(s) {
@@ -13973,10 +13973,10 @@ ${str(snapshot)}`);
             return pure7(v1.value0);
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 136, column 43 - line 138, column 64): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 137, column 43 - line 139, column 64): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 134, column 83 - line 138, column 64): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 135, column 83 - line 139, column 64): " + [v.constructor.name]);
       });
     });
     var insertSavedProviderConfig = function(provider) {
@@ -14070,7 +14070,7 @@ ${str(snapshot)}`);
         });
       }
       ;
-      throw new Error("Failed pattern match at Ai2.Widget.Provider (line 176, column 5 - line 194, column 25): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Ai2.Widget.Provider (line 177, column 5 - line 195, column 25): " + [v.constructor.name]);
     });
     var setProvider = function(provider) {
       return discard22(modify_3(function(v) {
@@ -14118,7 +14118,7 @@ ${str(snapshot)}`);
             });
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 148, column 5 - line 154, column 10): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 149, column 5 - line 155, column 10): " + [v.constructor.name]);
         });
       });
     };
@@ -14151,10 +14151,10 @@ ${str(snapshot)}`);
             return pure7(new Just(v1.value0));
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 162, column 9 - line 167, column 39): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Widget.Provider (line 163, column 9 - line 168, column 39): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 159, column 77 - line 167, column 39): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Ai2.Widget.Provider (line 160, column 77 - line 168, column 39): " + [v.constructor.name]);
       });
     });
     var $$eval = mkEval({
@@ -14193,7 +14193,7 @@ ${str(snapshot)}`);
               });
             }
             ;
-            throw new Error("Failed pattern match at Ai2.Widget.Provider (line 114, column 35 - line 123, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Ai2.Widget.Provider (line 115, column 35 - line 124, column 46): " + [v2.constructor.name]);
           });
         },
         set_open: function(v1) {
@@ -14425,7 +14425,7 @@ ${str(snapshot)}`);
             return liftEffect12(scrollIntoView(toElement(v2.value0)));
           }
           ;
-          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 423, column 38 - line 425, column 85): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 415, column 38 - line 417, column 85): " + [v2.constructor.name]);
         });
       }
     });
@@ -14516,7 +14516,7 @@ ${str(snapshot)}`);
             return pure32(unit);
           }
           ;
-          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 280, column 11 - line 284, column 33): " + [opts.width.constructor.name]);
+          throw new Error("Failed pattern match at Example.DiscreteAdventure (line 272, column 11 - line 276, column 33): " + [opts.width.constructor.name]);
         }())(function() {
           return tell3(["display: flex", "flex-direction: column"]);
         }))])([div2([css(discard12(tell3(["flex-grow: 0"]))(function() {
@@ -14556,7 +14556,7 @@ ${str(snapshot)}`);
           };
           return [btn(inj23(unit))("Save"), btn(inj33(unit))("Load")];
         }()
-      })("Story")))(function(story) {
+      })("Story!!")))(function(story) {
         return pure23(div2([css(discard12(tell3(["margin: auto"]))(function() {
           return discard12(tell3(["width: " + (show3(main_width) + "px")]))(function() {
             return discard12(tell3(["box-shadow: 0 0 0 1px black"]))(function() {
@@ -14571,7 +14571,7 @@ ${str(snapshot)}`);
           });
         }))])([world, menu2, story]), slot2($$Proxy.value)(unit)(component)({
           providerCategory: "Main",
-          providers: providers_with_tools
+          providers: providers_with_structured_output
         })(function($195) {
           return inj42(pure8($195));
         })]));

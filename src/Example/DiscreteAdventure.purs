@@ -211,14 +211,6 @@ type Prompt_StoryChoices_Structure =
         }
   }
 
--- prompt_StoryChoices_schemaDef = Llm.mkSchemaDef
---   "story_choices"
---   { choices: Llm.mkArraySchema $ Llm.mkObjectSchema
---       { long_description: Llm.mkStringSchema { description: "A long and detailed description of what the player could do next." # pure }
---       , short_description: Llm.mkStringSchema { description: "A short, high-level, 1-sentence summary of the long_description." # pure }
---       }
---   }
-
 type RenderM world = Reader (State world)
 
 type Html world = H.ComponentHTML
@@ -252,7 +244,7 @@ renderMain = do
           , btn (inj @"load_story" unit) "Load"
           ]
     }
-    "Story"
+    "Story!!"
   pure $
     HH.div
       [ css do
@@ -269,7 +261,7 @@ renderMain = do
               tell [ "display: flex", "flex-direction: row" ]
           ]
           [ world, menu, story ]
-      , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_tools } (inj @"set_config" <<< pure)
+      , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_structured_output } (inj @"set_config" <<< pure)
       ]
 
 renderMainBlock :: forall world. { width :: Maybe Int, controls :: Array (Html world) } -> String -> Html world -> RenderM_Html world

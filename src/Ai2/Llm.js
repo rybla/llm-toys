@@ -14,7 +14,7 @@ export const generate_ = ({ ok, error }) => (args) =>
       delete args.apiKey
       delete args.baseURL
       const completion = await openai.chat.completions.create(args)
-      if (DEBUG) console.log("response", JSON.stringify(completion.choices[0], undefined, 4))
+      if (DEBUG) console.log("completion", JSON.stringify(completion, undefined, 4))
       return ok(completion.choices[0].message)
     }
     catch (e) {
