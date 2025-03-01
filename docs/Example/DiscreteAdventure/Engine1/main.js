@@ -8151,7 +8151,7 @@ ${str(snapshot)}`);
   var openai_default = OpenAI;
 
   // output/Ai2.Llm/foreign.js
-  var DEBUG = true;
+  var DEBUG = false;
   var generate_ = ({ ok, error: error6 }) => (args) => async () => {
     try {
       if (DEBUG) console.log("request", JSON.stringify(args, void 0, 4));

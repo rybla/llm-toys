@@ -1,0 +1,93 @@
+<html>
+
+<body>
+  <canvas id="canvas" width="800" height="600"></canvas>
+  <button id="add-body">Add Body</button>
+</body>
+
+<head>
+  <script>
+    class Body {
+      constructor(x, y, vx, vy, mass, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.mass = mass;
+        this.color = color;
+      }
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let bodies = [];
+    const G = 10000; // gravitational constant
+    let lastTime = 0;
+
+    function addBody() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const vx = (Math.random() - 0.5) * 20;
+      const vy = (Math.random() - 0.5) * 20;
+      const mass = 1;
+      const color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+      const body = new Body(x, y, vx, vy, mass, color);
+      bodies.push(body);
+    }
+
+    const addButton = document.getElementById('add-body');
+    addButton.addEventListener('click', addBody);
+
+    function animate(time) {
+      if (lastTime == 0) {
+        lastTime = time;
+      }
+      const dt = (time - lastTime) / 1000; // dt in seconds
+      lastTime = time;
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update each body
+      for (const body of bodies) {
+        let fx = 0, fy = 0;
+        for (const other of bodies) {
+          if (body === other) continue;
+          const dx = other.x - body.x;
+          const dy = other.y - body.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 1) continue; // avoid very small distances
+          const force = G * body.mass * other.mass / (dist * dist);
+          const ax = dx / dist;
+          const ay = dy / dist;
+          fx += force * ax;
+          fy += force * ay;
+        }
+        // Calculate acceleration
+        const ax = fx / body.mass;
+        const ay = fy / body.mass;
+        // Update velocity
+        body.vx += ax * dt;
+        body.vy += ay * dt;
+        // Update position
+        body.x += body.vx * dt;
+        body.y += body.vy * dt;
+      }
+
+      // Render each body
+      for (const body of bodies) {
+        ctx.beginPath();
+        ctx.fillStyle = body.color;
+        ctx.arc(body.x, body.y, 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // Schedule next frame
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</head>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Moving Background Demo</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const gridSize = 50;
+    const squareSize = 50;
+
+    // Square stays centered
+    const squareX = (canvas.width - squareSize) / 2; // 175
+    const squareY = (canvas.height - squareSize) / 2; // 175
+
+    // Initial grid position
+    let currentCol = 0;
+    let currentRow = 0;
+    let targetCol = 0;
+    let targetRow = 0;
+
+    // Current offsets for background
+    let currentOffsetX = 0; // Start with simpler offset
+    let currentOffsetY = 0;
+    let targetOffsetX = 0;
+    let targetOffsetY = 0;
+
+    // Animation state
+    let isMoving = false;
+    let startOffsetX = 0;
+    let startOffsetY = 0;
+    let animationStartTime = 0;
+    const animationDuration = 200; // ms
+
+    // Key states
+    const keys = {};
+
+    // Load background image
+    const backgroundImage = new Image();
+    backgroundImage.src = 'background.png';
+    backgroundImage.onload = () => {
+      console.log('Background image loaded');
+      animate(); // Start animation loop once image is loaded
+    };
+    backgroundImage.onerror = () => {
+      console.error('Failed to load background.png');
+      drawFallbackGrid(); // Use fallback if image fails
+      animate();
+    };
+
+    // Key event listeners
+    window.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    function startMovement() {
+      console.log("startMovement")
+      if (isMoving) return;
+      startOffsetX = currentOffsetX;
+      startOffsetY = currentOffsetY;
+      targetCol = currentCol;
+      targetRow = currentRow;
+
+      if (keys.ArrowUp) {
+        targetRow--;
+      } else if (keys.ArrowDown) {
+        targetRow++;
+      } else if (keys.ArrowLeft) {
+        targetCol--;
+      } else if (keys.ArrowRight) {
+        targetCol++;
+      } else {
+        return; // No movement needed
+      }
+
+      // Calculate target offsets (opposite direction)
+      targetOffsetX = -targetCol * gridSize;
+      targetOffsetY = -targetRow * gridSize;
+
+      isMoving = true;
+      animationStartTime = performance.now();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (isMoving) {
+        const currentTime = performance.now();
+        let progress = (currentTime - animationStartTime) / animationDuration;
+        if (progress >= 1) {
+          progress = 1;
+          isMoving = false;
+          currentCol = targetCol;
+          currentRow = targetRow;
+          currentOffsetX = targetOffsetX;
+          currentOffsetY = targetOffsetY;
+        } else {
+          // Interpolate offsets
+          currentOffsetX = startOffsetX + (targetOffsetX - startOffsetX) * progress;
+          currentOffsetY = startOffsetY + (targetOffsetY - startOffsetY) * progress;
+        }
+      } else {
+        startMovement();
+      }
+
+      // Draw background
+      ctx.save();
+      ctx.translate(currentOffsetX, currentOffsetY);
+      const pattern = ctx.createPattern(backgroundImage, 'repeat');
+      ctx.fillStyle = pattern
+      ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 3, canvas.height * 3); // Large rect to ensure coverage
+      ctx.restore();
+
+      // Draw square (fixed position)
+      ctx.fillStyle = 'red';
+      ctx.fillRect(squareX, squareY, squareSize, squareSize);
+
+      requestAnimationFrame(animate);
+    }
+
+    // Fallback grid drawing for debugging
+    function drawFallbackGrid() {
+      ctx.save();
+      ctx.translate(currentOffsetX, currentOffsetY);
+      ctx.strokeStyle = 'lightgray';
+      ctx.lineWidth = 1;
+      for (let x = -gridSize; x < canvas.width + gridSize; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = -gridSize; y < canvas.height + gridSize; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  </script>
+</body>
+
+</html>

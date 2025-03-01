@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Square Animation</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Grid and animation settings
+    const gridSize = 50;    // Square size and grid unit (50x50 pixels)
+    const duration = 500;   // Movement duration in milliseconds (0.5 seconds)
+
+    // Square's position and animation state
+    let currentRow = 0;     // Grid row (0 to 7)
+    let currentCol = 0;     // Grid column (0 to 7)
+    let targetRow = 0;      // Target row for movement
+    let targetCol = 0;      // Target column for movement
+    let isMoving = false;   // Whether the square is currently moving
+    let startTime;          // Timestamp when movement starts
+    let startX;             // Starting x-coordinate (pixels)
+    let startY;             // Starting y-coordinate (pixels)
+    let targetX;            // Target x-coordinate (pixels)
+    let targetY;            // Target y-coordinate (pixels)
+
+    // Track arrow key states
+    const keys = {
+      ArrowUp: false,
+      ArrowDown: false,
+      ArrowLeft: false,
+      ArrowRight: false
+    };
+
+    // Handle key presses
+    document.addEventListener('keydown', (event) => {
+      if (event.key in keys) {
+        keys[event.key] = true;
+        event.preventDefault(); // Prevent page scrolling
+      }
+    });
+
+    document.addEventListener('keyup', (event) => {
+      if (event.key in keys) {
+        keys[event.key] = false;
+      }
+    });
+
+    // Animation loop
+    function animate() {
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let drawX, drawY; // Current position to draw the square
+
+      if (isMoving) {
+        // Calculate progress of the animation
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Interpolate position
+        drawX = startX + progress * (targetX - startX);
+        drawY = startY + progress * (targetY - startY);
+
+        // Check if movement is complete
+        if (progress >= 1) {
+          isMoving = false;
+          currentRow = targetRow;
+          currentCol = targetCol;
+        }
+      } else {
+        // When idle, draw at current grid position
+        drawX = currentCol * gridSize;
+        drawY = currentRow * gridSize;
+
+        // Check for key presses and start movement
+        if (keys.ArrowUp && currentRow > 0) {
+          targetRow = currentRow - 1;
+          targetCol = currentCol;
+          startX = drawX;
+          startY = drawY;
+          targetX = targetCol * gridSize;
+          targetY = targetRow * gridSize;
+          startTime = performance.now();
+          isMoving = true;
+        } else if (keys.ArrowDown && currentRow < 7) {
+          targetRow = currentRow + 1;
+          targetCol = currentCol;
+          startX = drawX;
+          startY = drawY;
+          targetX = targetCol * gridSize;
+          targetY = targetRow * gridSize;
+          startTime = performance.now();
+          isMoving = true;
+        } else if (keys.ArrowLeft && currentCol > 0) {
+          targetCol = currentCol - 1;
+          targetRow = currentRow;
+          startX = drawX;
+          startY = drawY;
+          targetX = targetCol * gridSize;
+          targetY = targetRow * gridSize;
+          startTime = performance.now();
+          isMoving = true;
+        } else if (keys.ArrowRight && currentCol < 7) {
+          targetCol = currentCol + 1;
+          targetRow = currentRow;
+          startX = drawX;
+          startY = drawY;
+          targetX = targetCol * gridSize;
+          targetY = targetRow * gridSize;
+          startTime = performance.now();
+          isMoving = true;
+        }
+      }
+
+      // Draw the square
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(drawX, drawY, gridSize, gridSize);
+
+      // Continue the animation
+      requestAnimationFrame(animate);
+    }
+
+    // Start the animation
+    animate();
+  </script>
+</body>
+
+</html>

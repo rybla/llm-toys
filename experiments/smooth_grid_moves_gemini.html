@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Interactive Square Animation</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    /* Remove default body margins */
+    canvas {
+      display: block;
+      border: 1px solid black;
+    }
+
+    /* Prevent scrollbars if canvas is slightly larger than viewport */
+  </style>
+</head>
+
+<body>
+  <canvas id="myCanvas"></canvas>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('myCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Set canvas dimensions (adjust as needed)
+      canvas.width = 500;
+      canvas.height = 400;
+
+      const squareSize = 50;
+      const squareColor = 'red';
+      let squareX = 50; // Initial X position
+      let squareY = 50; // Initial Y position
+      let targetX = squareX; // Target X position
+      let targetY = squareY; // Target Y position
+      const moveSpeed = 5; // Pixels to move per frame for smooth transition
+
+      function drawSquare(x, y) {
+        ctx.fillStyle = squareColor;
+        ctx.fillRect(x, y, squareSize, squareSize);
+      }
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function animate() {
+        clearCanvas();
+
+        // Smooth transition logic
+        if (squareX !== targetX) {
+          const directionX = targetX > squareX ? 1 : -1;
+          squareX += moveSpeed * directionX;
+          // Overshoot correction to precisely hit the target
+          if (directionX === 1 && squareX > targetX || directionX === -1 && squareX < targetX) {
+            squareX = targetX;
+          }
+        }
+        if (squareY !== targetY) {
+          const directionY = targetY > squareY ? 1 : -1;
+          squareY += moveSpeed * directionY;
+          // Overshoot correction to precisely hit the target
+          if (directionY === 1 && squareY > targetY || directionY === -1 && squareY < targetY) {
+            squareY = targetY;
+          }
+        }
+
+        drawSquare(squareX, squareY);
+        requestAnimationFrame(animate);
+      }
+
+      // Event listener for arrow keys
+      document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+          case 'ArrowUp':
+            targetY -= squareSize;
+            break;
+          case 'ArrowDown':
+            targetY += squareSize;
+            break;
+          case 'ArrowLeft':
+            targetX -= squareSize;
+            break;
+          case 'ArrowRight':
+            targetX += squareSize;
+            break;
+        }
+
+        // Keep square within canvas bounds (optional but good practice)
+        targetX = Math.max(0, Math.min(canvas.width - squareSize, targetX));
+        targetY = Math.max(0, Math.min(canvas.height - squareSize, targetY));
+      });
+
+      animate(); // Start the animation loop
+    });
+  </script>
+</body>
+
+</html>
