@@ -9966,13 +9966,6 @@ ${str(snapshot)}`);
   var hasCodePointAt = typeof String.prototype.codePointAt === "function";
 
   // output/Data.String.Common/foreign.js
-  var replace = function(s1) {
-    return function(s2) {
-      return function(s3) {
-        return s3.replace(s1, s2);
-      };
-    };
-  };
   var replaceAll = function(s1) {
     return function(s2) {
       return function(s3) {
@@ -11883,7 +11876,7 @@ ${str(snapshot)}`);
           ;
           if (v instanceof Cons) {
             $tco_var_v = v.value1;
-            $copy_v1 = replace("{{" + (v.value0.value0 + "}}"))(v.value0.value1)(v1);
+            $copy_v1 = replaceAll("{{" + (v.value0.value0 + "}}"))(v.value0.value1)(v1);
             return;
           }
           ;

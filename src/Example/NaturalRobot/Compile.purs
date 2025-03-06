@@ -26,7 +26,13 @@ compile = do
 
 index_html :: String
 index_html = String.trim
-  """
+  $ format
+      { grid_unit: "20"
+      , field_units: "20"
+      , transition_duration: "200"
+      }
+  $
+    """
 <!DOCTYPE html>
 <html lang="en">
 
@@ -45,6 +51,81 @@ body {
   padding: 0;
   font-family: "Merienda", serif;
 }
+
+.App {
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.Field {
+  width: calc({{grid_unit}}px * {{field_units}});
+  height: calc({{grid_unit}}px * {{field_units}});
+  padding: {{grid_unit}}px;
+  box-shadow: 0 0 0 1px black inset;
+}
+
+.Robot {
+  position: relative;
+  width: 0;
+  height: 0;
+
+  transition-property: all;
+  transition-duration: {{transition_duration}}ms;
+  transition-timing-function: linear;
+
+  overflow: visible;
+}
+
+.Robot>div {
+  position: relative;
+  width: {{grid_unit}}px;
+  left: calc(-{{grid_unit}}px / 2);
+  height: {{grid_unit}}px;
+  top: calc(-{{grid_unit}}px / 2);
+
+  background-color: blue;
+}
+
+.Console {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.Transcript {
+  height: 10em;
+  overflow-y: scroll;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.Msg {
+  box-shadow: 0 0 0 1px black inset;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.Msg>div {
+  padding: 0.5em;
+}
+
+.Msg>div:nth-child(1) {
+  width: 10em;
+  background-color: black;
+  color: white;
+}
+
+.Msg>div:nth-child(2) {
+  background-color: transparent;
+  color: black;
+}
+
+
 </style>
 
 <script src="main.js"></script>
