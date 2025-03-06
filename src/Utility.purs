@@ -2,10 +2,8 @@ module Utility where
 
 import Prelude
 
-import Control.Monad.Writer (Writer, execWriter, runWriter)
+import Control.Monad.Writer (Writer, execWriter)
 import Data.Array as Array
-import Data.Foldable (foldl)
-import Data.Function (applyFlipped)
 import Data.Function as Function
 import Data.Identity (Identity)
 import Data.Lens (Lens')
@@ -24,11 +22,13 @@ import Data.Unfoldable (none)
 import Data.Variant (Variant)
 import Data.Variant as V
 import Effect (Effect)
+import Foreign.Object as Object
 import Halogen.HTML.Properties as HP
 import Partial.Unsafe (unsafeCrashWith)
 import Prim.Row (class Cons)
 import Prim.TypeError (class Warn, Text)
 import Type.Prelude (Proxy(..))
+import Type.Row.Homogeneous (class Homogeneous)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM (Element)
 
@@ -103,6 +103,17 @@ replaceFormatVars sigma = go (Map.toUnfoldable sigma)
   where
   go Nil s = s
   go ((k /\ v) : sigma') s = go sigma' $ String.replace (String.Pattern $ "{{" <> k <> "}}") (String.Replacement v) s
+
+replaceFormatVars' ∷ forall r. Homogeneous r String ⇒ Record r → String → String
+replaceFormatVars' sigma = replaceFormatVars (fromHomogeneousToMap sigma)
+
+format = replaceFormatVars'
+
+fromHomogeneousToMap :: forall r a. Homogeneous r a => Record r -> Map String a
+fromHomogeneousToMap r = r
+  # Object.fromHomogeneous
+  # (Object.toUnfoldable :: _ -> List _)
+  # Map.fromFoldable
 
 paragraph :: String -> String
 paragraph = identity

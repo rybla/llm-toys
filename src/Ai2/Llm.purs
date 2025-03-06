@@ -5,7 +5,7 @@ module Ai2.Llm
   , mkSystemMsg
   , UserMsg
   , mkUserMsg
-  , AssistantMsg
+  , AssistantMsg(..)
   , TextAssistantMsg
   , mkTextAssistantMsg
   , StructureAssistantMsg
@@ -27,14 +27,17 @@ import Prelude
 
 import Control.Promise (Promise, toAffE)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut.Core (stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Argonaut.JsonSchema (class DecodeJsonFromSchema, class ToJsonSchema, decodeJsonFromSchema, toJsonSchema)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Either.Nested (type (\/))
+import Data.Generic.Rep (class Generic)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Show.Generic (genericShow)
 import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Effect (Effect)
@@ -43,6 +46,7 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import Record as R
 import Type.Row.Homogeneous (class Homogeneous)
+import Utility (format)
 
 --------------------------------------------------------------------------------
 -- types
@@ -101,6 +105,9 @@ mkToolAssistantMsg content toolCalls = AssistantMsg $ ToolAssistantMsg { content
 
 data ToolCall =
   FunctionToolCall { id :: String, name :: String, args :: Json }
+
+instance Show ToolCall where
+  show (FunctionToolCall { id, name, args }) = "{ id: {{id}}, name: {{name}}, args: {{args}} }" # format { id, name, args: stringify args }
 
 instance EncodeJson ToolCall where
   encodeJson (FunctionToolCall toolCall) = encodeJson

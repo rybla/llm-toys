@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+
+  <div>
+    <div id="grid">
+      <div id="robot">
+        <div id="robot-inner"></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>smooth_grid_via_css</title>
+
+  <style>
+    body {
+      padding: 100px;
+    }
+
+    #grid {
+      width: 900px;
+      height: 900px;
+      position: relative;
+      border: 1px solid black;
+    }
+
+    #robot {
+      width: 0;
+      height: 0;
+      position: relative;
+
+      transition-property: all;
+      transition-duration: 400ms;
+      transition-timing-function: linear;
+
+      overflow: visible;
+    }
+
+    #robot-inner {
+      width: 50px;
+      left: -25px;
+      height: 100px;
+      top: -50px;
+
+      position: relative;
+      background-color: blue;
+
+    }
+  </style>
+
+  <script>
+    async function main() {
+      const robot = document.getElementById('robot')
+      robot.style.left = '0';
+      robot.style.top = '0';
+      robot.style.transform = 'rotate(90deg)';
+
+      for (let i = 0; i < 10; i++) {
+        robot.style.left = `${i * 100}px`;
+        // sleep for 1 second
+        await new Promise(resolve => setTimeout(resolve, 400));
+      }
+
+      robot.style.transform = 'rotate(180deg)';
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      for (let i = 1; i < 10; i++) {
+        robot.style.top = `${i * 100}px`;
+        // sleep for 1 second
+        await new Promise(resolve => setTimeout(resolve, 400));
+      }
+    }
+    main()
+  </script>
+</head>
+
+</html>

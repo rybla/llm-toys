@@ -3,13 +3,9 @@ module Example.DiscreteAdventure.Engine1.Compile where
 import Prelude
 
 import Compile.Common (Compile, base_href, dist_path, writeTextFile)
-import Data.Array as Array
 import Data.String as String
-import Effect (Effect)
 import Node.ChildProcess as CP
-
-main :: Effect Unit
-main = compile # void
+import Utility (format)
 
 compile :: Compile
 compile = do
@@ -23,13 +19,9 @@ compile = do
 
   writeTextFile index_path index_html
 
-  CP.execSync
-    ( [ "bun spago bundle"
-      , "--bundle-type app"
-      , "--module " <> app_module_name
-      , " --outfile " <> main_path
-      ] # Array.intercalate " "
-    ) # void
+  void $ CP.execSync $
+    "bun --platform=node spago bundle --bundle-type app --module {{app_module_name}} --outfile {{main_path}}"
+      # format { app_module_name, main_path }
 
   pure { label, href: index_href }
 

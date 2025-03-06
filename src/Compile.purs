@@ -10,6 +10,7 @@ import Data.Traversable (sequence)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Example.DiscreteAdventure.Engine1.Compile as Example.DiscreteAdventure.Engine1.Compile
+import Example.NaturalRobot.Compile as Example.NaturalRobot.Compile
 import Utility (replaceFormatVars)
 
 main :: Effect Unit
@@ -18,6 +19,7 @@ main = do
 
   labels_hrefs <- sequence
     [ Example.DiscreteAdventure.Engine1.Compile.compile
+    , Example.NaturalRobot.Compile.compile
     ]
 
   writeTextFile index_path $

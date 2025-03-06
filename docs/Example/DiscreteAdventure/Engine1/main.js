@@ -3129,7 +3129,7 @@
     return array;
   })();
   var limit = 1024;
-  var encode = (str2, _defaultEncoder, charset2, _kind, format) => {
+  var encode = (str2, _defaultEncoder, charset2, _kind, format2) => {
     if (str2.length === 0) {
       return str2;
     }
@@ -3157,7 +3157,7 @@
         c >= 48 && c <= 57 || // 0-9
         c >= 65 && c <= 90 || // a-z
         c >= 97 && c <= 122 || // A-Z
-        format === RFC1738 && (c === 40 || c === 41)) {
+        format2 === RFC1738 && (c === 40 || c === 41)) {
           arr[arr.length] = segment.charAt(i2);
           continue;
         }
@@ -3244,7 +3244,7 @@
     return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
   }
   var sentinel = {};
-  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter3, sort2, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset2, sideChannel) {
+  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter3, sort2, allowDots, serializeDate, format2, formatter, encodeValuesOnly, charset2, sideChannel) {
     let obj = object2;
     let tmp_sc = sideChannel;
     let step3 = 0;
@@ -3279,17 +3279,17 @@
       if (strictNullHandling) {
         return encoder && !encodeValuesOnly ? (
           // @ts-expect-error
-          encoder(prefix, defaults.encoder, charset2, "key", format)
+          encoder(prefix, defaults.encoder, charset2, "key", format2)
         ) : prefix;
       }
       obj = "";
     }
     if (is_non_nullish_primitive(obj) || is_buffer(obj)) {
       if (encoder) {
-        const key_value = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset2, "key", format);
+        const key_value = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset2, "key", format2);
         return [
           formatter?.(key_value) + "=" + // @ts-expect-error
-          formatter?.(encoder(obj, defaults.encoder, charset2, "value", format))
+          formatter?.(encoder(obj, defaults.encoder, charset2, "value", format2))
         ];
       }
       return [formatter?.(prefix) + "=" + formatter?.(String(obj))];
@@ -3344,7 +3344,7 @@
         sort2,
         allowDots,
         serializeDate,
-        format,
+        format2,
         formatter,
         encodeValuesOnly,
         charset2,
@@ -3367,14 +3367,14 @@
     if (typeof opts.charset !== "undefined" && opts.charset !== "utf-8" && opts.charset !== "iso-8859-1") {
       throw new TypeError("The charset option must be either utf-8, iso-8859-1, or undefined");
     }
-    let format = default_format;
+    let format2 = default_format;
     if (typeof opts.format !== "undefined") {
       if (!has.call(formatters, opts.format)) {
         throw new TypeError("Unknown format option provided.");
       }
-      format = opts.format;
+      format2 = opts.format;
     }
-    const formatter = formatters[format];
+    const formatter = formatters[format2];
     let filter3 = defaults.filter;
     if (typeof opts.filter === "function" || is_array2(opts.filter)) {
       filter3 = opts.filter;
@@ -3406,7 +3406,7 @@
       encoder: typeof opts.encoder === "function" ? opts.encoder : defaults.encoder,
       encodeValuesOnly: typeof opts.encodeValuesOnly === "boolean" ? opts.encodeValuesOnly : defaults.encodeValuesOnly,
       filter: filter3,
-      format,
+      format: format2,
       formatter,
       serializeDate: typeof opts.serializeDate === "function" ? opts.serializeDate : defaults.serializeDate,
       skipNulls: typeof opts.skipNulls === "boolean" ? opts.skipNulls : defaults.skipNulls,
@@ -11866,7 +11866,7 @@ ${str(snapshot)}`);
   var style = /* @__PURE__ */ attr2("style");
 
   // output/Utility/index.js
-  var toUnfoldable6 = /* @__PURE__ */ toUnfoldable3(unfoldableList);
+  var toUnfoldable7 = /* @__PURE__ */ toUnfoldable3(unfoldableList);
   var inj1 = /* @__PURE__ */ inj();
   var intercalate4 = /* @__PURE__ */ intercalate2(monoidString);
   var replaceFormatVars = function(sigma) {
@@ -11897,7 +11897,7 @@ ${str(snapshot)}`);
         return $tco_result;
       };
     };
-    return go2(toUnfoldable6(sigma));
+    return go2(toUnfoldable7(sigma));
   };
   var prop4 = function(dictIsSymbol) {
     var prop13 = prop(dictIsSymbol)()();
@@ -11910,16 +11910,16 @@ ${str(snapshot)}`);
     };
   };
   var paragraph = /* @__PURE__ */ function() {
-    var $79 = replaceAll("\\n")(" ");
-    return function($80) {
-      return $79(trim($80));
+    var $84 = replaceAll("\\n")(" ");
+    return function($85) {
+      return $84(trim($85));
     };
   }();
   var paragraphs = /* @__PURE__ */ function() {
-    var $81 = joinWith("\n\n");
-    var $82 = map(functorArray)(paragraph);
-    return function($83) {
-      return $81($82($83));
+    var $86 = joinWith("\n\n");
+    var $87 = map(functorArray)(paragraph);
+    return function($88) {
+      return $86($87($88));
     };
   }();
   var inj2 = function() {
@@ -12281,7 +12281,7 @@ ${str(snapshot)}`);
         });
       }
       ;
-      throw new Error("Failed pattern match at Ai2.Llm (line 85, column 1 - line 88, column 129): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Ai2.Llm (line 89, column 1 - line 92, column 129): " + [v.constructor.name]);
     }
   };
   var encodeJson7 = /* @__PURE__ */ encodeJson(encodeJsonAssistantMsg);
@@ -12314,7 +12314,7 @@ ${str(snapshot)}`);
         });
       }
       ;
-      throw new Error("Failed pattern match at Ai2.Llm (line 67, column 1 - line 71, column 127): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Ai2.Llm (line 71, column 1 - line 75, column 127): " + [v.constructor.name]);
     }
   };
   var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMsg));
@@ -12383,20 +12383,20 @@ ${str(snapshot)}`);
                   return pure4(v3.value0);
                 }
                 ;
-                throw new Error("Failed pattern match at Ai2.Llm (line 224, column 25 - line 226, column 28): " + [v3.constructor.name]);
+                throw new Error("Failed pattern match at Ai2.Llm (line 231, column 25 - line 233, column 28): " + [v3.constructor.name]);
               }
               ;
-              throw new Error("Failed pattern match at Ai2.Llm (line 222, column 28 - line 226, column 28): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Ai2.Llm (line 229, column 28 - line 233, column 28): " + [v2.constructor.name]);
             }
             ;
             if (v1 instanceof Left) {
               return new Left("generate_structure: failed to parsed content as JSON: " + printJsonDecodeError(v1.value0));
             }
             ;
-            throw new Error("Failed pattern match at Ai2.Llm (line 221, column 23 - line 227, column 110): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Ai2.Llm (line 228, column 23 - line 234, column 110): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Llm (line 219, column 9 - line 227, column 110): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Llm (line 226, column 9 - line 234, column 110): " + [v.constructor.name]);
         });
       };
     };
@@ -12427,10 +12427,10 @@ ${str(snapshot)}`);
           return new Left("generate: " + printJsonDecodeError(v1.value0));
         }
         ;
-        throw new Error("Failed pattern match at Ai2.Llm (line 174, column 23 - line 176, column 66): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at Ai2.Llm (line 181, column 23 - line 183, column 66): " + [v1.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Ai2.Llm (line 172, column 9 - line 176, column 66): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Ai2.Llm (line 179, column 9 - line 183, column 66): " + [v.constructor.name]);
     });
   };
 
@@ -13862,7 +13862,7 @@ ${str(snapshot)}`);
   });
   var fold3 = /* @__PURE__ */ fold(foldableArray)(monoidArray);
   var map22 = /* @__PURE__ */ map(functorArray);
-  var toUnfoldable7 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
+  var toUnfoldable8 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
   var inj32 = /* @__PURE__ */ inj3({
     reflectSymbol: function() {
       return "set_apiKey";
@@ -13939,7 +13939,7 @@ ${str(snapshot)}`);
         return tell2(["padding: 0.5em"]);
       }))])([div2([])([bold("Configure AI Provider for " + v.providerCategory)]), div2([])([text("Your configuration will be saved to localStorage, and will be loaded automatically when you return to this page.")]), div2([])([bold("Status: "), text(v.status)]), div2([])([bold("Provider: "), select([value3(v.provider), onValueChange(inj22)])(fold3([[option([disabled(true), value3("")])([text("select a provider")])], map22(function(v1) {
         return option([value3(v1.value0)])([text(v1.value0)]);
-      })(toUnfoldable7(v.providers))]))]), div2([])([bold("API Key: "), input([value3(v.apiKey), onValueChange(inj32), type_4(InputPassword.value)])]), div2([onClick(function(v1) {
+      })(toUnfoldable8(v.providers))]))]), div2([])([bold("API Key: "), input([value3(v.apiKey), onValueChange(inj32), type_4(InputPassword.value)])]), div2([onClick(function(v1) {
         return inj4(unit);
       }), css(discard1(tell2(["background-color: black", "color: white", "user-select: none", "cursor: pointer"]))(function() {
         return tell2(["padding: 0.5em"]);
