@@ -67,6 +67,7 @@ providers = Map.fromFoldable
   , "ollama / deepscalar:latest" /\ mkOllamaProvider "deepscalar:latest"
   , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
   , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
+  , "ollama / phi4:latest" /\ mkOllamaProvider "phi4:latest"
   , "google / gemini-2.0-flash" /\ mkGoogleProvider "gemini-2.0-flash"
   ]
 
@@ -81,6 +82,7 @@ providers_with_structured_output = Map.fromFoldable
 providers_with_tools :: Map String Provider
 providers_with_tools = Map.fromFoldable
   [ "openai / gpt-4o" /\ mkOpenaiProvider "gpt-4o"
+  , "ollama / llama3.1:8b-instruct-fp16" /\ mkOllamaProvider "llama3.1:8b-instruct-fp16"
   , "ollama / llama3-groq-tool-use:latest" /\ mkOllamaProvider "llama3-groq-tool-use:latest"
   , "ollama / command-r7b:latest" /\ mkOllamaProvider "command-r7b:latest"
   , "google / gemini-2.0-flash" /\ mkGoogleProvider "gemini-2.0-flash"

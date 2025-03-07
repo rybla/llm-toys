@@ -19,7 +19,7 @@ module Ai2.Llm
   , ToolChoice(..)
   -- generate functions
   , generate
-  , generate_tool
+  , generate_tools
   , generate_structure
   ) where
 
@@ -129,7 +129,7 @@ type ToolMsg = { name :: String, tool_call_id :: String, content :: String }
 -- Tool
 
 -- following example of JsonSchema, make these typed somehow in the interface 
--- instead of an array of tools given to generate_tool, instead probably need to give a record where each tool specifies its return type in a typed way
+-- instead of an array of tools given to generate_tools, instead probably need to give a record where each tool specifies its return type in a typed way
 data Tool = FunctionTool FunctionTool
 
 instance EncodeJson Tool where
@@ -182,8 +182,8 @@ generate args =
       Right { content } -> Right { content }
       Left err -> Left $ "generate: " <> printJsonDecodeError err
 
-generate_tool :: { config :: Config, tools :: Array Tool, messages :: Array Msg } -> Aff (String \/ (TextAssistantMsg \/ ToolAssistantMsg))
-generate_tool args =
+generate_tools :: { config :: Config, tools :: Array Tool, messages :: Array Msg } -> Aff (String \/ (TextAssistantMsg \/ ToolAssistantMsg))
+generate_tools args =
   ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
       { baseURL: args.config.baseURL
       , model: args.config.model
@@ -193,14 +193,14 @@ generate_tool args =
       , messages: args.messages
       }
   ) <#> case _ of
-    Left err -> Left $ "generate_tool: " <> err
+    Left err -> Left $ "generate_tools: " <> err
     Right response -> case response # decodeJson @{ content :: String, tool_calls :: Array ToolCall } of
       Right { content, tool_calls } -> Right $ Right { content: Just content, toolCalls: tool_calls }
       Left err1 -> case response # decodeJson @{ tool_calls :: Array ToolCall } of
         Right { tool_calls } -> Right $ Right { content: Nothing, toolCalls: tool_calls }
         Left err2 -> case response # decodeJson @{ content :: String } of
           Right { content } -> Right $ Left { content }
-          Left err3 -> Left $ "generate_tool:\n" <> Array.intercalate "\n" ([ err1, err2, err3 ] # map printJsonDecodeError)
+          Left err3 -> Left $ "generate_tools:\n" <> Array.intercalate "\n" ([ err1, err2, err3 ] # map printJsonDecodeError)
 
 generate_structure
   :: forall @r

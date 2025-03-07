@@ -1,20 +1,20 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>llm-toys | Discrete Adventure | Engine1</title>
+<title>llm-toys | MutableWorld | Engine1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap" rel="stylesheet">
 
 <style>
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-  font-family: "Merienda", serif;
+  font-family: Merienda;
 }
 
 .App {
@@ -24,44 +24,12 @@ body {
   gap: 1em;
 }
 
-.Field {
-  width: calc(20px * 20);
-  height: calc(20px * 20);
-  padding: 20px;
-  box-shadow: 0 0 0 1px black inset;
-}
-
-.Robot {
-  position: relative;
-  width: 0;
-  height: 0;
-
-  transition-property: all;
-  transition-duration: 200ms;
-  transition-timing-function: linear;
-
-  overflow: visible;
-}
-
-.Robot>div {
-  position: relative;
-  width: 20px;
-  left: calc(-20px / 2);
-  height: 20px;
-  top: calc(-20px / 2);
-
-  background-color: blue;
-}
-
-.Console {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
 .Transcript {
-  height: 10em;
+  height: 20em;
   overflow-y: scroll;
+  
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
 
   display: flex;
   flex-direction: column;
@@ -80,7 +48,7 @@ body {
 }
 
 .Msg>div:nth-child(1) {
-  width: 10em;
+  width: 6em;
   background-color: black;
   color: white;
 }
@@ -90,7 +58,33 @@ body {
   color: black;
 }
 
+.World {  
+  height: 20em;
+  overflow-y: scroll;
 
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
+
+  white-space: pre-wrap;
+}
+
+.Prompts {
+  height: 20em;
+  overflow-y: scroll;
+
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.PromptButton {
+  padding: 0.5em;
+  text-align: left;
+  font-family: Merienda;
+}
 </style>
 
 <script src="main.js"></script>

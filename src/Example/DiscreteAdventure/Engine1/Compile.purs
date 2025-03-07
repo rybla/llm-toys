@@ -23,7 +23,7 @@ compile = do
     "bun --platform=node spago bundle --bundle-type app --module {{app_module_name}} --outfile {{main_path}}"
       # format { app_module_name, main_path }
 
-  pure { label, href: index_href }
+  pure [ { label, href: index_href } ]
 
 index_html ∷ String
 index_html =

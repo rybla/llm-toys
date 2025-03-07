@@ -7,6 +7,7 @@
           "dependencies": [
             "aff-promise",
             "argonaut",
+            "argonaut-generic",
             "arrays",
             "console",
             "debug",
@@ -30,6 +31,7 @@
             "argonaut",
             "argonaut-codecs",
             "argonaut-core",
+            "argonaut-generic",
             "argonaut-traversals",
             "arraybuffer-types",
             "arrays",
@@ -723,6 +725,17 @@
         "prelude",
         "strings",
         "tailrec"
+      ]
+    },
+    "argonaut-generic": {
+      "type": "registry",
+      "version": "8.0.0",
+      "integrity": "sha256-WCqRWoomRKg5BFZnGBS4k4SqBX84fy/X1aJzMyaIeP0=",
+      "dependencies": [
+        "argonaut-codecs",
+        "argonaut-core",
+        "prelude",
+        "record"
       ]
     },
     "argonaut-traversals": {

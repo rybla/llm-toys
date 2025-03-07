@@ -9,7 +9,7 @@ import Node.FS.Sync (mkdir')
 import Node.FS.Sync as FS
 import Node.Path (dirname)
 
-type Compile = Effect { label :: String, href :: String }
+type Compile = Effect (Array { label :: String, href :: String })
 
 base_href = "/llm-toys/"
 dist_path = "docs/"

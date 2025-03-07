@@ -1,37 +1,45 @@
-module Example.NaturalRobot.Compile where
+module Example.MutableWorld.Compile where
 
 import Prelude
 
 import Compile.Common (Compile, base_href, dist_path, writeTextFile)
-import Data.String as String
+import Data.Foldable (fold)
+import Data.Traversable (traverse)
+import Example.MutableWorld.Common (Engine)
+import Example.MutableWorld.Engine1 as Engine1
 import Node.ChildProcess as CP
 import Utility (format)
 
 compile :: Compile
 compile = do
-  let localpath = "Example/NaturalRobot/"
-  let app_module_name = "Example.NaturalRobot.App"
+  [ { label: "Example.MutableWorld.Engine1"
+    , localpath: "Example/MutableWorld/Engine1/"
+    , app_module_name: "Example.MutableWorld.Engine1"
+    , engine: Engine1.engine
+    }
+  ]
+    # traverse compile_engine
+    # map fold
 
+compile_engine :: { label :: String, localpath :: String, app_module_name :: String, engine :: Engine } -> Compile
+compile_engine { label, localpath, app_module_name, engine } = do
   let index_href = base_href <> localpath <> "index.html"
   let index_path = dist_path <> localpath <> "index.html"
   let main_path = dist_path <> localpath <> "main.js"
 
-  writeTextFile index_path index_html
+  writeTextFile index_path $ index_html engine
 
   void $ CP.execSync $
     "bun --platform=node spago bundle --bundle-type app --module {{app_module_name}} --outfile {{main_path}}"
       # format { app_module_name, main_path }
 
-  pure [ { label: "Example.NaturalRobot", href: index_href } ]
+  pure [ { label, href: index_href } ]
 
-index_html :: String
-index_html = String.trim
-  $ format
-      { grid_unit: "20"
-      , field_units: "20"
-      , transition_duration: "200"
-      }
-  $
+index_html :: Engine -> String
+index_html engine =
+  format
+    { title: "MutableWorld | " <> engine.name
+    }
     """
 <!DOCTYPE html>
 <html lang="en">
@@ -39,17 +47,16 @@ index_html = String.trim
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>llm-toys | Discrete Adventure | Engine1</title>
+<title>llm-toys | {{title}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap" rel="stylesheet">
 
 <style>
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-  font-family: "Merienda", serif;
+  font-family: Merienda;
 }
 
 .App {
@@ -59,44 +66,12 @@ body {
   gap: 1em;
 }
 
-.Field {
-  width: calc({{grid_unit}}px * {{field_units}});
-  height: calc({{grid_unit}}px * {{field_units}});
-  padding: {{grid_unit}}px;
-  box-shadow: 0 0 0 1px black inset;
-}
-
-.Robot {
-  position: relative;
-  width: 0;
-  height: 0;
-
-  transition-property: all;
-  transition-duration: {{transition_duration}}ms;
-  transition-timing-function: linear;
-
-  overflow: visible;
-}
-
-.Robot>div {
-  position: relative;
-  width: {{grid_unit}}px;
-  left: calc(-{{grid_unit}}px / 2);
-  height: {{grid_unit}}px;
-  top: calc(-{{grid_unit}}px / 2);
-
-  background-color: blue;
-}
-
-.Console {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
 .Transcript {
-  height: 10em;
+  height: 20em;
   overflow-y: scroll;
+  
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
 
   display: flex;
   flex-direction: column;
@@ -115,7 +90,7 @@ body {
 }
 
 .Msg>div:nth-child(1) {
-  width: 10em;
+  width: 6em;
   background-color: black;
   color: white;
 }
@@ -125,7 +100,33 @@ body {
   color: black;
 }
 
+.World {  
+  height: 20em;
+  overflow-y: scroll;
 
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
+
+  white-space: pre-wrap;
+}
+
+.Prompts {
+  height: 20em;
+  overflow-y: scroll;
+
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.PromptButton {
+  padding: 0.5em;
+  text-align: left;
+  font-family: Merienda;
+}
 </style>
 
 <script src="main.js"></script>

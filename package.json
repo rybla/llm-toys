@@ -3,7 +3,8 @@
   "scripts": {
     "build": "spago build",
     "compile": "rm -rf docs/ && spago run -m Compile",
-    "serve": "bun run --hot server.ts"
+    "serve": "bun run --hot server.ts",
+    "start": "bun run compile && bun run serve"
   },
   "author": "Henry Blanchette",
   "license": "ISC",

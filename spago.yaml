@@ -3,6 +3,7 @@ package:
   dependencies:
     - aff-promise
     - argonaut
+    - argonaut-generic
     - arrays
     - console
     - debug
