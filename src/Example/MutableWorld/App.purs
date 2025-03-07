@@ -60,9 +60,9 @@ type State =
 data Action
   = SetConfig Config
   | SubmitPrompt PromptSource String
-  | Export
-  | Import
   | InputKeyDown PromptSource KeyboardEvent
+  | Import
+  | Export
 
 data PromptSource
   = UpdateWorld_PromptSource
