@@ -12014,7 +12014,9 @@ ${str(snapshot)}`);
   var decodeJson2 = /* @__PURE__ */ decodeJson(decodeJsonString);
   var throwError2 = /* @__PURE__ */ throwError(monadThrowEither);
   var gEncodeJsonCons22 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJBoolean);
-  var gEncodeJsonCons3 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonJString))(gEncodeJsonCons1)({
+  var gEncodeJsonCons3 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeForeignObject2(encodeJsonJson));
+  var gEncodeJsonCons4 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonJString));
+  var gEncodeJsonCons5 = /* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonCons1)({
     reflectSymbol: function() {
       return "required";
     }
@@ -12029,10 +12031,9 @@ ${str(snapshot)}`);
       return "additionalProperties";
     }
   };
-  var encodeJson1 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons22(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeForeignObject2(encodeJsonJson))(gEncodeJsonCons3)(propertiesIsSymbol)())(additionalPropertiesIsSymbol)())());
+  var encodeJson1 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons22(/* @__PURE__ */ gEncodeJsonCons3(gEncodeJsonCons5)(propertiesIsSymbol)())(additionalPropertiesIsSymbol)())());
   var append2 = /* @__PURE__ */ append(semigroupArray);
-  var gEncodeJsonCons4 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJson);
-  var encodeJson22 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonCons1)({
+  var encodeJson22 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJson)(gEncodeJsonCons1)({
     reflectSymbol: function() {
       return "items";
     }
@@ -12042,18 +12043,14 @@ ${str(snapshot)}`);
       return "const";
     }
   })())());
-  var valueIsSymbol = {
+  var encodeJson4 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons22(/* @__PURE__ */ gEncodeJsonCons3(/* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonCons5)({
     reflectSymbol: function() {
-      return "value";
+      return "propertyOrder";
     }
-  };
-  var tagIsSymbol = {
-    reflectSymbol: function() {
-      return "tag";
-    }
-  };
-  var encodeJson4 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons22(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons4(/* @__PURE__ */ gEncodeJsonCons4(gEncodeJsonNil)(valueIsSymbol)())(tagIsSymbol)())())(gEncodeJsonCons3)(propertiesIsSymbol)())(additionalPropertiesIsSymbol)())());
-  var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonJson))(gEncodeJsonNil)({
+  })())(propertiesIsSymbol)())(additionalPropertiesIsSymbol)())());
+  var fromHomogeneous3 = /* @__PURE__ */ fromHomogeneous();
+  var encodeJson5 = /* @__PURE__ */ encodeJson(encodeJsonJson);
+  var encodeJson6 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonJson))(gEncodeJsonNil)({
     reflectSymbol: function() {
       return "anyOf";
     }
@@ -12061,9 +12058,17 @@ ${str(snapshot)}`);
   var map19 = /* @__PURE__ */ map(functorArray);
   var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindEither);
   var decodeJson4 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(decodeJsonJson));
-  var decodeJson5 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonJson))(gDecodeJsonNil)(valueIsSymbol)()())(tagIsSymbol)()())());
+  var decodeJson5 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonJson))(gDecodeJsonNil)({
+    reflectSymbol: function() {
+      return "value";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "tag";
+    }
+  })()())());
   var map110 = /* @__PURE__ */ map(functorEither);
-  var encodeJson6 = /* @__PURE__ */ encodeJson(encodeJsonJString);
+  var encodeJson7 = /* @__PURE__ */ encodeJson(encodeJsonJString);
   var decodeJson6 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeArray2(decodeJsonJson));
   var traverse3 = /* @__PURE__ */ traverse(traversableArray)(applicativeEither);
   var lmap4 = /* @__PURE__ */ lmap(bifunctorEither);
@@ -12197,7 +12202,7 @@ ${str(snapshot)}`);
         }];
       }
       ;
-      throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 87, column 1 - line 87, column 113): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 97, column 1 - line 97, column 113): " + [v.constructor.name]);
     };
   };
   var toJsonSchema_ConsConstruc = function(dictIsSymbol) {
@@ -12219,12 +12224,13 @@ ${str(snapshot)}`);
       return maybe(mkStringSchema(con.tag))(function(value14) {
         return encodeJson4({
           type: "object",
-          properties: {
+          properties: insert(con.tag)(mkStringSchema(con.tag))(fromHomogeneous3({
             tag: mkStringSchema(con.tag),
-            value: value14
-          },
-          required: ["tag", "value"],
-          additionalProperties: false
+            value: encodeJson5(value14)
+          })),
+          required: [con.tag, "tag", "value"],
+          additionalProperties: false,
+          propertyOrder: [con.tag, "tag", "value"]
         });
       })(con.value);
     };
@@ -12237,7 +12243,7 @@ ${str(snapshot)}`);
       return f(v[0]);
     }
     ;
-    return encodeJson5({
+    return encodeJson6({
       anyOf: map19(f)(v)
     });
   };
@@ -12278,10 +12284,10 @@ ${str(snapshot)}`);
             return decodeJsonFromSchema_Cons4(new Untagged(json));
           }
           ;
-          throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 169, column 17 - line 171, column 60): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 179, column 17 - line 181, column 60): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 167, column 17 - line 171, column 60): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 177, column 17 - line 181, column 60): " + [v2.constructor.name]);
       }();
       var v = head(decodings);
       if (v instanceof Nothing) {
@@ -12292,16 +12298,16 @@ ${str(snapshot)}`);
         return v.value0;
       }
       ;
-      throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 172, column 3 - line 174, column 16): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 182, column 3 - line 184, column 16): " + [v.constructor.name]);
     };
   };
   var generic_decodeJsonFromSchema = function(dictGeneric) {
     var to2 = to(dictGeneric);
     return function(dictDecodeJsonFromSchema_Cons) {
-      var $243 = map110(to2);
-      var $244 = decodeJsonFromSchema_Cons_final(dictDecodeJsonFromSchema_Cons);
-      return function($245) {
-        return $243($244($245));
+      var $240 = map110(to2);
+      var $241 = decodeJsonFromSchema_Cons_final(dictDecodeJsonFromSchema_Cons);
+      return function($242) {
+        return $240($241($242));
       };
     };
   };
@@ -12330,7 +12336,7 @@ ${str(snapshot)}`);
           }
           ;
           if (v instanceof $$String) {
-            return [map110(Constructor)(decodeJsonFromSchema_Args2(encodeJson6(v.value0)))];
+            return [map110(Constructor)(decodeJsonFromSchema_Args2(encodeJson7(v.value0)))];
           }
           ;
           if (v instanceof Untagged) {
@@ -12353,10 +12359,10 @@ ${str(snapshot)}`);
   var decodeJsonFromSchema_Args1 = function(dictDecodeJsonFromSchema) {
     return {
       decodeJsonFromSchema_Args: function() {
-        var $246 = map110(Argument);
-        var $247 = decodeJsonFromSchema(dictDecodeJsonFromSchema);
-        return function($248) {
-          return $246($247($248));
+        var $243 = map110(Argument);
+        var $244 = decodeJsonFromSchema(dictDecodeJsonFromSchema);
+        return function($245) {
+          return $243($244($245));
         };
       }()
     };
@@ -12382,7 +12388,7 @@ ${str(snapshot)}`);
                   return lmap4(AtKey.create(x))(apply3(map110(insert10($$Proxy.value))(decodeJsonFromSchema1(v.value0)))(decodeJsonFromSchema_Row1(o)));
                 }
                 ;
-                throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 151, column 32 - line 156, column 45): " + [v.constructor.name]);
+                throw new Error("Failed pattern match at Data.Argonaut.JsonSchema (line 161, column 32 - line 166, column 45): " + [v.constructor.name]);
               }
             };
           };
@@ -12413,8 +12419,8 @@ ${str(snapshot)}`);
 
   // output/Ai2.Llm/index.js
   var format2 = /* @__PURE__ */ format();
-  var gEncodeJsonCons5 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
-  var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons5(gEncodeJsonNil);
+  var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
+  var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonNil);
   var nameIsSymbol = {
     reflectSymbol: function() {
       return "name";
@@ -12440,7 +12446,7 @@ ${str(snapshot)}`);
       return "function";
     }
   };
-  var encodeJson7 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons12(nameIsSymbol)())(argumentsIsSymbol)())())(/* @__PURE__ */ gEncodeJsonCons5(gEncodeJsonCons23)(idIsSymbol)())(functionIsSymbol)())());
+  var encodeJson8 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons12(nameIsSymbol)())(argumentsIsSymbol)())())(/* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonCons23)(idIsSymbol)())(functionIsSymbol)())());
   var gEncodeJsonCons32 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJson);
   var gEncodeJsonCons42 = /* @__PURE__ */ gEncodeJsonCons32(/* @__PURE__ */ gEncodeJsonCons(encodeJsonJBoolean)(gEncodeJsonNil)({
     reflectSymbol: function() {
@@ -12458,18 +12464,18 @@ ${str(snapshot)}`);
       return "content";
     }
   };
-  var encodeJson23 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(gEncodeJsonCons52)(contentIsSymbol)())());
+  var encodeJson23 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonCons52)(contentIsSymbol)())());
   var tool_callsIsSymbol = {
     reflectSymbol: function() {
       return "tool_calls";
     }
   };
-  var encodeJson32 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonCons52)({
+  var encodeJson32 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonCons52)({
     reflectSymbol: function() {
       return "parsed";
     }
   })())(contentIsSymbol)())());
-  var encodeJson42 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons12({
+  var encodeJson42 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons12({
     reflectSymbol: function() {
       return "tool_call_id";
     }
@@ -12500,7 +12506,7 @@ ${str(snapshot)}`);
   var decodeJson1 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(contentIsSymbol)()())());
   var discard2 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var log4 = /* @__PURE__ */ log3(monadEffectAff);
-  var encodeJson52 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons42({
+  var encodeJson52 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons42({
     reflectSymbol: function() {
       return "schema";
     }
@@ -12591,7 +12597,7 @@ ${str(snapshot)}`);
   };
   var encodeJsonToolCall = {
     encodeJson: function(v) {
-      return encodeJson7({
+      return encodeJson8({
         id: v.value0.id,
         type: "function",
         "function": {
@@ -12601,7 +12607,7 @@ ${str(snapshot)}`);
       });
     }
   };
-  var encodeJson62 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonMaybe(encodeJsonJString))(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonToolCall))(gEncodeJsonNil)(tool_callsIsSymbol)())(roleIsSymbol)())(contentIsSymbol)())());
+  var encodeJson62 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonMaybe(encodeJsonJString))(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonToolCall))(gEncodeJsonNil)(tool_callsIsSymbol)())(roleIsSymbol)())(contentIsSymbol)())());
   var encodeJsonAssistantMsg = {
     encodeJson: function(v) {
       if (v instanceof TextAssistantMsg) {
@@ -12663,8 +12669,8 @@ ${str(snapshot)}`);
       throw new Error("Failed pattern match at Ai2.Llm (line 72, column 1 - line 76, column 127): " + [v.constructor.name]);
     }
   };
-  var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMsg));
-  var encodeJson9 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons5(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonNil)({
+  var gEncodeJsonCons62 = /* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonMsg));
+  var encodeJson9 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons62(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons32(gEncodeJsonNil)({
     reflectSymbol: function() {
       return "response_format";
     }
@@ -14172,7 +14178,7 @@ ${str(snapshot)}`);
   var show2 = /* @__PURE__ */ show(showString);
   var discard22 = /* @__PURE__ */ discard3(bindHalogenM);
   var log5 = /* @__PURE__ */ log3(monadEffectHalogenM2);
-  var encodeJson8 = /* @__PURE__ */ encodeJson(encodeRecord1);
+  var encodeJson10 = /* @__PURE__ */ encodeJson(encodeRecord1);
   var fromJsonString1 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeRecord2))(/* @__PURE__ */ gDecodeJsonCons12(nameIsSymbol2)()())(configIsSymbol)()())());
   var assign2 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop5 = /* @__PURE__ */ prop4({
@@ -14333,7 +14339,7 @@ ${str(snapshot)}`);
           name: state3.provider,
           config
         };
-        return discard22(log5("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson8(providerConfig))))))(function() {
+        return discard22(log5("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson10(providerConfig))))))(function() {
           return discard22(insertSavedProviderConfig(state3.provider)(config))(function() {
             return discard22(setProviderConfig(providerConfig))(function() {
               return discard22(modify_3(function(v1) {
@@ -14554,10 +14560,10 @@ ${str(snapshot)}`);
     };
   };
   var encodeRepArgsArgument = function(dictEncodeJson) {
-    var encodeJson11 = encodeJson(dictEncodeJson);
+    var encodeJson13 = encodeJson(dictEncodeJson);
     return {
       encodeRepArgs: function(v) {
-        return [encodeJson11(v)];
+        return [encodeJson13(v)];
       }
     };
   };
@@ -16108,7 +16114,7 @@ ${str(snapshot)}`);
       return "description";
     }
   };
-  var encodeJson10 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15({
+  var encodeJson11 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15({
     reflectSymbol: function() {
       return "status";
     }
@@ -16247,7 +16253,7 @@ ${str(snapshot)}`);
         }
         ;
         return [new Tuple(show3(length_msgs), div2([])([text("processing...")]))];
-      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(stringifyWithIndent(4)(encodeJson10(state3.world)))]), div2([classes(["Prompts"])])([mkPromptButton("\nCreate some locations and characters for a medieval fantasy world. Be creative!\n")]), slot2($$Proxy.value)(unit)(component)({
+      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(stringifyWithIndent(4)(encodeJson11(state3.world)))]), div2([classes(["Prompts"])])([mkPromptButton("\nCreate some locations and characters for a medieval fantasy world. Be creative!\n")]), slot2($$Proxy.value)(unit)(component)({
         providerCategory: "Main",
         providers: providers_with_structured_output
       })(SetConfig.create)]);

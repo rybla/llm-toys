@@ -78,7 +78,18 @@ toJsonSchema_Cons_final = case toJsonSchema_Cons @a of
   [ con ] -> f con
   cons -> encodeJson { anyOf: cons # map f }
   where
-  f con = con.value # maybe (mkStringSchema con.tag) \value -> encodeJson { type: "object", properties: { tag: mkStringSchema con.tag, value }, required: [ "tag", "value" ], additionalProperties: false }
+  f con = con.value # maybe (mkStringSchema con.tag) \value -> encodeJson
+    { type: "object"
+    , properties:
+        Object.insert con.tag (mkStringSchema con.tag) $
+          Object.fromHomogeneous
+            { tag: mkStringSchema con.tag
+            , value: encodeJson value
+            }
+    , required: [ con.tag, "tag", "value" ]
+    , additionalProperties: false
+    , propertyOrder: [ con.tag, "tag", "value" ]
+    }
 
 class ToJsonSchema_Cons (a :: Type) where
   toJsonSchema_Cons :: Array { tag :: String, value :: Maybe Json }
@@ -207,4 +218,3 @@ reflectSymbolAsTag = reflectSymbol (Proxy @x)
 
 mkStringSchema ∷ String → Json
 mkStringSchema s = encodeJson { type: "string", const: s }
-

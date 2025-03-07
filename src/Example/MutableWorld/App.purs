@@ -53,6 +53,8 @@ type State =
 data Action
   = SetConfig Config
   | SubmitPrompt String
+  | ExportWorld
+  | ImportWorld
 
 main_component :: forall query output. H.Component query Input output Aff
 main_component = H.mkComponent { initialState, eval, render }
@@ -125,6 +127,10 @@ Have fun with it.
 
     prop @"processing" .= false
 
+  handleAction ExportWorld = pure unit
+
+  handleAction ImportWorld = pure unit
+
   render state =
     let
       length_msgs = length state.msgs
@@ -161,14 +167,22 @@ User instructions: {{prompt}}
                 UserMsg msg -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "User" ] ] [ HH.div [] [ HH.text "User" ], HH.div [] [ HH.text msg.content ] ]
                 ToolMsg msg -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Tool" ] ] [ HH.div [] [ HH.text "Tool" ], HH.div [] [ HH.text msg.content ] ]
                 AssistantMsg (TextAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Text" ] ] [ HH.div [] [ HH.text "Assistant" ], HH.div [] [ HH.text $ show msg ] ]
-                AssistantMsg (ToolAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Tool" ] ] [ HH.div [] [ HH.text "Assistant/Tool" ], HH.div [] [ HH.text $ show msg ] ]
-                AssistantMsg (StructureAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Structure" ] ] [ HH.div [] [ HH.text "Assistant/Structure" ], HH.div [] [ HH.text $ "{ parsed: {{parsed}} }" # format { parsed: stringify msg.parsed } ] ]
+                AssistantMsg (ToolAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Tool" ] ] [ HH.div [] [ HH.text "Assistant Tool" ], HH.div [] [ HH.text $ show msg ] ]
+                AssistantMsg (StructureAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Structure" ] ] [ HH.div [] [ HH.text "Assistant Structure" ], HH.div [] [ HH.text $ "{ parsed: {{parsed}} }" # format { parsed: stringify msg.parsed } ] ]
             , if not state.processing then []
               else [ Tuple (show transcript_processing_slotId) $ HH.div [] [ HH.text "processing..." ] ]
             , [ Tuple (show transcript_bottom_slotId) $ HH.slot_ (Proxy @"ScrollToMe") (show transcript_bottom_slotId) Widget.scrollToMe unit ]
             ]
         , HH.div [ HP.classes [ H.ClassName "World" ] ]
             [ HH.text $ stringifyWithIndent 4 $ encodeJson state.world ]
+        , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
+            [ HH.button
+                [ HE.onClick $ const ExportWorld ]
+                [ HH.text "export world" ]
+            , HH.button
+                [ HE.onClick $ const ExportWorld ]
+                [ HH.text "import world" ]
+            ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
             [ mkPromptButton $
                 """
