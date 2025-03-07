@@ -6,6 +6,7 @@ import Ai2.Llm (Config, generate, generate_structure, mkSystemMsg, mkUserMsg)
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
+import Control.Monad.Writer (tell)
 import Data.Argonaut (encodeJson, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
 import Data.Array (filter, foldMap, intercalate, length, take)
@@ -24,10 +25,11 @@ import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
 import Example.MutableWorld.Common (Engine)
-import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld)
+import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld, renderWorld, renderWorldUpdate)
 import Halogen (liftAff, liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
+import Halogen.HTML (PlainHTML, fromPlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Elements.Keyed as HHK
 import Halogen.HTML.Events as HE
@@ -36,7 +38,7 @@ import Halogen.Utility (copyToClipboard, readFromClipboard)
 import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
-import Utility (format, prop)
+import Utility (css, format, prop)
 import Web.Event.Event as Event
 import Web.HTML.HTMLTextAreaElement as HTMLTextAreaElement
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
@@ -57,7 +59,7 @@ type State =
   , processing :: Boolean
   , world :: World
   , story :: Array { prompt :: String, content :: String }
-  , transcript :: Array { label :: String, content :: String }
+  , transcript :: Array { label :: String, content :: PlainHTML }
   }
 
 data Action
@@ -162,7 +164,7 @@ This is my suggestion for what should happen next in the story:
       prop @"transcript" %=
         ( _ `Array.snoc`
             { label: "Story / Next / User Prompt"
-            , content: userPrompt
+            , content: HH.text userPrompt
             }
         )
 
@@ -179,7 +181,7 @@ This is my suggestion for what should happen next in the story:
       prop @"transcript" %=
         ( _ `Array.snoc`
             { label: "Story / Next / Model"
-            , content: story_content
+            , content: HH.text story_content
             }
         )
 
@@ -224,7 +226,7 @@ The next paragraph of my story, which may imply some changes to the world state:
       prop @"transcript" %=
         ( _ `Array.snoc`
             { label: "Story / Update World / User Prompt"
-            , content: userPrompt
+            , content: HH.text userPrompt
             }
         )
 
@@ -241,7 +243,18 @@ The next paragraph of my story, which may imply some changes to the world state:
       prop @"transcript" %=
         ( _ `Array.snoc`
             { label: "Story / Update World / Model Response"
-            , content: result.updates # map show # intercalate "\n"
+            -- , content: result.updates # map show # intercalate "\n"
+            , content:
+                HH.div [ css do tell [ "display: flex", "flex-direction: column", "gap: 0.5em", "flex-wrap: wrap" ] ] $
+                  result.updates # map
+                    ( HH.div
+                        [ css do
+                            tell [ "padding: 0.5em" ]
+                            -- tell [ "box-shadow: 0 0 0 1px black" ]
+                            tell [ "background-color: color-mix(in hsl, black, transparent 80%)" ]
+                        ] <<< pure <<< renderWorldUpdate
+                    )
+
             }
         )
       prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
@@ -295,7 +308,7 @@ My instructions for how to update the world state:
     prop @"transcript" %=
       ( _ `Array.snoc`
           { label: "Manually modify world / User Prompt"
-          , content: userPrompt
+          , content: HH.text userPrompt
           }
       )
 
@@ -318,7 +331,17 @@ My instructions for how to update the world state:
     prop @"transcript" %=
       ( _ `Array.snoc`
           { label: "Manually modify world / Model Response"
-          , content: result.updates # map show # intercalate "\n"
+          -- , content: result.updates # map show # intercalate "\n"
+          , content:
+              HH.div [ css do tell [ "display: flex", "flex-direction: column", "gap: 0.5em", "flex-wrap: wrap" ] ] $
+                result.updates # map
+                  ( HH.div
+                      [ css do
+                          tell [ "padding: 0.5em" ]
+                          -- tell [ "box-shadow: 0 0 0 1px black" ]
+                          tell [ "background-color: color-mix(in hsl, black, transparent 80%)" ]
+                      ] <<< pure <<< renderWorldUpdate
+                  )
           }
       )
     prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
@@ -378,62 +401,93 @@ My instructions for how to update the world state:
       transcript_bottom_slotId = "transcript_bottom_" <> show (length state.transcript + (if state.processing then 1 else 0))
 
       story_bottom_slotId = "story_bottom_" <> show (length state.story)
+
+      transcript =
+        HHK.div [ HP.classes [ H.ClassName "Transcript" ] ] $ fold $
+          [ state.transcript # mapWithIndex \i { label, content } ->
+              Tuple (show i) $
+                HH.div [ HP.classes [ H.ClassName "Msg" ] ]
+                  [ HH.div [] [ HH.text label ]
+                  , HH.div [] [ content # HH.fromPlainHTML ]
+                  ]
+          , if not state.processing then []
+            else [ Tuple transcript_processing_slotId $ HH.div [] [ HH.text "processing..." ] ]
+          , [ Tuple transcript_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") transcript_bottom_slotId Widget.scrollToMe unit ]
+          ]
+      story =
+        HHK.div [ HP.classes [ H.ClassName "Story" ] ] $ fold $
+          [ state.story # mapWithIndex \i { prompt, content } ->
+              Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "StoryItem" ] ] $ fold $
+                [ [ HH.div [ HP.classes [ H.ClassName "StoryItemPrompt" ] ] [ HH.text prompt ] ]
+                , content # String.split (Pattern "\n") # map String.trim # filter (not <<< String.null) # map \s ->
+                    HH.div [ HP.classes [ H.ClassName "StoryItemContent" ] ] [ HH.text s ]
+                ]
+          , [ Tuple story_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") story_bottom_slotId Widget.scrollToMe unit ]
+          ]
+      world =
+        HH.div [ HP.classes [ H.ClassName "World" ] ]
+          -- [ HH.text $ describeWorld state.world ]
+          [ renderWorld state.world # fromPlainHTML ]
+      toolbar =
+        HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
+          [ HH.button
+              [ HE.onClick $ const ExportWorld ]
+              [ HH.text "export world" ]
+          , HH.button
+              [ HE.onClick $ const ImportWorld ]
+              [ HH.text "import world" ]
+          , HH.button
+              [ HE.onClick $ const ExportStory ]
+              [ HH.text "export story (json)" ]
+          , HH.button
+              [ HE.onClick $ const ExportStoryMd ]
+              [ HH.text "export story (md)" ]
+          , HH.button
+              [ HE.onClick $ const ImportStory ]
+              [ HH.text "import story" ]
+          ]
+      prompting =
+        HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
+          [ HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
+              [ HH.text "Manually modify world:" ]
+          , HH.textarea
+              [ HE.onKeyDown $ InputKeyDown UpdateWorld_PromptSource
+              , HP.value "Create some locations and characters for a medieval fantasy world. Be creative!"
+              ]
+          , HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
+              [ HH.text "Prompt next portion of story:" ]
+          , HH.textarea
+              [ HE.onKeyDown $ InputKeyDown PromptStory_PromptSource
+              , HP.value "A secret cabal of mages gather in the Shadowhold Citadel. They are outcasts from Acanion city. They are trying to cast a curse on the famed Elara the Bard in order to spark chaos so that they can take over the city."
+              ]
+          ]
+      provider = HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_structured_output } SetConfig
+
+      row kids =
+        HH.div [ HP.classes [ H.ClassName "AppRow" ] ]
+          kids
+      panel title kid =
+        HH.div [ HP.classes [ H.ClassName "AppPanel" ] ]
+          [ HH.div [] [ HH.text title ]
+          , HH.div [] [ kid ]
+          ]
+      panel_small title kid =
+        HH.div [ HP.classes [ H.ClassName "AppPanel", H.ClassName "small" ] ]
+          [ HH.div [] [ HH.text title ]
+          , HH.div [] [ kid ]
+          ]
     in
       HH.div
         [ HP.classes [ H.ClassName "App" ] ]
-        [ HHK.div [ HP.classes [ H.ClassName "Transcript" ] ] $ fold $
-            [ state.transcript # mapWithIndex \i { label, content } ->
-                Tuple (show i) $
-                  HH.div [ HP.classes [ H.ClassName "Msg" ] ]
-                    [ HH.div [] [ HH.text label ]
-                    , HH.div [] [ HH.text content ]
-                    ]
-            , if not state.processing then []
-              else [ Tuple transcript_processing_slotId $ HH.div [] [ HH.text "processing..." ] ]
-            , [ Tuple transcript_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") transcript_bottom_slotId Widget.scrollToMe unit ]
+        [ panel_small "Toolbar" toolbar
+        , row
+            [ panel "World" world
+            , panel "Story" story
             ]
-        , HHK.div [ HP.classes [ H.ClassName "Story" ] ] $ fold $
-            [ state.story # mapWithIndex \i { prompt, content } ->
-                Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "StoryItem" ] ] $ fold $
-                  [ [ HH.div [ HP.classes [ H.ClassName "StoryItemPrompt" ] ] [ HH.text prompt ] ]
-                  , content # String.split (Pattern "\n") # map String.trim # filter (not <<< String.null) # map \s ->
-                      HH.div [ HP.classes [ H.ClassName "StoryItemContent" ] ] [ HH.text s ]
-                  ]
-            , [ Tuple story_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") story_bottom_slotId Widget.scrollToMe unit ]
+        , HH.div [ HP.classes [ H.ClassName "AppRow" ] ]
+            [ panel "Prompting" prompting
+            , panel "Transcript" transcript
             ]
-        , HH.div [ HP.classes [ H.ClassName "World" ] ]
-            [ HH.text $ describeWorld state.world ]
-        , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
-            [ HH.button
-                [ HE.onClick $ const ExportWorld ]
-                [ HH.text "export world" ]
-            , HH.button
-                [ HE.onClick $ const ImportWorld ]
-                [ HH.text "import world" ]
-            , HH.button
-                [ HE.onClick $ const ExportStory ]
-                [ HH.text "export story (json)" ]
-            , HH.button
-                [ HE.onClick $ const ExportStoryMd ]
-                [ HH.text "export story (md)" ]
-            , HH.button
-                [ HE.onClick $ const ImportStory ]
-                [ HH.text "import story" ]
-            ]
-        , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
-            [ HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
-                [ HH.text "Manually modify world:" ]
-            , HH.textarea
-                [ HE.onKeyDown $ InputKeyDown UpdateWorld_PromptSource
-                , HP.value "Create some locations and characters for a medieval fantasy world. Be creative!"
-                ]
-            , HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
-                [ HH.text "Prompt next portion of story:" ]
-            , HH.textarea
-                [ HE.onKeyDown $ InputKeyDown PromptStory_PromptSource
-                , HP.value "..."
-                ]
-            ]
-        , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_structured_output } SetConfig
+        , provider
         ]
 

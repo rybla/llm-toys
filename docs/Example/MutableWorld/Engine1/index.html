@@ -24,13 +24,39 @@ html, body {
   gap: 1em;
 }
 
-.Transcript {
+.AppRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.AppRow>div {
+  flex: 1 1;
+}
+
+.AppPanel {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0 1px black;
+}
+.AppPanel>div:nth-child(1) {
+  flex: 0 0;
+  background-color: black;
+  color: white;
+  padding: 0.5em;
+  font-size: 0.8em;
+}
+.AppPanel>div:nth-child(2) {
   height: 20em;
   overflow-y: scroll;
-  
-  padding: 1em;
-  box-shadow: 0 0 0 1px black;
+  padding: 0.5em;
+}
+.AppPanel.small>div:nth-child(2) {
+  height: auto;
+}
 
+
+.Transcript {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
@@ -68,21 +94,10 @@ html, body {
 }
 
 .World {  
-  height: 20em;
-  overflow-y: scroll;
-
-  padding: 1em;
-  box-shadow: 0 0 0 1px black;
-
   white-space: pre-wrap;
 }
 
 .Story {
-  height: 20em;
-  padding: 1em;
-  overflow-y: scroll;
-  box-shadow: 0 0 0 1px black;
-
   display: flex;
   flex-direction: column;
   gap: 0.5em;
@@ -105,18 +120,9 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: 1em;
-
-  padding: 1em;
-  box-shadow: 0 0 0 1px black;
 }
 
 .Prompts {
-  height: 20em;
-  overflow-y: scroll;
-
-  padding: 1em;
-  box-shadow: 0 0 0 1px black;
-
   display: flex;
   flex-direction: column;
   gap: 0.5em;
@@ -130,7 +136,7 @@ html, body {
 
 .PromptSectionTitle {
   font-weight: bold;
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 textarea {
@@ -144,6 +150,50 @@ textarea {
 button {
   padding: 0.5em;
   font-family: Merienda;
+}
+
+.Constructor {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+.Constructor>div:nth-child(1) {
+  font-weight: bold;
+}
+.Constructor>div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.NamedArg {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+.NamedArg>div:nth-child(1) {
+  font-weight: bold;
+}
+.NamedArg>div:nth-child(2) {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+
+.LocationName {
+  font-weight: bold;
+  color: green;
+}
+.CharacterName {
+  font-weight: bold;
+  color: blue;
+}
+.Description {
+  font-style: italic;
+}
+.Status {
+  font-style: italic;
 }
 </style>
 

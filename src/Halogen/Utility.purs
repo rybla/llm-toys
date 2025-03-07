@@ -7,6 +7,8 @@ import Control.Promise (Promise, toAffE)
 import Data.Either (Either)
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
 
 foreign import copyToClipboard_
   :: { ok :: Either String Unit
@@ -27,3 +29,5 @@ foreign import readFromClipboard_
 readFromClipboard :: Aff (Either String String)
 readFromClipboard = readFromClipboard_ { ok: pure, error: throwError } # toAffE
 
+divC cns props kids = HH.div ([ HP.classes cns ] <> props) kids
+spanC cns props kids = HH.span ([ HP.classes cns ] <> props) kids

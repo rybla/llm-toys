@@ -13,6 +13,11 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Show.Generic (genericShow)
 import Data.Tuple.Nested ((/\))
+import Halogen.HTML (PlainHTML)
+import Halogen.HTML as H
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import Halogen.Utility (spanC)
 import Utility (format, prop)
 
 --------------------------------------------------------------------------------
@@ -90,3 +95,70 @@ describeWorld w = intercalate "\n"
       ]
   ]
 
+renderWorld :: World -> PlainHTML
+renderWorld w =
+  HH.ul []
+    [ HH.li [] [ HH.b [] [ HH.text "Locations:" ] ]
+    , HH.ul [] $ w.locations # Map.toUnfoldable # map \(_ /\ l) ->
+        HH.li []
+          [ spanC [ H.ClassName "LocationName" ] [] [ HH.text l.name ]
+          , HH.text ". "
+          , spanC [ H.ClassName "Description" ] [] [ HH.text l.description ]
+          ]
+    , HH.li [] [ HH.b [] [ HH.text "Characters:" ] ]
+    , HH.ul [] $ w.characters # Map.toUnfoldable # map \(_ /\ c) ->
+        HH.li []
+          [ spanC [ H.ClassName "CharacterName" ] [] [ HH.text c.name ]
+          , HH.text ". "
+          , spanC [ H.ClassName "Description" ] [] [ HH.text c.description ]
+          , HH.ul []
+              [ HH.li []
+                  [ HH.b [] [ HH.text "Location:" ]
+                  , HH.text " "
+                  , spanC [ HH.ClassName "LocationName" ] [] [ HH.text $ c.location_name ]
+                  ]
+              , HH.li []
+                  [ HH.b [] [ HH.text "Status:" ]
+                  , HH.text " "
+                  , spanC [ HH.ClassName "Status" ] [] [ HH.text c.status ]
+                  ]
+              ]
+          ]
+    ]
+
+renderWorldUpdate :: WorldUpdate -> PlainHTML
+renderWorldUpdate (CreateCharacter wu) =
+  renderConstructor "CreateCharacter"
+    [ renderNamedArg "name" (spanC [ H.ClassName "CharacterName" ] [] [ HH.text wu.name ])
+    , renderNamedArg "description" (spanC [ H.ClassName "Description" ] [] [ HH.text wu.description ])
+    , renderNamedArg "status" (spanC [ H.ClassName "Status" ] [] [ HH.text wu.status ])
+    ]
+renderWorldUpdate (SetCharacterStatus wu) =
+  renderConstructor "SetCharacterStatus"
+    [ renderNamedArg "name" (spanC [ H.ClassName "CharacterName" ] [] [ HH.text wu.name ])
+    , renderNamedArg "status" (spanC [ H.ClassName "Status" ] [] [ HH.text wu.status ])
+    ]
+renderWorldUpdate (SetCharacterLocation wu) =
+  renderConstructor "SetCharacterLocation"
+    [ renderNamedArg "name" (spanC [ H.ClassName "CharacterName" ] [] [ HH.text wu.name ])
+    , renderNamedArg "location_name" (spanC [ H.ClassName "LocationName" ] [] [ HH.text wu.location_name ])
+    ]
+renderWorldUpdate (CreateLocation wu) =
+  renderConstructor "CreateLocation"
+    [ renderNamedArg "name" (spanC [ H.ClassName "LocationName" ] [] [ HH.text wu.name ])
+    , renderNamedArg "description" (spanC [ H.ClassName "Description" ] [] [ HH.text wu.description ])
+    ]
+
+renderConstructor :: String -> Array PlainHTML -> PlainHTML
+renderConstructor name args =
+  HH.div [ HP.classes [ H.ClassName "Constructor" ] ]
+    [ HH.div [] [ HH.text name ]
+    , HH.div [] args
+    ]
+
+renderNamedArg :: String -> PlainHTML -> PlainHTML
+renderNamedArg name val =
+  HH.div [ HP.classes [ H.ClassName "NamedArg" ] ]
+    [ HH.div [] [ HH.text (name <> ":") ]
+    , HH.div [] [ val ]
+    ]

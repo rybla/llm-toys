@@ -5059,6 +5059,23 @@ ${str(snapshot)}`);
     }
   };
 
+  // output/Control.Apply/foreign.js
+  var arrayApply = function(fs) {
+    return function(xs) {
+      var l = fs.length;
+      var k = xs.length;
+      var result = new Array(l * k);
+      var n = 0;
+      for (var i2 = 0; i2 < l; i2++) {
+        var f = fs[i2];
+        for (var j = 0; j < k; j++) {
+          result[n++] = f(xs[j]);
+        }
+      }
+      return result;
+    };
+  };
+
   // output/Control.Semigroupoid/index.js
   var semigroupoidFn = {
     compose: function(f) {
@@ -5145,10 +5162,10 @@ ${str(snapshot)}`);
     return dict.map;
   };
   var mapFlipped = function(dictFunctor) {
-    var map112 = map(dictFunctor);
+    var map113 = map(dictFunctor);
     return function(fa) {
       return function(f) {
-        return map112(f)(fa);
+        return map113(f)(fa);
       };
     };
   };
@@ -5156,17 +5173,17 @@ ${str(snapshot)}`);
     return map(dictFunctor)($$const(unit));
   };
   var voidLeft = function(dictFunctor) {
-    var map112 = map(dictFunctor);
+    var map113 = map(dictFunctor);
     return function(f) {
       return function(x) {
-        return map112($$const(x))(f);
+        return map113($$const(x))(f);
       };
     };
   };
   var voidRight = function(dictFunctor) {
-    var map112 = map(dictFunctor);
+    var map113 = map(dictFunctor);
     return function(x) {
-      return map112($$const(x));
+      return map113($$const(x));
     };
   };
   var functorFn = {
@@ -5178,6 +5195,12 @@ ${str(snapshot)}`);
 
   // output/Control.Apply/index.js
   var identity2 = /* @__PURE__ */ identity(categoryFn);
+  var applyArray = {
+    apply: arrayApply,
+    Functor0: function() {
+      return functorArray;
+    }
+  };
   var apply = function(dict) {
     return dict.apply;
   };
@@ -5246,6 +5269,14 @@ ${str(snapshot)}`);
         return apply4(pure19(f))(a2);
       };
     };
+  };
+  var applicativeArray = {
+    pure: function(x) {
+      return [x];
+    },
+    Apply0: function() {
+      return applyArray;
+    }
   };
 
   // output/Control.Promise/foreign.js
@@ -5498,60 +5529,11 @@ ${str(snapshot)}`);
   var showString = {
     show: showStringImpl
   };
-  var showRecordFields = function(dict) {
-    return dict.showRecordFields;
-  };
-  var showRecord = function() {
-    return function() {
-      return function(dictShowRecordFields) {
-        var showRecordFields1 = showRecordFields(dictShowRecordFields);
-        return {
-          show: function(record) {
-            return "{" + (showRecordFields1($$Proxy.value)(record) + "}");
-          }
-        };
-      };
-    };
-  };
   var showInt = {
     show: showIntImpl
   };
   var show = function(dict) {
     return dict.show;
-  };
-  var showRecordFieldsCons = function(dictIsSymbol) {
-    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
-    return function(dictShowRecordFields) {
-      var showRecordFields1 = showRecordFields(dictShowRecordFields);
-      return function(dictShow) {
-        var show13 = show(dictShow);
-        return {
-          showRecordFields: function(v) {
-            return function(record) {
-              var tail2 = showRecordFields1($$Proxy.value)(record);
-              var key2 = reflectSymbol2($$Proxy.value);
-              var focus3 = unsafeGet(key2)(record);
-              return " " + (key2 + (": " + (show13(focus3) + ("," + tail2))));
-            };
-          }
-        };
-      };
-    };
-  };
-  var showRecordFieldsConsNil = function(dictIsSymbol) {
-    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
-    return function(dictShow) {
-      var show13 = show(dictShow);
-      return {
-        showRecordFields: function(v) {
-          return function(record) {
-            var key2 = reflectSymbol2($$Proxy.value);
-            var focus3 = unsafeGet(key2)(record);
-            return " " + (key2 + (": " + (show13(focus3) + " ")));
-          };
-        }
-      };
-    };
   };
 
   // output/Data.Generic.Rep/index.js
@@ -5583,9 +5565,6 @@ ${str(snapshot)}`);
   };
   var to = function(dict) {
     return dict.to;
-  };
-  var from = function(dict) {
-    return dict.from;
   };
 
   // output/Data.Maybe/index.js
@@ -6355,10 +6334,10 @@ ${str(snapshot)}`);
     };
   };
   var functorExceptT = function(dictFunctor) {
-    var map112 = map(dictFunctor);
+    var map113 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapExceptT(map112(map5(f)));
+        return mapExceptT(map113(map5(f)));
       }
     };
   };
@@ -7171,11 +7150,11 @@ ${str(snapshot)}`);
   var traversableList = {
     traverse: function(dictApplicative) {
       var Apply0 = dictApplicative.Apply0();
-      var map112 = map(Apply0.Functor0());
+      var map113 = map(Apply0.Functor0());
       var lift22 = lift2(Apply0);
       var pure19 = pure(dictApplicative);
       return function(f) {
-        var $301 = map112(foldl2(flip(Cons.create))(Nil.value));
+        var $301 = map113(foldl2(flip(Cons.create))(Nil.value));
         var $302 = foldl2(function(acc) {
           var $304 = lift22(flip(Cons.create))(acc);
           return function($305) {
@@ -13561,18 +13540,18 @@ ${str(snapshot)}`);
   };
   var foldFree = function(dictMonadRec) {
     var Monad0 = dictMonadRec.Monad0();
-    var map112 = map(Monad0.Bind1().Apply0().Functor0());
+    var map113 = map(Monad0.Bind1().Apply0().Functor0());
     var pure19 = pure(Monad0.Applicative0());
     var tailRecM4 = tailRecM(dictMonadRec);
     return function(k) {
       var go2 = function(f) {
         var v = toView(f);
         if (v instanceof Return) {
-          return map112(Done.create)(pure19(v.value0));
+          return map113(Done.create)(pure19(v.value0));
         }
         ;
         if (v instanceof Bind) {
-          return map112(function($199) {
+          return map113(function($199) {
             return Loop.create(v.value1($199));
           })(k(v.value0));
         }
@@ -14080,14 +14059,17 @@ ${str(snapshot)}`);
   var input = function(props) {
     return element2("input")(props)([]);
   };
+  var li = /* @__PURE__ */ element2("li");
   var option = /* @__PURE__ */ element2("option");
   var select = /* @__PURE__ */ element2("select");
   var span3 = /* @__PURE__ */ element2("span");
   var textarea = function(es) {
     return element2("textarea")(es)([]);
   };
+  var ul = /* @__PURE__ */ element2("ul");
   var div2 = /* @__PURE__ */ element2("div");
   var button = /* @__PURE__ */ element2("button");
+  var b = /* @__PURE__ */ element2("b");
 
   // output/Foreign.Index/foreign.js
   function unsafeReadPropImpl(f, s, key2, value15) {
@@ -14689,89 +14671,57 @@ ${str(snapshot)}`);
     return dict.at;
   };
 
-  // output/Data.Show.Generic/foreign.js
-  var intercalate5 = function(separator) {
-    return function(xs) {
-      return xs.join(separator);
-    };
+  // output/Halogen.Utility/foreign.js
+  var copyToClipboard_ = ({ ok, error: error4 }) => (text6) => async () => {
+    try {
+      await navigator.clipboard.writeText(text6);
+      return ok;
+    } catch (e) {
+      return error4(e);
+    }
+  };
+  var readFromClipboard_ = ({ ok, error: error4 }) => async () => {
+    try {
+      const text6 = await navigator.clipboard.readText();
+      return ok(text6);
+    } catch (e) {
+      return error4(e);
+    }
   };
 
-  // output/Data.Show.Generic/index.js
+  // output/Halogen.Utility/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
-  var genericShowArgsArgument = function(dictShow) {
-    var show4 = show(dictShow);
-    return {
-      genericShowArgs: function(v) {
-        return [show4(v)];
-      }
-    };
-  };
-  var genericShowArgs = function(dict) {
-    return dict.genericShowArgs;
-  };
-  var genericShowConstructor = function(dictGenericShowArgs) {
-    var genericShowArgs1 = genericShowArgs(dictGenericShowArgs);
-    return function(dictIsSymbol) {
-      var reflectSymbol2 = reflectSymbol(dictIsSymbol);
-      return {
-        "genericShow'": function(v) {
-          var ctor = reflectSymbol2($$Proxy.value);
-          var v1 = genericShowArgs1(v);
-          if (v1.length === 0) {
-            return ctor;
-          }
-          ;
-          return "(" + (intercalate5(" ")(append6([ctor])(v1)) + ")");
-        }
+  var pure8 = /* @__PURE__ */ pure(applicativeEither);
+  var throwError3 = /* @__PURE__ */ throwError(monadThrowEither);
+  var spanC = function(cns) {
+    return function(props) {
+      return function(kids) {
+        return span3(append6([classes(cns)])(props))(kids);
       };
     };
   };
-  var genericShow$prime = function(dict) {
-    return dict["genericShow'"];
-  };
-  var genericShowSum = function(dictGenericShow) {
-    var genericShow$prime1 = genericShow$prime(dictGenericShow);
-    return function(dictGenericShow1) {
-      var genericShow$prime2 = genericShow$prime(dictGenericShow1);
-      return {
-        "genericShow'": function(v) {
-          if (v instanceof Inl) {
-            return genericShow$prime1(v.value0);
-          }
-          ;
-          if (v instanceof Inr) {
-            return genericShow$prime2(v.value0);
-          }
-          ;
-          throw new Error("Failed pattern match at Data.Show.Generic (line 26, column 1 - line 28, column 40): " + [v.constructor.name]);
-        }
-      };
-    };
-  };
-  var genericShow = function(dictGeneric) {
-    var from3 = from(dictGeneric);
-    return function(dictGenericShow) {
-      var genericShow$prime1 = genericShow$prime(dictGenericShow);
-      return function(x) {
-        return genericShow$prime1(from3(x));
-      };
-    };
+  var readFromClipboard = /* @__PURE__ */ toAffE(/* @__PURE__ */ readFromClipboard_({
+    ok: pure8,
+    error: throwError3
+  }));
+  var copyToClipboard = function(s) {
+    return toAffE(copyToClipboard_({
+      ok: pure8(unit),
+      error: throwError3
+    })(s));
   };
 
   // output/Example.MutableWorld.World/index.js
-  var showRecord2 = /* @__PURE__ */ showRecord()();
   var descriptionIsSymbol = {
     reflectSymbol: function() {
       return "description";
     }
   };
-  var showRecordFieldsCons2 = /* @__PURE__ */ showRecordFieldsCons(descriptionIsSymbol);
   var location_nameIsSymbol = {
     reflectSymbol: function() {
       return "location_name";
     }
   };
-  var showRecordFieldsCons1 = /* @__PURE__ */ showRecordFieldsCons(location_nameIsSymbol);
   var nameIsSymbol3 = {
     reflectSymbol: function() {
       return "name";
@@ -14782,7 +14732,6 @@ ${str(snapshot)}`);
       return "status";
     }
   };
-  var showRecordFieldsCons22 = /* @__PURE__ */ showRecordFieldsCons(nameIsSymbol3)(/* @__PURE__ */ showRecordFieldsConsNil(statusIsSymbol)(showString))(showString);
   var CreateCharacterIsSymbol = {
     reflectSymbol: function() {
       return "CreateCharacter";
@@ -14793,7 +14742,6 @@ ${str(snapshot)}`);
       return "SetCharacterStatus";
     }
   };
-  var showRecordFieldsConsNil2 = /* @__PURE__ */ showRecordFieldsConsNil(nameIsSymbol3)(showString);
   var SetCharacterLocationIsSymbol = {
     reflectSymbol: function() {
       return "SetCharacterLocation";
@@ -14816,9 +14764,10 @@ ${str(snapshot)}`);
   var decodeJsonFromSchema_RowL122 = /* @__PURE__ */ decodeJsonFromSchema_RowL1(nameIsSymbol3)(decodeJsonFromSchemaStrin)()();
   var decodeJsonFromSchema_RowL13 = /* @__PURE__ */ decodeJsonFromSchema_RowL122(/* @__PURE__ */ decodeJsonFromSchema_RowL1(statusIsSymbol)(decodeJsonFromSchemaStrin)()()(decodeJsonFromSchema_RowL));
   var decodeJsonFromSchema_RowL14 = /* @__PURE__ */ decodeJsonFromSchema_RowL122(decodeJsonFromSchema_RowL);
+  var map23 = /* @__PURE__ */ map(functorArray);
+  var toUnfoldable9 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
   var intercalate6 = /* @__PURE__ */ intercalate2(monoidString);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorArray);
-  var toUnfoldable9 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
   var format2 = /* @__PURE__ */ format();
   var prop6 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -14826,13 +14775,13 @@ ${str(snapshot)}`);
     }
   })()()(strongFn);
   var at2 = /* @__PURE__ */ at(/* @__PURE__ */ atMap(ordString));
-  var pure8 = /* @__PURE__ */ pure(applicativeMaybe);
+  var pure9 = /* @__PURE__ */ pure(applicativeMaybe);
   var prop13 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "characters";
     }
   })()()(strongFn);
-  var map23 = /* @__PURE__ */ map(functorMaybe);
+  var map111 = /* @__PURE__ */ map(functorMaybe);
   var prop23 = /* @__PURE__ */ prop4(statusIsSymbol)()()(strongFn);
   var prop32 = /* @__PURE__ */ prop4(location_nameIsSymbol)()()(strongFn);
   var CreateCharacter = /* @__PURE__ */ function() {
@@ -14893,7 +14842,7 @@ ${str(snapshot)}`);
         return new CreateLocation(x.value0.value0.value0);
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 47, column 1 - line 47, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 52, column 1 - line 52, column 38): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof CreateCharacter) {
@@ -14912,16 +14861,10 @@ ${str(snapshot)}`);
         return new Inr(new Inr(new Inr(x.value0)));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 47, column 1 - line 47, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 52, column 1 - line 52, column 38): " + [x.constructor.name]);
     }
   };
-  var genericShow2 = /* @__PURE__ */ genericShow(genericWorldUpdate_)(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons2(/* @__PURE__ */ showRecordFieldsCons1(showRecordFieldsCons22)(showString))(showString))))(CreateCharacterIsSymbol))(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(showRecordFieldsCons22)))(SetCharacterStatusIsSymbol))(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons1(showRecordFieldsConsNil2)(showString))))(SetCharacterLocationIsSymbol))(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons2(showRecordFieldsConsNil2)(showString))))(CreateLocationIsSymbol)))));
   var generic_decodeJsonFromSchema2 = /* @__PURE__ */ generic_decodeJsonFromSchema(genericWorldUpdate_)(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateCharacterIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL13))))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterStatusIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(decodeJsonFromSchema_RowL13))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL14)))))(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(decodeJsonFromSchema_RowL14))))))));
-  var showWorldUpdate = {
-    show: function(x) {
-      return genericShow2(x);
-    }
-  };
   var toJsonSchemaWorldUpdate = {
     toJsonSchema: /* @__PURE__ */ generic_toJsonSchema(genericWorldUpdate_)(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateCharacterIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons3))))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterStatusIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(toJsonSchema_RowListCons3))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons4)))))(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(toJsonSchema_RowListCons4))))))))
   };
@@ -14930,10 +14873,46 @@ ${str(snapshot)}`);
       return generic_decodeJsonFromSchema2(x);
     }
   };
+  var renderWorld = function(w) {
+    return ul([])([li([])([b([])([text("Locations:")])]), ul([])(map23(function(v) {
+      return li([])([spanC(["LocationName"])([])([text(v.value1.name)]), text(". "), spanC(["Description"])([])([text(v.value1.description)])]);
+    })(toUnfoldable9(w.locations))), li([])([b([])([text("Characters:")])]), ul([])(map23(function(v) {
+      return li([])([spanC(["CharacterName"])([])([text(v.value1.name)]), text(". "), spanC(["Description"])([])([text(v.value1.description)]), ul([])([li([])([b([])([text("Location:")]), text(" "), spanC(["LocationName"])([])([text(v.value1.location_name)])]), li([])([b([])([text("Status:")]), text(" "), spanC(["Status"])([])([text(v.value1.status)])])])]);
+    })(toUnfoldable9(w.characters)))]);
+  };
+  var renderNamedArg = function(name15) {
+    return function(val) {
+      return div2([classes(["NamedArg"])])([div2([])([text(name15 + ":")]), div2([])([val])]);
+    };
+  };
+  var renderConstructor = function(name15) {
+    return function(args) {
+      return div2([classes(["Constructor"])])([div2([])([text(name15)]), div2([])(args)]);
+    };
+  };
+  var renderWorldUpdate = function(v) {
+    if (v instanceof CreateCharacter) {
+      return renderConstructor("CreateCharacter")([renderNamedArg("name")(spanC(["CharacterName"])([])([text(v.value0.name)])), renderNamedArg("description")(spanC(["Description"])([])([text(v.value0.description)])), renderNamedArg("status")(spanC(["Status"])([])([text(v.value0.status)]))]);
+    }
+    ;
+    if (v instanceof SetCharacterStatus) {
+      return renderConstructor("SetCharacterStatus")([renderNamedArg("name")(spanC(["CharacterName"])([])([text(v.value0.name)])), renderNamedArg("status")(spanC(["Status"])([])([text(v.value0.status)]))]);
+    }
+    ;
+    if (v instanceof SetCharacterLocation) {
+      return renderConstructor("SetCharacterLocation")([renderNamedArg("name")(spanC(["CharacterName"])([])([text(v.value0.name)])), renderNamedArg("location_name")(spanC(["LocationName"])([])([text(v.value0.location_name)]))]);
+    }
+    ;
+    if (v instanceof CreateLocation) {
+      return renderConstructor("CreateLocation")([renderNamedArg("name")(spanC(["LocationName"])([])([text(v.value0.name)])), renderNamedArg("description")(spanC(["Description"])([])([text(v.value0.description)]))]);
+    }
+    ;
+    throw new Error("Failed pattern match at Example.MutableWorld.World (line 129, column 1 - line 129, column 46): " + [v.constructor.name]);
+  };
   var describeWorld = function(w) {
     return intercalate6("\n")([function() {
-      var $246 = isEmpty(w.locations);
-      if ($246) {
+      var $262 = isEmpty(w.locations);
+      if ($262) {
         return "    - No locations have been created yet";
       }
       ;
@@ -14941,8 +14920,8 @@ ${str(snapshot)}`);
         return format2(v.value1)("        - {{name}}: {{description}}");
       }))]);
     }(), "", function() {
-      var $250 = isEmpty(w.characters);
-      if ($250) {
+      var $266 = isEmpty(w.characters);
+      if ($266) {
         return "    - No characters have been created yet";
       }
       ;
@@ -14954,11 +14933,11 @@ ${str(snapshot)}`);
   var applyWorldUpdate = function(v) {
     if (v instanceof CreateLocation) {
       return set2(function() {
-        var $268 = at2(v.value0.name)(strongFn);
-        return function($269) {
-          return prop6($268($269));
+        var $284 = at2(v.value0.name)(strongFn);
+        return function($285) {
+          return prop6($284($285));
         };
-      }())(pure8({
+      }())(pure9({
         name: v.value0.name,
         description: v.value0.description
       }));
@@ -14966,11 +14945,11 @@ ${str(snapshot)}`);
     ;
     if (v instanceof CreateCharacter) {
       return set2(function() {
-        var $270 = at2(v.value0.name)(strongFn);
-        return function($271) {
-          return prop13($270($271));
+        var $286 = at2(v.value0.name)(strongFn);
+        return function($287) {
+          return prop13($286($287));
         };
-      }())(pure8({
+      }())(pure9({
         name: v.value0.name,
         description: v.value0.description,
         location_name: v.value0.location_name,
@@ -14980,23 +14959,23 @@ ${str(snapshot)}`);
     ;
     if (v instanceof SetCharacterStatus) {
       return over2(function() {
-        var $272 = at2(v.value0.name)(strongFn);
-        return function($273) {
-          return prop13($272($273));
+        var $288 = at2(v.value0.name)(strongFn);
+        return function($289) {
+          return prop13($288($289));
         };
-      }())(map23(set2(prop23)(v.value0.status)));
+      }())(map111(set2(prop23)(v.value0.status)));
     }
     ;
     if (v instanceof SetCharacterLocation) {
       return over2(function() {
-        var $274 = at2(v.value0.name)(strongFn);
-        return function($275) {
-          return prop13($274($275));
+        var $290 = at2(v.value0.name)(strongFn);
+        return function($291) {
+          return prop13($290($291));
         };
-      }())(map23(set2(prop32)(v.value0.location_name)));
+      }())(map111(set2(prop32)(v.value0.location_name)));
     }
     ;
-    throw new Error("Failed pattern match at Example.MutableWorld.World (line 61, column 1 - line 61, column 50): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Example.MutableWorld.World (line 66, column 1 - line 66, column 50): " + [v.constructor.name]);
   };
 
   // output/Web.HTML/foreign.js
@@ -15111,12 +15090,12 @@ ${str(snapshot)}`);
   var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
-  var pure9 = /* @__PURE__ */ pure(applicativeAff);
+  var pure10 = /* @__PURE__ */ pure(applicativeAff);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure1 = /* @__PURE__ */ pure(applicativeEffect);
   var map25 = /* @__PURE__ */ map(functorEffect);
   var discard3 = /* @__PURE__ */ discard(discardUnit);
-  var throwError3 = /* @__PURE__ */ throwError(monadThrowAff);
+  var throwError4 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query2) {
     return bind7(liftEffect5(bindFlipped4(composeKleisliFlipped4(function() {
       var $16 = querySelector(query2);
@@ -15124,7 +15103,7 @@ ${str(snapshot)}`);
         return $16(toParentNode($17));
       };
     }())(document2))(windowImpl)))(function(mel) {
-      return pure9(bindFlipped1(fromElement)(mel));
+      return pure10(bindFlipped1(fromElement)(mel));
     });
   };
   var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure1(unit))));
@@ -15146,7 +15125,7 @@ ${str(snapshot)}`);
   });
   var awaitBody = /* @__PURE__ */ discard3(bindAff)(awaitLoad)(function() {
     return bind7(selectElement("body"))(function(body2) {
-      return maybe(throwError3(error("Could not find body")))(pure9)(body2);
+      return maybe(throwError4(error("Could not find body")))(pure10)(body2);
     });
   });
 
@@ -15190,41 +15169,10 @@ ${str(snapshot)}`);
       };
     };
   };
+  var fromPlainHTML = unsafeCoerce2;
 
   // output/Halogen.HTML.Elements.Keyed/index.js
   var div3 = /* @__PURE__ */ keyed2("div");
-
-  // output/Halogen.Utility/foreign.js
-  var copyToClipboard_ = ({ ok, error: error4 }) => (text6) => async () => {
-    try {
-      await navigator.clipboard.writeText(text6);
-      return ok;
-    } catch (e) {
-      return error4(e);
-    }
-  };
-  var readFromClipboard_ = ({ ok, error: error4 }) => async () => {
-    try {
-      const text6 = await navigator.clipboard.readText();
-      return ok(text6);
-    } catch (e) {
-      return error4(e);
-    }
-  };
-
-  // output/Halogen.Utility/index.js
-  var pure10 = /* @__PURE__ */ pure(applicativeEither);
-  var throwError4 = /* @__PURE__ */ throwError(monadThrowEither);
-  var readFromClipboard = /* @__PURE__ */ toAffE(/* @__PURE__ */ readFromClipboard_({
-    ok: pure10,
-    error: throwError4
-  }));
-  var copyToClipboard = function(s) {
-    return toAffE(copyToClipboard_({
-      ok: pure10(unit),
-      error: throwError4
-    })(s));
-  };
 
   // output/Control.Monad.Fork.Class/index.js
   var monadForkAff = {
@@ -15334,7 +15282,7 @@ ${str(snapshot)}`);
   var pure11 = /* @__PURE__ */ pure(applicativeAff);
   var map27 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
-  var map111 = /* @__PURE__ */ map(functorAff);
+  var map112 = /* @__PURE__ */ map(functorAff);
   var sequential2 = /* @__PURE__ */ sequential(parallelAff);
   var map28 = /* @__PURE__ */ map(functorMaybe);
   var insert9 = /* @__PURE__ */ insert3(ordSubscriptionId);
@@ -15425,7 +15373,7 @@ ${str(snapshot)}`);
                     })(dsx);
                   }));
                 };
-                return map111(v2.value2)(sequential2(v2.value0(applicativeParAff)(evalChild)(v1.children)));
+                return map112(v2.value2)(sequential2(v2.value0(applicativeParAff)(evalChild)(v1.children)));
               })(cqb);
             });
           };
@@ -16211,17 +16159,18 @@ ${str(snapshot)}`);
   })(ordString);
   var scrollToMe2 = /* @__PURE__ */ scrollToMe(monadEffectAff);
   var map32 = /* @__PURE__ */ map(functorArray);
-  var value14 = /* @__PURE__ */ value(isPropString);
   var slot2 = /* @__PURE__ */ slot()({
     reflectSymbol: function() {
       return "provider";
     }
   })(ordUnit);
+  var value14 = /* @__PURE__ */ value(isPropString);
   var bind10 = /* @__PURE__ */ bind(bindHalogenM);
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure17 = /* @__PURE__ */ pure(applicativeHalogenM);
   var throwError5 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
-  var discard6 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var discard13 = /* @__PURE__ */ discard6(bindHalogenM);
   var assign4 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop7 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -16256,7 +16205,9 @@ ${str(snapshot)}`);
     }
   };
   var generate_structure2 = /* @__PURE__ */ generate_structure(/* @__PURE__ */ toJsonSchemaRecord()(/* @__PURE__ */ toJsonSchema_RowListCons(updatesIsSymbol)()(/* @__PURE__ */ toJsonSchemaArray(toJsonSchemaWorldUpdate))(toJsonSchema_RowListNil)))(/* @__PURE__ */ decodeJsonFromSchemaRecor()(/* @__PURE__ */ decodeJsonFromSchema_RowL1(updatesIsSymbol)(/* @__PURE__ */ decodeJsonFromSchemaArray(decodeJsonFromSchemaWorld))()()(decodeJsonFromSchema_RowL)));
-  var show12 = /* @__PURE__ */ show(showWorldUpdate);
+  var tell4 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
+  var discard24 = /* @__PURE__ */ discard6(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var pure23 = /* @__PURE__ */ pure(applicativeArray);
   var prop42 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "world";
@@ -16405,6 +16356,7 @@ ${str(snapshot)}`);
   }();
   var main_component = /* @__PURE__ */ function() {
     var render = function(state3) {
+      var world = div2([classes(["World"])])([fromPlainHTML(renderWorld(state3.world))]);
       var transcript_processing_slotId = show3(length3(state3.transcript));
       var transcript_bottom_slotId = "transcript_bottom_" + show3(length3(state3.transcript) + function() {
         if (state3.processing) {
@@ -16413,30 +16365,48 @@ ${str(snapshot)}`);
         ;
         return 0;
       }() | 0);
-      var story_bottom_slotId = "story_bottom_" + show3(length3(state3.story));
-      return div2([classes(["App"])])([div3([classes(["Transcript"])])(fold4([mapWithIndex4(function(i2) {
+      var transcript = div3([classes(["Transcript"])])(fold4([mapWithIndex4(function(i2) {
         return function(v) {
-          return new Tuple(show3(i2), div2([classes(["Msg"])])([div2([])([text(v.label)]), div2([])([text(v.content)])]));
+          return new Tuple(show3(i2), div2([classes(["Msg"])])([div2([])([text(v.label)]), div2([])([fromPlainHTML(v.content)])]));
         };
       })(state3.transcript), function() {
-        var $234 = !state3.processing;
-        if ($234) {
+        var $240 = !state3.processing;
+        if ($240) {
           return [];
         }
         ;
         return [new Tuple(transcript_processing_slotId, div2([])([text("processing...")]))];
-      }(), [new Tuple(transcript_bottom_slotId, slot_2($$Proxy.value)(transcript_bottom_slotId)(scrollToMe2)(unit))]])), div3([classes(["Story"])])(fold4([mapWithIndex4(function(i2) {
+      }(), [new Tuple(transcript_bottom_slotId, slot_2($$Proxy.value)(transcript_bottom_slotId)(scrollToMe2)(unit))]]));
+      var toolbar = div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")]), button([onClick($$const(ExportStory.value))])([text("export story (json)")]), button([onClick($$const(ExportStoryMd.value))])([text("export story (md)")]), button([onClick($$const(ImportStory.value))])([text("import story")])]);
+      var story_bottom_slotId = "story_bottom_" + show3(length3(state3.story));
+      var story = div3([classes(["Story"])])(fold4([mapWithIndex4(function(i2) {
         return function(v) {
           return new Tuple(show3(i2), div2([classes(["StoryItem"])])(fold4([[div2([classes(["StoryItemPrompt"])])([text(v.prompt)])], map32(function(s) {
             return div2([classes(["StoryItemContent"])])([text(s)]);
-          })(filter2(function($292) {
-            return !$$null2($292);
+          })(filter2(function($298) {
+            return !$$null2($298);
           })(map32(trim)(split("\n")(v.content))))])));
         };
-      })(state3.story), [new Tuple(story_bottom_slotId, slot_2($$Proxy.value)(story_bottom_slotId)(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")]), button([onClick($$const(ExportStory.value))])([text("export world (json)")]), button([onClick($$const(ExportStoryMd.value))])([text("export world (md)")]), button([onClick($$const(ImportStory.value))])([text("import story")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Manually modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
+      })(state3.story), [new Tuple(story_bottom_slotId, slot_2($$Proxy.value)(story_bottom_slotId)(scrollToMe2)(unit))]]));
+      var row = function(kids) {
+        return div2([classes(["AppRow"])])(kids);
+      };
+      var provider = slot2($$Proxy.value)(unit)(component)({
         providerCategory: "Main",
         providers: providers_with_structured_output
-      })(SetConfig.create)]);
+      })(SetConfig.create);
+      var prompting = div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Manually modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("A secret cabal of mages gather in the Shadowhold Citadel. They are outcasts from Acanion city. They are trying to cast a curse on the famed Elara the Bard in order to spark chaos so that they can take over the city.")])]);
+      var panel_small = function(title3) {
+        return function(kid) {
+          return div2([classes(["AppPanel", "small"])])([div2([])([text(title3)]), div2([])([kid])]);
+        };
+      };
+      var panel = function(title3) {
+        return function(kid) {
+          return div2([classes(["AppPanel"])])([div2([])([text(title3)]), div2([])([kid])]);
+        };
+      };
+      return div2([classes(["App"])])([panel_small("Toolbar")(toolbar), row([panel("World")(world), panel("Story")(story)]), div2([classes(["AppRow"])])([panel("Prompting")(prompting), panel("Transcript")(transcript)]), provider]);
     };
     var initialState = function(engine2) {
       return {
@@ -16456,24 +16426,24 @@ ${str(snapshot)}`);
     });
     var handleAction = function(v) {
       if (v instanceof SetConfig) {
-        return discard6(assign4(prop7)(pure18(v.value0)))(function() {
+        return discard13(assign4(prop7)(pure18(v.value0)))(function() {
           return pure17(unit);
         });
       }
       ;
       if (v instanceof SubmitPrompt && v.value0 instanceof PromptStory_PromptSource) {
         return bind10(getConfig)(function(config) {
-          return discard6(bind10(get4)(function(v1) {
+          return discard13(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
-            return discard6(assign4(prop14)(true))(function() {
+            return discard13(assign4(prop14)(true))(function() {
               return bind10(bind10(pure17(mkSystemMsg(trim("\nYou are a helpful fiction writing assistant, and are currently collaborating with the user to write a novel.\n\nThe way this collaboration works is that if the user has written a portion of their story already, they will show you the latest few paragraphs in their story.\nYou should read these paragraphs carefully to get an idea of what's going on right now in their story.\n\nThe user will also provide a description of the current state of the world.\nNote that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in their story.\nBut, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.\nThe story takes place in this world, so make sure to use locations and characters by name, have named characters speak dialogue, and take into account their descriptions, statuses, and other properties.\n\nFinally, the user will provide a high-level suggestion for what they think should happen next in their story.\nConsider this suggestion, and find an interpretation that makes the most sense to make their story interesting and make progress in developing the plot and the worldbuilding.\n\nYou should reply with 1-3 paragraphs that continue the user's story, picking up right where the user left off (if they've written anything in their story already).\n  "))))(function(systemMsg) {
                 var userPrompt = trim(v.value1);
                 return bind10(bind10(get4)(function(v1) {
                   return pure17(mkUserMsg(trim(format3({
                     story_so_far: function() {
-                      var $245 = length3(v1.story) === 0;
-                      if ($245) {
+                      var $251 = length3(v1.story) === 0;
+                      if ($251) {
                         return "I haven't written any of the story yet. So you are helping me write the very first paragraph.";
                       }
                       ;
@@ -16486,10 +16456,10 @@ ${str(snapshot)}`);
                   })("\n{{story_so_far}}\n\nSo right now in the story, this is the current state of the world:\n\n{{world}}\n\nThis is my suggestion for what should happen next in the story:\n\n    {{prompt}}  \n  "))));
                 }))(function(promptMsg) {
                   return bind10(get4)(function(state_backup) {
-                    return discard6(modifying2(prop24)(function(v1) {
+                    return discard13(modifying2(prop24)(function(v1) {
                       return snoc2(v1)({
                         label: "Story / Next / User Prompt",
-                        content: userPrompt
+                        content: text(userPrompt)
                       });
                     }))(function() {
                       return bind10(bind10(lift3(generate({
@@ -16497,7 +16467,7 @@ ${str(snapshot)}`);
                         messages: [systemMsg, promptMsg]
                       })))(function(err_msg) {
                         if (err_msg instanceof Left) {
-                          return discard6(put2(state_backup))(function() {
+                          return discard13(put2(state_backup))(function() {
                             return throwError5(error("error when generating: " + err_msg.value0));
                           });
                         }
@@ -16506,16 +16476,16 @@ ${str(snapshot)}`);
                           return pure17(err_msg.value0);
                         }
                         ;
-                        throw new Error("Failed pattern match at Example.MutableWorld.App (line 171, column 9 - line 175, column 32): " + [err_msg.constructor.name]);
+                        throw new Error("Failed pattern match at Example.MutableWorld.App (line 173, column 9 - line 177, column 32): " + [err_msg.constructor.name]);
                       }))(function(result) {
                         var story_content = trim(result.content);
-                        return discard6(modifying2(prop24)(function(v1) {
+                        return discard13(modifying2(prop24)(function(v1) {
                           return snoc2(v1)({
                             label: "Story / Next / Model",
-                            content: story_content
+                            content: text(story_content)
                           });
                         }))(function() {
-                          return discard6(modifying2(prop33)(function(v1) {
+                          return discard13(modifying2(prop33)(function(v1) {
                             return snoc2(v1)({
                               prompt: userPrompt,
                               content: story_content
@@ -16529,7 +16499,7 @@ ${str(snapshot)}`);
                   });
                 });
               }))(function(story_content) {
-                return discard6(function() {
+                return discard13(function() {
                   var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nThe user is currently writing a story.\nThey will present to you the current state of the world, and the most recent paragraph of their story which may imply some changes to the world state.\nIt is critically important to keep the world state updated to match the latest events in their story, so the user needs your help to update the world state.\nThe updates you produce should exactly reflect whatever changes to the world state are implied by the single story paragraph provided by the user.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\n  "));
                   var userPrompt = trim(v.value1);
                   return bind10(bind10(get4)(function(v1) {
@@ -16540,10 +16510,10 @@ ${str(snapshot)}`);
                     return pure17(mkUserMsg(prompt));
                   }))(function(promptMsg) {
                     return bind10(get4)(function(state_backup) {
-                      return discard6(modifying2(prop24)(function(v1) {
+                      return discard13(modifying2(prop24)(function(v1) {
                         return snoc2(v1)({
                           label: "Story / Update World / User Prompt",
-                          content: userPrompt
+                          content: text(userPrompt)
                         });
                       }))(function() {
                         return bind10(bind10(lift3(generate_structure2({
@@ -16552,7 +16522,7 @@ ${str(snapshot)}`);
                           messages: [systemMsg, promptMsg]
                         })))(function(err_msg) {
                           if (err_msg instanceof Left) {
-                            return discard6(put2(state_backup))(function() {
+                            return discard13(put2(state_backup))(function() {
                               return throwError5(error("error when generating: " + err_msg.value0));
                             });
                           }
@@ -16561,12 +16531,19 @@ ${str(snapshot)}`);
                             return pure17(err_msg.value0);
                           }
                           ;
-                          throw new Error("Failed pattern match at Example.MutableWorld.App (line 235, column 9 - line 239, column 32): " + [err_msg.constructor.name]);
+                          throw new Error("Failed pattern match at Example.MutableWorld.App (line 237, column 9 - line 241, column 32): " + [err_msg.constructor.name]);
                         }))(function(result) {
-                          return discard6(modifying2(prop24)(function(v1) {
+                          return discard13(modifying2(prop24)(function(v1) {
                             return snoc2(v1)({
                               label: "Story / Update World / Model Response",
-                              content: intercalate7("\n")(map32(show12)(result.updates))
+                              content: div2([css(tell4(["display: flex", "flex-direction: column", "gap: 0.5em", "flex-wrap: wrap"]))])(map32(function() {
+                                var $299 = div2([css(discard24(tell4(["padding: 0.5em"]))(function() {
+                                  return tell4(["background-color: color-mix(in hsl, black, transparent 80%)"]);
+                                }))]);
+                                return function($300) {
+                                  return $299(pure23(renderWorldUpdate($300)));
+                                };
+                              }())(result.updates))
                             });
                           }))(function() {
                             return modifying2(prop42)(function(world) {
@@ -16588,10 +16565,10 @@ ${str(snapshot)}`);
       ;
       if (v instanceof SubmitPrompt && v.value0 instanceof UpdateWorld_PromptSource) {
         return bind10(getConfig)(function(config) {
-          return discard6(bind10(get4)(function(v1) {
+          return discard13(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
-            return discard6(assign4(prop14)(true))(function() {
+            return discard13(assign4(prop14)(true))(function() {
               var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it!\n"));
               var userPrompt = trim(v.value1);
               return bind10(bind10(get4)(function(v1) {
@@ -16602,10 +16579,10 @@ ${str(snapshot)}`);
                 return pure17(mkUserMsg(prompt));
               }))(function(promptMsg) {
                 return bind10(get4)(function(state_backup) {
-                  return discard6(modifying2(prop24)(function(v1) {
+                  return discard13(modifying2(prop24)(function(v1) {
                     return snoc2(v1)({
                       label: "Manually modify world / User Prompt",
-                      content: userPrompt
+                      content: text(userPrompt)
                     });
                   }))(function() {
                     return bind10(bind10(lift3(generate_structure2({
@@ -16614,7 +16591,7 @@ ${str(snapshot)}`);
                       messages: [systemMsg, promptMsg]
                     })))(function(err_msg) {
                       if (err_msg instanceof Left) {
-                        return discard6(put2(state_backup))(function() {
+                        return discard13(put2(state_backup))(function() {
                           return throwError5(error("error when generating: " + err_msg.value0));
                         });
                       }
@@ -16623,15 +16600,22 @@ ${str(snapshot)}`);
                         return pure17(err_msg.value0);
                       }
                       ;
-                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 312, column 7 - line 316, column 30): " + [err_msg.constructor.name]);
+                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 325, column 7 - line 329, column 30): " + [err_msg.constructor.name]);
                     }))(function(result) {
-                      return discard6(modifying2(prop24)(function(v1) {
+                      return discard13(modifying2(prop24)(function(v1) {
                         return snoc2(v1)({
                           label: "Manually modify world / Model Response",
-                          content: intercalate7("\n")(map32(show12)(result.updates))
+                          content: div2([css(tell4(["display: flex", "flex-direction: column", "gap: 0.5em", "flex-wrap: wrap"]))])(map32(function() {
+                            var $301 = div2([css(discard24(tell4(["padding: 0.5em"]))(function() {
+                              return tell4(["background-color: color-mix(in hsl, black, transparent 80%)"]);
+                            }))]);
+                            return function($302) {
+                              return $301(pure23(renderWorldUpdate($302)));
+                            };
+                          }())(result.updates))
                         });
                       }))(function() {
-                        return discard6(modifying2(prop42)(function(world) {
+                        return discard13(modifying2(prop42)(function(world) {
                           return foldr5(applyWorldUpdate)(world)(result.updates);
                         }))(function() {
                           return assign4(prop14)(false);
@@ -16668,10 +16652,10 @@ ${str(snapshot)}`);
               return assign4(prop42)(v2.value0);
             }
             ;
-            throw new Error("Failed pattern match at Example.MutableWorld.App (line 335, column 18 - line 337, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 358, column 18 - line 360, column 46): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 333, column 37 - line 337, column 46): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 356, column 37 - line 360, column 46): " + [v1.constructor.name]);
         });
       }
       ;
@@ -16705,10 +16689,10 @@ ${str(snapshot)}`);
               return assign4(prop33)(v2.value0);
             }
             ;
-            throw new Error("Failed pattern match at Example.MutableWorld.App (line 355, column 18 - line 357, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 378, column 18 - line 380, column 46): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 353, column 37 - line 357, column 46): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 376, column 37 - line 380, column 46): " + [v1.constructor.name]);
         });
       }
       ;
@@ -16719,14 +16703,14 @@ ${str(snapshot)}`);
           return maybe(throwError5(error("impossible")))(pure17)(fromEventTarget2(target6));
         })(target(toEvent(v.value1))))(function(el) {
           return bind10(liftEffect9(value13(el)))(function(v1) {
-            return discard6(liftEffect9(setValue11("")(el)))(function() {
+            return discard13(liftEffect9(setValue11("")(el)))(function() {
               return handleAction(new SubmitPrompt(v.value0, v1));
             });
           });
         }));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.App (line 98, column 3 - line 100, column 14): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.App (line 100, column 3 - line 102, column 14): " + [v.constructor.name]);
     };
     var $$eval = mkEval({
       handleQuery: defaultEval.handleQuery,
