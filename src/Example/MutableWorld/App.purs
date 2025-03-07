@@ -6,7 +6,8 @@ import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructu
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get)
 import Control.Monad.Trans.Class (lift)
-import Data.Argonaut (encodeJson, stringify, stringifyWithIndent)
+import Data.Argonaut (decodeJson, encodeJson, stringify, stringifyWithIndent)
+import Data.Argonaut.Decode (fromJsonString)
 import Data.Array (length)
 import Data.Array as Array
 import Data.Either (Either(..))
@@ -22,12 +23,14 @@ import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
 import Example.MutableWorld.Common (Engine)
 import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld)
+import Halogen (liftAff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Elements.Keyed as HHK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Utility (copyToClipboard, readFromClipboard)
 import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
@@ -69,7 +72,7 @@ main_component = H.mkComponent { initialState, eval, render }
             """
 You are a helpful assistant for write story-related content.
 You are interacting with a fictional world in collaboration with the user.
-The world starts off with no content.
+The world may start off empty, of pre-filled with some existing content from the user.
 The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
 The idea is that these changes will reflect a story progressing in the fictional world.
 You will always output in a structured form with an array of updates to apply simultaneously to the world.
@@ -88,13 +91,28 @@ Have fun with it.
   handleAction (SetConfig config) = do
     prop @"config" .= pure config
 
-  handleAction (SubmitPrompt prompt) = do
+  handleAction (SubmitPrompt userPrompt_) = do
     config <- get >>= \{ config } -> config # flip maybe pure do
       throwError $ Aff.error "config has not been set"
 
     prop @"processing" .= true
 
-    prop @"msgs" %= (_ `Array.snoc` mkUserMsg prompt)
+    do
+      { world } <- get
+      let
+        prelude = describeWorld world
+        userPrompt = userPrompt_ # String.trim
+        prompt =
+          """
+{{prelude}}
+
+User instructions: {{prompt}}
+  """
+            # format
+                { prelude
+                , prompt: userPrompt
+                }
+      prop @"msgs" %= (_ `Array.snoc` mkUserMsg prompt)
 
     result <- do
       { msgs } <- get
@@ -112,24 +130,18 @@ Have fun with it.
 
     prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
 
-    -- msg <- do
-    --   { msgs } <- get
-    --   err_msg <- lift $
-    --     generate_structure @(value :: StringOrInt)
-    --       { config
-    --       , name: "StringOrInt"
-    --       , messages: msgs
-    --       }
-    --   case err_msg of
-    --     Left err -> throwError $ Aff.error $ "error when generating: " <> err
-    --     Right msg -> pure msg
-    -- Console.logShow { msg }
-
     prop @"processing" .= false
 
-  handleAction ExportWorld = pure unit
+  handleAction ExportWorld = do
+    { world } <- get
+    copyToClipboard (stringifyWithIndent 4 $ encodeJson world) # liftAff # void
 
-  handleAction ImportWorld = pure unit
+  handleAction ImportWorld = do
+    readFromClipboard # liftAff >>= case _ of
+      Left _ -> pure unit
+      Right s -> case fromJsonString s of
+        Left _ -> pure unit
+        Right world -> prop @"world" .= world
 
   render state =
     let
@@ -138,9 +150,10 @@ Have fun with it.
       transcript_processing_slotId = length_msgs
       transcript_bottom_slotId = length_msgs + (if state.processing then 1 else 0)
 
-      mkPromptButton userPrompt =
+      mkPromptButton userPrompt_ =
         let
           prelude = describeWorld state.world
+          userPrompt = userPrompt_ # String.trim
           prompt =
             """
 {{prelude}}
@@ -149,7 +162,7 @@ User instructions: {{prompt}}
 """
               # format
                   { prelude
-                  , prompt: String.trim userPrompt
+                  , prompt: userPrompt
                   }
         in
           HH.button
@@ -157,7 +170,7 @@ User instructions: {{prompt}}
             , HE.onClick $ const $ SubmitPrompt prompt
             , HP.disabled state.processing
             ]
-            [ HH.text prompt ]
+            [ HH.text userPrompt ]
     in
       HH.div
         [ HP.classes [ H.ClassName "App" ] ]
@@ -180,7 +193,7 @@ User instructions: {{prompt}}
                 [ HE.onClick $ const ExportWorld ]
                 [ HH.text "export world" ]
             , HH.button
-                [ HE.onClick $ const ExportWorld ]
+                [ HE.onClick $ const ImportWorld ]
                 [ HH.text "import world" ]
             ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]

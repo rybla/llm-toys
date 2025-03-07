@@ -119,6 +119,15 @@ html, body {
   white-space: pre-wrap;
 }
 
+.Toolbar {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  
+  padding: 1em;
+  box-shadow: 0 0 0 1px black inset;
+}
+
 .Prompts {
   height: 20em;
   overflow-y: scroll;
