@@ -58,13 +58,13 @@ html, body {
 }
 
 .Msg>div:nth-child(2) {
-  flex-grow: 1;
   flex-shrink: 1;
+  flex-grow: 1;
 
   background-color: transparent;
   color: black;
 
-  whitespace: pre-wrap;
+  white-space: pre-wrap !important;
 }
 
 .World {  
@@ -81,7 +81,7 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: 1em;
-  
+
   padding: 1em;
   box-shadow: 0 0 0 1px black inset;
 }
@@ -101,6 +101,14 @@ html, body {
 .PromptButton {
   padding: 0.5em;
   text-align: left;
+  font-family: Merienda;
+}
+
+textarea {
+  padding: 0.5em;
+  height: 5em;
+  resize: none;
+  overflow: auto;
   font-family: Merienda;
 }
 </style>

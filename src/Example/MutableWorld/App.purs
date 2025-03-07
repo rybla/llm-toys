@@ -4,7 +4,7 @@ import Prelude
 
 import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructureAssistantMsg, mkSystemMsg, mkUserMsg)
 import Ai2.Widget.Provider as Provider
-import Control.Monad.State (get)
+import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (decodeJson, encodeJson, stringify, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
@@ -60,10 +60,14 @@ type State =
 
 data Action
   = SetConfig Config
-  | SubmitPrompt String
+  | SubmitPrompt PromptSource String
   | ExportWorld
   | ImportWorld
-  | InputKeyDown KeyboardEvent
+  | InputKeyDown PromptSource KeyboardEvent
+
+data PromptSource
+  = UpdateWorld_PromptSource
+  | PromptStory_PromptSource
 
 main_component :: forall query output. H.Component query Input output Aff
 main_component = H.mkComponent { initialState, eval, render }
@@ -73,9 +77,20 @@ main_component = H.mkComponent { initialState, eval, render }
     { engine
     , config: Nothing
     , processing: false
-    , msgs:
-        [ mkSystemMsg $ String.trim
-            """
+    , msgs: []
+    , world:
+        { characters: Map.empty
+        , locations: Map.empty
+        }
+    }
+
+  eval = H.mkEval H.defaultEval { handleAction = handleAction }
+
+  getConfig = get >>= \{ config } -> config # flip maybe pure do
+    throwError $ Aff.error "config has not been set"
+
+  systemMsg_UpdateWorld = mkSystemMsg $ String.trim
+    """
 You are a helpful assistant for write story-related content.
 You are interacting with a fictional world in collaboration with the user.
 The world may start off empty, of pre-filled with some existing content from the user.
@@ -85,21 +100,16 @@ You will always output in a structured form with an array of updates to apply si
 Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
 Have fun with it.
 """
-        ]
-    , world:
-        { characters: Map.empty
-        , locations: Map.empty
-        }
-    }
-
-  eval = H.mkEval H.defaultEval { handleAction = handleAction }
 
   handleAction (SetConfig config) = do
     prop @"config" .= pure config
 
-  handleAction (SubmitPrompt userPrompt_) = do
-    config <- get >>= \{ config } -> config # flip maybe pure do
-      throwError $ Aff.error "config has not been set"
+  handleAction (SubmitPrompt PromptStory_PromptSource userPrompt_) = do
+    config <- getConfig
+    pure unit
+
+  handleAction (SubmitPrompt UpdateWorld_PromptSource userPrompt_) = do
+    config <- getConfig
 
     get >>= \{ processing } ->
       when processing do
@@ -107,7 +117,7 @@ Have fun with it.
 
     prop @"processing" .= true
 
-    do
+    promptMsg <- do
       { world } <- get
       let
         prelude = describeWorld world
@@ -122,22 +132,26 @@ User instructions: {{prompt}}
                 { prelude
                 , prompt: userPrompt
                 }
-      prop @"msgs" %= (_ `Array.snoc` mkUserMsg prompt)
+            # String.trim
+      pure $ mkUserMsg prompt
+
+    state_backup <- get
+    prop @"msgs" %= (_ `Array.snoc` promptMsg)
 
     result <- do
-      { msgs } <- get
       err_msg <- lift $
         generate_structure @(updates :: Array WorldUpdate)
           { config
           , name: "updates"
-          , messages: msgs
+          , messages: [ systemMsg_UpdateWorld, promptMsg ]
           }
       case err_msg of
-        Left err -> throwError $ Aff.error $ "error when generating: " <> err
+        Left err -> do
+          put state_backup
+          throwError $ Aff.error $ "error when generating: " <> err
         Right msg -> pure msg
 
     prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson result))
-
     prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
 
     prop @"processing" .= false
@@ -153,7 +167,7 @@ User instructions: {{prompt}}
         Left _ -> pure unit
         Right world -> prop @"world" .= world
 
-  handleAction (InputKeyDown event) = do
+  handleAction (InputKeyDown source event) = do
     let
       key = event # KeyboardEvent.key
       cmd = (event # KeyboardEvent.ctrlKey) || (event # KeyboardEvent.metaKey)
@@ -167,7 +181,7 @@ User instructions: {{prompt}}
             # maybe (throwError $ Aff.error "impossible") pure
       v <- el # HTMLTextAreaElement.value # liftEffect
       HTMLTextAreaElement.setValue "" el # liftEffect
-      handleAction (SubmitPrompt v)
+      handleAction (SubmitPrompt source v)
 
   render state =
     let
@@ -191,7 +205,6 @@ User instructions: {{prompt}}
             , [ Tuple (show transcript_bottom_slotId) $ HH.slot_ (Proxy @"ScrollToMe") (show transcript_bottom_slotId) Widget.scrollToMe unit ]
             ]
         , HH.div [ HP.classes [ H.ClassName "World" ] ]
-            -- [ HH.text $ stringifyWithIndent 4 $ encodeJson state.world ]
             [ HH.text $ describeWorld state.world ]
         , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
             [ HH.button
@@ -202,9 +215,17 @@ User instructions: {{prompt}}
                 [ HH.text "import world" ]
             ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
-            [ HH.textarea
-                [ HE.onKeyDown InputKeyDown
+            [ HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
+                [ HH.text "Directly modify world:" ]
+            , HH.textarea
+                [ HE.onKeyDown $ InputKeyDown UpdateWorld_PromptSource
                 , HP.value "Create some locations and characters for a medieval fantasy world. Be creative!"
+                ]
+            , HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
+                [ HH.text "Prompt next portion of story:" ]
+            , HH.textarea
+                [ HE.onKeyDown $ InputKeyDown PromptStory_PromptSource
+                , HP.value "..."
                 ]
             ]
         , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_structured_output } SetConfig

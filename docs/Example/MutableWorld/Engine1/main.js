@@ -6319,6 +6319,14 @@ ${str(snapshot)}`);
   var state = function(dict) {
     return dict.state;
   };
+  var put = function(dictMonadState) {
+    var state1 = state(dictMonadState);
+    return function(s) {
+      return state1(function(v) {
+        return new Tuple(unit, s);
+      });
+    };
+  };
   var modify_2 = function(dictMonadState) {
     var state1 = state(dictMonadState);
     return function(f) {
@@ -14775,17 +14783,6 @@ ${str(snapshot)}`);
     }
   };
   var toJsonSchema_RowListCons3 = /* @__PURE__ */ toJsonSchema_RowListCons22(/* @__PURE__ */ toJsonSchema_RowListCons(statusIsSymbol)()(toJsonSchemaString)(toJsonSchema_RowListNil));
-  var SetCharacterHealthIsSymbol = {
-    reflectSymbol: function() {
-      return "SetCharacterHealth";
-    }
-  };
-  var healthIsSymbol = {
-    reflectSymbol: function() {
-      return "health";
-    }
-  };
-  var toJsonSchema_RowListCons4 = /* @__PURE__ */ toJsonSchema_RowListCons22(toJsonSchema_RowListNil);
   var SetCharacterStatusIsSymbol = {
     reflectSymbol: function() {
       return "SetCharacterStatus";
@@ -14796,6 +14793,7 @@ ${str(snapshot)}`);
       return "SetCharacterLocation";
     }
   };
+  var toJsonSchema_RowListCons4 = /* @__PURE__ */ toJsonSchema_RowListCons22(toJsonSchema_RowListNil);
   var CreateLocationIsSymbol = {
     reflectSymbol: function() {
       return "CreateLocation";
@@ -14828,9 +14826,8 @@ ${str(snapshot)}`);
     }
   })()()(strongFn);
   var map23 = /* @__PURE__ */ map(functorMaybe);
-  var prop23 = /* @__PURE__ */ prop4(healthIsSymbol)()()(strongFn);
-  var prop32 = /* @__PURE__ */ prop4(statusIsSymbol)()()(strongFn);
-  var prop42 = /* @__PURE__ */ prop4(location_nameIsSymbol)()()(strongFn);
+  var prop23 = /* @__PURE__ */ prop4(statusIsSymbol)()()(strongFn);
+  var prop32 = /* @__PURE__ */ prop4(location_nameIsSymbol)()()(strongFn);
   var CreateCharacter = /* @__PURE__ */ function() {
     function CreateCharacter2(value0) {
       this.value0 = value0;
@@ -14840,16 +14837,6 @@ ${str(snapshot)}`);
       return new CreateCharacter2(value0);
     };
     return CreateCharacter2;
-  }();
-  var SetCharacterHealth = /* @__PURE__ */ function() {
-    function SetCharacterHealth2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SetCharacterHealth2.create = function(value0) {
-      return new SetCharacterHealth2(value0);
-    };
-    return SetCharacterHealth2;
   }();
   var SetCharacterStatus = /* @__PURE__ */ function() {
     function SetCharacterStatus2(value0) {
@@ -14888,51 +14875,43 @@ ${str(snapshot)}`);
       }
       ;
       if (x instanceof Inr && x.value0 instanceof Inl) {
-        return new SetCharacterHealth(x.value0.value0);
+        return new SetCharacterStatus(x.value0.value0);
       }
       ;
       if (x instanceof Inr && (x.value0 instanceof Inr && x.value0.value0 instanceof Inl)) {
-        return new SetCharacterStatus(x.value0.value0.value0);
+        return new SetCharacterLocation(x.value0.value0.value0);
       }
       ;
-      if (x instanceof Inr && (x.value0 instanceof Inr && (x.value0.value0 instanceof Inr && x.value0.value0.value0 instanceof Inl))) {
-        return new SetCharacterLocation(x.value0.value0.value0.value0);
+      if (x instanceof Inr && (x.value0 instanceof Inr && x.value0.value0 instanceof Inr)) {
+        return new CreateLocation(x.value0.value0.value0);
       }
       ;
-      if (x instanceof Inr && (x.value0 instanceof Inr && (x.value0.value0 instanceof Inr && x.value0.value0.value0 instanceof Inr))) {
-        return new CreateLocation(x.value0.value0.value0.value0);
-      }
-      ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 49, column 1 - line 49, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 46, column 1 - line 46, column 38): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof CreateCharacter) {
         return new Inl(x.value0);
       }
       ;
-      if (x instanceof SetCharacterHealth) {
+      if (x instanceof SetCharacterStatus) {
         return new Inr(new Inl(x.value0));
       }
       ;
-      if (x instanceof SetCharacterStatus) {
+      if (x instanceof SetCharacterLocation) {
         return new Inr(new Inr(new Inl(x.value0)));
       }
       ;
-      if (x instanceof SetCharacterLocation) {
-        return new Inr(new Inr(new Inr(new Inl(x.value0))));
-      }
-      ;
       if (x instanceof CreateLocation) {
-        return new Inr(new Inr(new Inr(new Inr(x.value0))));
+        return new Inr(new Inr(new Inr(x.value0)));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 49, column 1 - line 49, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 46, column 1 - line 46, column 38): " + [x.constructor.name]);
     }
   };
-  var genericEncodeJson2 = /* @__PURE__ */ genericEncodeJson(genericWorldUpdate_)(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(CreateCharacterIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons8(gEncodeJsonCons24)(location_nameIsSymbol)())(descriptionIsSymbol)())())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterHealthIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(healthIsSymbol)())())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterStatusIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(gEncodeJsonCons24)())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(location_nameIsSymbol)())())))(/* @__PURE__ */ encodeRepConstructor(CreateLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(descriptionIsSymbol)())())))))));
-  var generic_decodeJsonFromSchema2 = /* @__PURE__ */ generic_decodeJsonFromSchema(genericWorldUpdate_)(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateCharacterIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL13))))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterHealthIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL1(healthIsSymbol)(decodeJsonFromSchemaStrin)()()(decodeJsonFromSchema_RowL14)))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterStatusIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(decodeJsonFromSchema_RowL13))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL14)))))(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(decodeJsonFromSchema_RowL14)))))))));
+  var genericEncodeJson2 = /* @__PURE__ */ genericEncodeJson(genericWorldUpdate_)(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(CreateCharacterIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons8(gEncodeJsonCons24)(location_nameIsSymbol)())(descriptionIsSymbol)())())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterStatusIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(gEncodeJsonCons24)())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(location_nameIsSymbol)())())))(/* @__PURE__ */ encodeRepConstructor(CreateLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(descriptionIsSymbol)())()))))));
+  var generic_decodeJsonFromSchema2 = /* @__PURE__ */ generic_decodeJsonFromSchema(genericWorldUpdate_)(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateCharacterIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL13))))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterStatusIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(decodeJsonFromSchema_RowL13))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL14)))))(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(decodeJsonFromSchema_RowL14))))))));
   var toJsonSchemaWorldUpdate = {
-    toJsonSchema: /* @__PURE__ */ generic_toJsonSchema(genericWorldUpdate_)(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateCharacterIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons3))))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterHealthIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons(healthIsSymbol)()(toJsonSchemaString)(toJsonSchema_RowListCons4)))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterStatusIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(toJsonSchema_RowListCons3))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons4)))))(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(toJsonSchema_RowListCons4)))))))))
+    toJsonSchema: /* @__PURE__ */ generic_toJsonSchema(genericWorldUpdate_)(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateCharacterIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons3))))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterStatusIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(toJsonSchema_RowListCons3))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons4)))))(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(toJsonSchema_RowListCons4))))))))
   };
   var encodeJsonWorldUpdate = {
     encodeJson: function(x) {
@@ -14946,8 +14925,8 @@ ${str(snapshot)}`);
   };
   var describeWorld = function(w) {
     return intercalate5("\n")(["Current state of the world:", "", function() {
-      var $245 = isEmpty(w.locations);
-      if ($245) {
+      var $202 = isEmpty(w.locations);
+      if ($202) {
         return "  - No locations have been created yet";
       }
       ;
@@ -14955,22 +14934,22 @@ ${str(snapshot)}`);
         return format3(v.value1)("    - {{name}}: {{description}}");
       }))]);
     }(), "", function() {
-      var $249 = isEmpty(w.characters);
-      if ($249) {
+      var $206 = isEmpty(w.characters);
+      if ($206) {
         return "  - No characters have been created yet";
       }
       ;
       return intercalate5("\n")(["  - Characters:", intercalate5("\n")(mapFlipped3(toUnfoldable9(w.characters))(function(v) {
-        return format3(v.value1)(intercalate5("\n")(["    - {{name}}: {{description}}", "      - Current location: {{location_name}}", "      - Current health: {{health}}", "      - Current status: {{status}}"]));
+        return format3(v.value1)(intercalate5("\n")(["    - {{name}}: {{description}}", "      - Current location: {{location_name}}", "      - Current status: {{status}}"]));
       }))]);
     }()]);
   };
   var applyWorldUpdate = function(v) {
     if (v instanceof CreateLocation) {
       return set2(function() {
-        var $270 = at2(v.value0.name)(strongFn);
-        return function($271) {
-          return prop6($270($271));
+        var $224 = at2(v.value0.name)(strongFn);
+        return function($225) {
+          return prop6($224($225));
         };
       }())(pure8({
         name: v.value0.name,
@@ -14980,47 +14959,37 @@ ${str(snapshot)}`);
     ;
     if (v instanceof CreateCharacter) {
       return set2(function() {
-        var $272 = at2(v.value0.name)(strongFn);
-        return function($273) {
-          return prop13($272($273));
+        var $226 = at2(v.value0.name)(strongFn);
+        return function($227) {
+          return prop13($226($227));
         };
       }())(pure8({
         name: v.value0.name,
         description: v.value0.description,
         location_name: v.value0.location_name,
-        health: "Healthy",
         status: "Normal"
       }));
     }
     ;
-    if (v instanceof SetCharacterHealth) {
-      return over2(function() {
-        var $274 = at2(v.value0.name)(strongFn);
-        return function($275) {
-          return prop13($274($275));
-        };
-      }())(map23(set2(prop23)(v.value0.health)));
-    }
-    ;
     if (v instanceof SetCharacterStatus) {
       return over2(function() {
-        var $276 = at2(v.value0.name)(strongFn);
-        return function($277) {
-          return prop13($276($277));
+        var $228 = at2(v.value0.name)(strongFn);
+        return function($229) {
+          return prop13($228($229));
         };
-      }())(map23(set2(prop32)(v.value0.status)));
+      }())(map23(set2(prop23)(v.value0.status)));
     }
     ;
     if (v instanceof SetCharacterLocation) {
       return over2(function() {
-        var $278 = at2(v.value0.name)(strongFn);
-        return function($279) {
-          return prop13($278($279));
+        var $230 = at2(v.value0.name)(strongFn);
+        return function($231) {
+          return prop13($230($231));
         };
-      }())(map23(set2(prop42)(v.value0.location_name)));
+      }())(map23(set2(prop32)(v.value0.location_name)));
     }
     ;
-    throw new Error("Failed pattern match at Example.MutableWorld.World (line 60, column 1 - line 60, column 50): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Example.MutableWorld.World (line 57, column 1 - line 57, column 50): " + [v.constructor.name]);
   };
 
   // output/Web.HTML/foreign.js
@@ -16253,17 +16222,17 @@ ${str(snapshot)}`);
       return "provider";
     }
   })(ordUnit);
+  var bind10 = /* @__PURE__ */ bind(bindHalogenM);
+  var get4 = /* @__PURE__ */ get(monadStateHalogenM);
+  var pure17 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var throwError5 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
   var assign4 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop7 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "config";
     }
   })()()(strongFn);
-  var pure17 = /* @__PURE__ */ pure(applicativeMaybe);
-  var bind10 = /* @__PURE__ */ bind(bindHalogenM);
-  var get4 = /* @__PURE__ */ get(monadStateHalogenM);
-  var pure18 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var throwError5 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
+  var pure18 = /* @__PURE__ */ pure(applicativeMaybe);
   var discard6 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when4 = /* @__PURE__ */ when(applicativeHalogenM);
   var prop14 = /* @__PURE__ */ prop4({
@@ -16284,6 +16253,7 @@ ${str(snapshot)}`);
     }
   };
   var generate_structure2 = /* @__PURE__ */ generate_structure(/* @__PURE__ */ toJsonSchemaRecord()(/* @__PURE__ */ toJsonSchema_RowListCons(updatesIsSymbol)()(/* @__PURE__ */ toJsonSchemaArray(toJsonSchemaWorldUpdate))(toJsonSchema_RowListNil)))(/* @__PURE__ */ decodeJsonFromSchemaRecor()(/* @__PURE__ */ decodeJsonFromSchema_RowL1(updatesIsSymbol)(/* @__PURE__ */ decodeJsonFromSchemaArray(decodeJsonFromSchemaWorld))()()(decodeJsonFromSchema_RowL)));
+  var put2 = /* @__PURE__ */ put(monadStateHalogenM);
   var encodeJson11 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonWorldUpdate))(gEncodeJsonNil)(updatesIsSymbol)())());
   var prop33 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -16311,11 +16281,6 @@ ${str(snapshot)}`);
       return "location_name";
     }
   };
-  var healthIsSymbol2 = {
-    reflectSymbol: function() {
-      return "health";
-    }
-  };
   var descriptionIsSymbol2 = {
     reflectSymbol: function() {
       return "description";
@@ -16331,13 +16296,27 @@ ${str(snapshot)}`);
       return "characters";
     }
   };
-  var encodeJson12 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(statusIsSymbol2)())(nameIsSymbol4)())(location_nameIsSymbol2)())(healthIsSymbol2)())(descriptionIsSymbol2)())()))(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(nameIsSymbol4)())(descriptionIsSymbol2)())()))(gEncodeJsonNil)(locationsIsSymbol)())(charactersIsSymbol)())());
+  var encodeJson12 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(statusIsSymbol2)())(nameIsSymbol4)())(location_nameIsSymbol2)())(descriptionIsSymbol2)())()))(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(nameIsSymbol4)())(descriptionIsSymbol2)())()))(gEncodeJsonNil)(locationsIsSymbol)())(charactersIsSymbol)())());
   var decodeMap3 = /* @__PURE__ */ decodeMap2(ordString)(decodeJsonString);
   var gDecodeJsonCons4 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString));
   var gDecodeJsonCons13 = /* @__PURE__ */ gDecodeJsonCons4(gDecodeJsonNil);
-  var fromJsonString3 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(statusIsSymbol2)()())(nameIsSymbol4)()())(location_nameIsSymbol2)()())(healthIsSymbol2)()())(descriptionIsSymbol2)()())())))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(nameIsSymbol4)()())(descriptionIsSymbol2)()())())))(gDecodeJsonNil)(locationsIsSymbol)()())(charactersIsSymbol)()())());
+  var fromJsonString3 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(statusIsSymbol2)()())(nameIsSymbol4)()())(location_nameIsSymbol2)()())(descriptionIsSymbol2)()())())))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(nameIsSymbol4)()())(descriptionIsSymbol2)()())())))(gDecodeJsonNil)(locationsIsSymbol)()())(charactersIsSymbol)()())());
   var liftEffect9 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindAff);
+  var UpdateWorld_PromptSource = /* @__PURE__ */ function() {
+    function UpdateWorld_PromptSource2() {
+    }
+    ;
+    UpdateWorld_PromptSource2.value = new UpdateWorld_PromptSource2();
+    return UpdateWorld_PromptSource2;
+  }();
+  var PromptStory_PromptSource = /* @__PURE__ */ function() {
+    function PromptStory_PromptSource2() {
+    }
+    ;
+    PromptStory_PromptSource2.value = new PromptStory_PromptSource2();
+    return PromptStory_PromptSource2;
+  }();
   var SetConfig = /* @__PURE__ */ function() {
     function SetConfig2(value0) {
       this.value0 = value0;
@@ -16349,12 +16328,15 @@ ${str(snapshot)}`);
     return SetConfig2;
   }();
   var SubmitPrompt = /* @__PURE__ */ function() {
-    function SubmitPrompt2(value0) {
+    function SubmitPrompt2(value0, value1) {
       this.value0 = value0;
+      this.value1 = value1;
     }
     ;
     SubmitPrompt2.create = function(value0) {
-      return new SubmitPrompt2(value0);
+      return function(value1) {
+        return new SubmitPrompt2(value0, value1);
+      };
     };
     return SubmitPrompt2;
   }();
@@ -16373,16 +16355,20 @@ ${str(snapshot)}`);
     return ImportWorld2;
   }();
   var InputKeyDown = /* @__PURE__ */ function() {
-    function InputKeyDown2(value0) {
+    function InputKeyDown2(value0, value1) {
       this.value0 = value0;
+      this.value1 = value1;
     }
     ;
     InputKeyDown2.create = function(value0) {
-      return new InputKeyDown2(value0);
+      return function(value1) {
+        return new InputKeyDown2(value0, value1);
+      };
     };
     return InputKeyDown2;
   }();
   var main_component = /* @__PURE__ */ function() {
+    var systemMsg_UpdateWorld = mkSystemMsg(trim("\nYou are a helpful assistant for write story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it.\n"));
     var render = function(state3) {
       var length_msgs = length3(state3.msgs);
       var transcript_bottom_slotId = length_msgs + function() {
@@ -16420,16 +16406,16 @@ ${str(snapshot)}`);
             })("{ parsed: {{parsed}} }"))])]));
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 182, column 47 - line 188, column 311): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 196, column 47 - line 202, column 311): " + [v.constructor.name]);
         };
       })(state3.msgs), function() {
-        var $226 = !state3.processing;
-        if ($226) {
+        var $218 = !state3.processing;
+        if ($218) {
           return [];
         }
         ;
         return [new Tuple(show3(length_msgs), div2([])([text("processing...")]))];
-      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")])]), div2([classes(["Prompts"])])([textarea([onKeyDown(InputKeyDown.create), value14("Create some locations and characters for a medieval fantasy world. Be creative!")])]), slot2($$Proxy.value)(unit)(component)({
+      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Directly modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
         providerCategory: "Main",
         providers: providers_with_structured_output
       })(SetConfig.create)]);
@@ -16439,61 +16425,72 @@ ${str(snapshot)}`);
         engine: engine2,
         config: Nothing.value,
         processing: false,
-        msgs: [mkSystemMsg(trim("\nYou are a helpful assistant for write story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it.\n"))],
+        msgs: [],
         world: {
           characters: empty3,
           locations: empty3
         }
       };
     };
+    var getConfig = bind10(get4)(function(v) {
+      return flip(maybe)(pure17)(throwError5(error("config has not been set")))(v.config);
+    });
     var handleAction = function(v) {
       if (v instanceof SetConfig) {
-        return assign4(prop7)(pure17(v.value0));
+        return assign4(prop7)(pure18(v.value0));
       }
       ;
-      if (v instanceof SubmitPrompt) {
-        return bind10(bind10(get4)(function(v1) {
-          return flip(maybe)(pure18)(throwError5(error("config has not been set")))(v1.config);
-        }))(function(config) {
+      if (v instanceof SubmitPrompt && v.value0 instanceof PromptStory_PromptSource) {
+        return bind10(getConfig)(function(config) {
+          return pure17(unit);
+        });
+      }
+      ;
+      if (v instanceof SubmitPrompt && v.value0 instanceof UpdateWorld_PromptSource) {
+        return bind10(getConfig)(function(config) {
           return discard6(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
             return discard6(assign4(prop14)(true))(function() {
-              return discard6(bind10(get4)(function(v1) {
-                var userPrompt = trim(v.value0);
+              return bind10(bind10(get4)(function(v1) {
+                var userPrompt = trim(v.value1);
                 var prelude = describeWorld(v1.world);
-                var prompt = format4({
+                var prompt = trim(format4({
                   prelude,
                   prompt: userPrompt
-                })("\n{{prelude}}\n\nUser instructions: {{prompt}}\n  ");
-                return modifying2(prop24)(function(v2) {
-                  return snoc2(v2)(mkUserMsg(prompt));
-                });
-              }))(function() {
-                return bind10(bind10(get4)(function(v1) {
-                  return bind10(lift3(generate_structure2({
-                    config,
-                    name: "updates",
-                    messages: v1.msgs
-                  })))(function(err_msg) {
-                    if (err_msg instanceof Left) {
-                      return throwError5(error("error when generating: " + err_msg.value0));
-                    }
-                    ;
-                    if (err_msg instanceof Right) {
-                      return pure18(err_msg.value0);
-                    }
-                    ;
-                    throw new Error("Failed pattern match at Example.MutableWorld.App (line 135, column 7 - line 137, column 30): " + [err_msg.constructor.name]);
-                  });
-                }))(function(result) {
+                })("\n{{prelude}}\n\nUser instructions: {{prompt}}\n  "));
+                return pure17(mkUserMsg(prompt));
+              }))(function(promptMsg) {
+                return bind10(get4)(function(state_backup) {
                   return discard6(modifying2(prop24)(function(v1) {
-                    return snoc2(v1)(mkStructureAssistantMsg(encodeJson11(result)));
+                    return snoc2(v1)(promptMsg);
                   }))(function() {
-                    return discard6(modifying2(prop33)(function(world) {
-                      return foldr5(applyWorldUpdate)(world)(result.updates);
-                    }))(function() {
-                      return assign4(prop14)(false);
+                    return bind10(bind10(lift3(generate_structure2({
+                      config,
+                      name: "updates",
+                      messages: [systemMsg_UpdateWorld, promptMsg]
+                    })))(function(err_msg) {
+                      if (err_msg instanceof Left) {
+                        return discard6(put2(state_backup))(function() {
+                          return throwError5(error("error when generating: " + err_msg.value0));
+                        });
+                      }
+                      ;
+                      if (err_msg instanceof Right) {
+                        return pure17(err_msg.value0);
+                      }
+                      ;
+                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 148, column 7 - line 152, column 30): " + [err_msg.constructor.name]);
+                    }))(function(result) {
+                      return discard6(modifying2(prop24)(function(v1) {
+                        return snoc2(v1)(mkStructureAssistantMsg(encodeJson11(result)));
+                      }))(function() {
+                        return discard6(modifying2(prop33)(function(world) {
+                          return foldr5(applyWorldUpdate)(world)(result.updates);
+                        }))(function() {
+                          return assign4(prop14)(false);
+                        });
+                      });
                     });
                   });
                 });
@@ -16512,41 +16509,41 @@ ${str(snapshot)}`);
       if (v instanceof ImportWorld) {
         return bind10(liftAff2(readFromClipboard))(function(v1) {
           if (v1 instanceof Left) {
-            return pure18(unit);
+            return pure17(unit);
           }
           ;
           if (v1 instanceof Right) {
             var v2 = fromJsonString3(v1.value0);
             if (v2 instanceof Left) {
-              return pure18(unit);
+              return pure17(unit);
             }
             ;
             if (v2 instanceof Right) {
               return assign4(prop33)(v2.value0);
             }
             ;
-            throw new Error("Failed pattern match at Example.MutableWorld.App (line 152, column 18 - line 154, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 166, column 18 - line 168, column 46): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 150, column 37 - line 154, column 46): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 164, column 37 - line 168, column 46): " + [v1.constructor.name]);
         });
       }
       ;
       if (v instanceof InputKeyDown) {
-        var key2 = key(v.value0);
-        var cmd = ctrlKey(v.value0) || metaKey(v.value0);
+        var key2 = key(v.value1);
+        var cmd = ctrlKey(v.value1) || metaKey(v.value1);
         return when4(key2 === "Enter" && cmd)(bind10(maybe(throwError5(error("impossible")))(function(target6) {
-          return maybe(throwError5(error("impossible")))(pure18)(fromEventTarget2(target6));
-        })(target(toEvent(v.value0))))(function(el) {
+          return maybe(throwError5(error("impossible")))(pure17)(fromEventTarget2(target6));
+        })(target(toEvent(v.value1))))(function(el) {
           return bind10(liftEffect9(value13(el)))(function(v1) {
             return discard6(liftEffect9(setValue11("")(el)))(function() {
-              return handleAction(new SubmitPrompt(v1));
+              return handleAction(new SubmitPrompt(v.value0, v1));
             });
           });
         }));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.App (line 97, column 3 - line 98, column 34): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.App (line 104, column 3 - line 105, column 34): " + [v.constructor.name]);
     };
     var $$eval = mkEval({
       handleQuery: defaultEval.handleQuery,

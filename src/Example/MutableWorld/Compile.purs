@@ -100,13 +100,13 @@ html, body {
 }
 
 .Msg>div:nth-child(2) {
-  flex-grow: 1;
   flex-shrink: 1;
+  flex-grow: 1;
 
   background-color: transparent;
   color: black;
 
-  whitespace: pre-wrap;
+  white-space: pre-wrap !important;
 }
 
 .World {  
@@ -148,7 +148,9 @@ html, body {
 
 textarea {
   padding: 0.5em;
-  text-align: left;
+  height: 5em;
+  resize: none;
+  overflow: auto;
   font-family: Merienda;
 }
 </style>
