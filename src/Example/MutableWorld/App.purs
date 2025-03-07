@@ -2,13 +2,13 @@ module Example.MutableWorld.App where
 
 import Prelude
 
-import Ai2.Llm (Config, generate_structure, mkSystemMsg, mkUserMsg)
+import Ai2.Llm (Config, generate, generate_structure, mkSystemMsg, mkUserMsg)
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (encodeJson, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
-import Data.Array (intercalate, length)
+import Data.Array (intercalate, length, take)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldr)
@@ -54,6 +54,7 @@ type State =
   , engine :: Engine
   , processing :: Boolean
   , world :: World
+  , story :: Array { prompt :: String, content :: String }
   , transcript :: Array { label :: String, content :: String }
   }
 
@@ -77,6 +78,7 @@ main_component = H.mkComponent { initialState, eval, render }
     , config: Nothing
     , processing: false
     , transcript: []
+    , story: []
     , world:
         { characters: Map.empty
         , locations: Map.empty
@@ -90,9 +92,95 @@ main_component = H.mkComponent { initialState, eval, render }
 
   handleAction (SetConfig config) = do
     prop @"config" .= pure config
+    pure unit
 
   handleAction (SubmitPrompt PromptStory_PromptSource userPrompt_) = do
     config <- getConfig
+
+    get >>= \{ processing } ->
+      when processing do
+        throwError $ Aff.error $ "already processing! dont submit another prompt yet"
+
+    prop @"processing" .= true
+
+    do
+      systemMsg <- do
+        pure $ mkSystemMsg $ String.trim
+          """
+You are a helpful fiction writing assistant.
+You are currently collaborating with the user to write a novel.
+The way this collaboration works is that if the user has written a portion of the story already, they will show you the latest few paragraphs in the story.
+You should read these paragraphs carefully to get an idea of what's going on right now in the story.
+The user will also provide a description of the current state of the story world.
+Note that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in the story.
+But, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.
+Finally, the user will provide a high-level suggestion for what they think should happen next in the story.
+Consider this suggestion, and find an interpretation that makes the most sense to make the story interesting and make progress in developing the plot and the worldbuilding.
+
+You should reply with EXACTLY 1 PARAGRAPH as the next paragraph of the story, picking up right where the user left off if they've written anything in the story already.
+  """
+
+      let userPrompt = userPrompt_ # String.trim
+      promptMsg <- do
+        { world, story } <- get
+        pure $ mkUserMsg $ String.trim $
+          """
+{{story_so_far}}
+
+So right now in the story, this is the current state of the world:
+
+{{world}}
+
+This is my suggestion for what should happen next in the story:
+
+    {{prompt}}  
+  """
+            # format
+                { story_so_far:
+                    if length story == 0 then
+                      "I haven't written any of the story yet. So you are helping me write the very first paragraph."
+                    else
+                      intercalate "\n\n"
+                        [ "The following paragraphs are the most recent portion of the story I'm currently writing."
+                        , intercalate "\n\n" $
+                            story # take 2 # map (\{ content } -> "    " <> content)
+                        ]
+                , world: describeWorld world
+                , prompt: userPrompt
+                }
+
+      state_backup <- get
+      prop @"transcript" %=
+        ( _ `Array.snoc`
+            { label: "Story / User Prompt"
+            , content: userPrompt
+            }
+        )
+
+      result <- do
+        err_msg <- lift $
+          generate
+            { config
+            , messages:
+                [ systemMsg
+                , promptMsg
+                ]
+            }
+        case err_msg of
+          Left err -> do
+            put state_backup
+            throwError $ Aff.error $ "error when generating: " <> err
+          Right msg -> pure msg
+
+      prop @"transcript" %=
+        ( _ `Array.snoc`
+            { label: "Story / Model"
+            , content: result.content
+            }
+        )
+
+    prop @"processing" .= false
+
     pure unit
 
   handleAction (SubmitPrompt UpdateWorld_PromptSource userPrompt_) = do
@@ -104,6 +192,19 @@ main_component = H.mkComponent { initialState, eval, render }
 
     prop @"processing" .= true
 
+    let
+      systemMsg = mkSystemMsg $ String.trim
+        """
+You are a helpful assistant for write story-related content.
+You are interacting with a fictional world in collaboration with the user.
+The world may start off empty, of pre-filled with some existing content from the user.
+The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
+The idea is that these changes will reflect a story progressing in the fictional world.
+You will always output in a structured form with an array of updates to apply simultaneously to the world.
+Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
+Have fun with it!
+"""
+
     let userPrompt = userPrompt_ # String.trim
     promptMsg <- do
       { world } <- get
@@ -111,6 +212,8 @@ main_component = H.mkComponent { initialState, eval, render }
         prelude = describeWorld world
         prompt =
           """
+Current state of the world:
+
 {{prelude}}
 
 User instructions: {{prompt}}
@@ -136,17 +239,7 @@ User instructions: {{prompt}}
           { config
           , name: "updates"
           , messages:
-              [ mkSystemMsg $ String.trim
-                  """
-You are a helpful assistant for write story-related content.
-You are interacting with a fictional world in collaboration with the user.
-The world may start off empty, of pre-filled with some existing content from the user.
-The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
-The idea is that these changes will reflect a story progressing in the fictional world.
-You will always output in a structured form with an array of updates to apply simultaneously to the world.
-Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
-Have fun with it!
-"""
+              [ systemMsg
               , promptMsg
               ]
           }

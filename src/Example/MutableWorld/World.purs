@@ -68,26 +68,24 @@ applyWorldUpdate (SetCharacterLocation { name, location_name }) = prop @"charact
 
 describeWorld :: World -> String
 describeWorld w = intercalate "\n"
-  [ "Current state of the world:"
-  , ""
-  , if Map.isEmpty w.locations then
-      "  - No locations have been created yet"
+  [ if Map.isEmpty w.locations then
+      "    - No locations have been created yet"
     else intercalate "\n" $
-      [ "  - Locations:"
+      [ "    - Locations:"
       , intercalate "\n" $
           w.locations # Map.toUnfoldable <#> \(_ /\ l) ->
-            "    - {{name}}: {{description}}" # format l
+            "        - {{name}}: {{description}}" # format l
       ]
   , ""
   , if Map.isEmpty w.characters then
-      "  - No characters have been created yet"
+      "    - No characters have been created yet"
     else intercalate "\n" $
-      [ "  - Characters:"
+      [ "    - Characters:"
       , intercalate "\n" $
           w.characters # Map.toUnfoldable <#> \(_ /\ c) -> format c $ intercalate "\n"
             [ "    - {{name}}: {{description}}"
-            , "      - Current location: {{location_name}}"
-            , "      - Current status: {{status}}"
+            , "        - Current location: {{location_name}}"
+            , "        - Current status: {{status}}"
             ]
       ]
   ]
