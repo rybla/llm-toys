@@ -88,18 +88,6 @@ main_component = H.mkComponent { initialState, eval, render }
   getConfig = get >>= \{ config } -> config # flip maybe pure do
     throwError $ Aff.error "config has not been set"
 
-  systemMsg_UpdateWorld = mkSystemMsg $ String.trim
-    """
-You are a helpful assistant for write story-related content.
-You are interacting with a fictional world in collaboration with the user.
-The world may start off empty, of pre-filled with some existing content from the user.
-The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
-The idea is that these changes will reflect a story progressing in the fictional world.
-You will always output in a structured form with an array of updates to apply simultaneously to the world.
-Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
-Have fun with it.
-"""
-
   handleAction (SetConfig config) = do
     prop @"config" .= pure config
 
@@ -147,7 +135,20 @@ User instructions: {{prompt}}
         generate_structure @(updates :: Array WorldUpdate)
           { config
           , name: "updates"
-          , messages: [ systemMsg_UpdateWorld, promptMsg ]
+          , messages:
+              [ mkSystemMsg $ String.trim
+                  """
+You are a helpful assistant for write story-related content.
+You are interacting with a fictional world in collaboration with the user.
+The world may start off empty, of pre-filled with some existing content from the user.
+The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
+The idea is that these changes will reflect a story progressing in the fictional world.
+You will always output in a structured form with an array of updates to apply simultaneously to the world.
+Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
+Have fun with it!
+"""
+              , promptMsg
+              ]
           }
       case err_msg of
         Left err -> do
