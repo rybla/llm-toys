@@ -83,9 +83,9 @@ describeWorld w = intercalate "\n"
       [ "    - Characters:"
       , intercalate "\n" $
           w.characters # Map.toUnfoldable <#> \(_ /\ c) -> format c $ intercalate "\n"
-            [ "    - {{name}}: {{description}}"
-            , "        - Current location: {{location_name}}"
-            , "        - Current status: {{status}}"
+            [ "        - {{name}}: {{description}}"
+            , "            - Current location: {{location_name}}"
+            , "            - Current status: {{status}}"
             ]
       ]
   ]

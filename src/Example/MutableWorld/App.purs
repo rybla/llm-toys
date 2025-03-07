@@ -8,14 +8,16 @@ import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (encodeJson, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
-import Data.Array (intercalate, length, take)
+import Data.Array (filter, foldMap, intercalate, length, take)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldr)
 import Data.FunctorWithIndex (mapWithIndex)
 import Data.Lens ((%=), (.=))
+import Data.List (Pattern)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), maybe)
+import Data.String (Pattern(..))
 import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -62,8 +64,11 @@ data Action
   = SetConfig Config
   | SubmitPrompt PromptSource String
   | InputKeyDown PromptSource KeyboardEvent
-  | Import
-  | Export
+  | ImportWorld
+  | ExportWorld
+  | ImportStory
+  | ExportStory
+  | ExportStoryMd
 
 data PromptSource
   = UpdateWorld_PromptSource
@@ -103,21 +108,25 @@ main_component = H.mkComponent { initialState, eval, render }
 
     prop @"processing" .= true
 
-    do
+    -- generate next paragraph of story
+    story_content <- do
       systemMsg <- do
         pure $ mkSystemMsg $ String.trim
           """
-You are a helpful fiction writing assistant.
-You are currently collaborating with the user to write a novel.
-The way this collaboration works is that if the user has written a portion of the story already, they will show you the latest few paragraphs in the story.
-You should read these paragraphs carefully to get an idea of what's going on right now in the story.
-The user will also provide a description of the current state of the story world.
-Note that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in the story.
-But, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.
-Finally, the user will provide a high-level suggestion for what they think should happen next in the story.
-Consider this suggestion, and find an interpretation that makes the most sense to make the story interesting and make progress in developing the plot and the worldbuilding.
+You are a helpful fiction writing assistant, and are currently collaborating with the user to write a novel.
 
-You should reply with EXACTLY 1 PARAGRAPH as the next paragraph of the story, picking up right where the user left off if they've written anything in the story already.
+The way this collaboration works is that if the user has written a portion of their story already, they will show you the latest few paragraphs in their story.
+You should read these paragraphs carefully to get an idea of what's going on right now in their story.
+
+The user will also provide a description of the current state of the world.
+Note that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in their story.
+But, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.
+The story takes place in this world, so make sure to use locations and characters by name, have named characters speak dialogue, and take into account their descriptions, statuses, and other properties.
+
+Finally, the user will provide a high-level suggestion for what they think should happen next in their story.
+Consider this suggestion, and find an interpretation that makes the most sense to make their story interesting and make progress in developing the plot and the worldbuilding.
+
+You should reply with 1-3 paragraphs that continue the user's story, picking up right where the user left off (if they've written anything in their story already).
   """
 
       let userPrompt = userPrompt_ # String.trim
@@ -152,20 +161,77 @@ This is my suggestion for what should happen next in the story:
       state_backup <- get
       prop @"transcript" %=
         ( _ `Array.snoc`
-            { label: "Story / User Prompt"
+            { label: "Story / Next / User Prompt"
+            , content: userPrompt
+            }
+        )
+
+      result <- do
+        err_msg <- lift $ generate { config, messages: [ systemMsg, promptMsg ] }
+        case err_msg of
+          Left err -> do
+            put state_backup
+            throwError $ Aff.error $ "error when generating: " <> err
+          Right msg -> pure msg
+
+      let story_content = String.trim result.content
+
+      prop @"transcript" %=
+        ( _ `Array.snoc`
+            { label: "Story / Next / Model"
+            , content: story_content
+            }
+        )
+
+      prop @"story" %= (_ `Array.snoc` { prompt: userPrompt, content: story_content })
+      pure story_content
+
+    -- derive and apply changes to world
+    do
+      let
+        systemMsg = mkSystemMsg $ String.trim
+          """
+You are a helpful assistant for writing story-related content.
+The user is currently writing a story.
+They will present to you the current state of the world, and the most recent paragraph of their story which may imply some changes to the world state.
+It is critically important to keep the world state updated to match the latest events in their story, so the user needs your help to update the world state.
+The updates you produce should exactly reflect whatever changes to the world state are implied by the single story paragraph provided by the user.
+You will always output in a structured form with an array of updates to apply simultaneously to the world.
+  """
+
+      let userPrompt = userPrompt_ # String.trim
+      promptMsg <- do
+        { world } <- get
+        let
+          prompt =
+            """
+The current state of the world:
+
+{{world}}
+
+The next paragraph of my story, which may imply some changes to the world state:
+
+    {{story_content}}
+    """
+              # format
+                  { world: describeWorld world
+                  , story_content
+                  }
+              # String.trim
+        pure $ mkUserMsg prompt
+
+      state_backup <- get
+      prop @"transcript" %=
+        ( _ `Array.snoc`
+            { label: "Story / Update World / User Prompt"
             , content: userPrompt
             }
         )
 
       result <- do
         err_msg <- lift $
-          generate
-            { config
-            , messages:
-                [ systemMsg
-                , promptMsg
-                ]
-            }
+          generate_structure @(updates :: Array WorldUpdate)
+            { config, name: "updates", messages: [ systemMsg, promptMsg ] }
         case err_msg of
           Left err -> do
             put state_backup
@@ -174,14 +240,13 @@ This is my suggestion for what should happen next in the story:
 
       prop @"transcript" %=
         ( _ `Array.snoc`
-            { label: "Story / Model"
-            , content: result.content
+            { label: "Story / Update World / Model Response"
+            , content: result.updates # map show # intercalate "\n"
             }
         )
+      prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
 
     prop @"processing" .= false
-
-    pure unit
 
   handleAction (SubmitPrompt UpdateWorld_PromptSource userPrompt_) = do
     config <- getConfig
@@ -195,7 +260,7 @@ This is my suggestion for what should happen next in the story:
     let
       systemMsg = mkSystemMsg $ String.trim
         """
-You are a helpful assistant for write story-related content.
+You are a helpful assistant for writing story-related content.
 You are interacting with a fictional world in collaboration with the user.
 The world may start off empty, of pre-filled with some existing content from the user.
 The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
@@ -209,17 +274,18 @@ Have fun with it!
     promptMsg <- do
       { world } <- get
       let
-        prelude = describeWorld world
         prompt =
           """
-Current state of the world:
+The current state of the world:
 
-{{prelude}}
+{{world}}
 
-User instructions: {{prompt}}
+My instructions for how to update the world state:
+
+    {{prompt}}
   """
             # format
-                { prelude
+                { world: describeWorld world
                 , prompt: userPrompt
                 }
             # String.trim
@@ -259,16 +325,36 @@ User instructions: {{prompt}}
 
     prop @"processing" .= false
 
-  handleAction Export = do
+  handleAction ExportWorld = do
     { world } <- get
     copyToClipboard (stringifyWithIndent 4 $ encodeJson world) # liftAff # void
 
-  handleAction Import = do
+  handleAction ImportWorld = do
     readFromClipboard # liftAff >>= case _ of
       Left _ -> pure unit
       Right s -> case fromJsonString s of
         Left _ -> pure unit
         Right world -> prop @"world" .= world
+
+  handleAction ExportStory = do
+    { story } <- get
+    copyToClipboard (stringifyWithIndent 4 $ encodeJson story) # liftAff # void
+
+  handleAction ExportStoryMd = do
+    { story } <- get
+    void $ liftAff $ copyToClipboard $ intercalate "\n\n" $
+      story
+        # foldMap \{ content, prompt } ->
+            [ "> " <> prompt
+            , content
+            ]
+
+  handleAction ImportStory = do
+    readFromClipboard # liftAff >>= case _ of
+      Left _ -> pure unit
+      Right s -> case fromJsonString s of
+        Left _ -> pure unit
+        Right story -> prop @"story" .= story
 
   handleAction (InputKeyDown source event) = do
     let
@@ -288,10 +374,10 @@ User instructions: {{prompt}}
 
   render state =
     let
-      n = length state.transcript
+      transcript_processing_slotId = show (length state.transcript)
+      transcript_bottom_slotId = "transcript_bottom_" <> show (length state.transcript + (if state.processing then 1 else 0))
 
-      transcript_processing_slotId = n
-      transcript_bottom_slotId = n + (if state.processing then 1 else 0)
+      story_bottom_slotId = "story_bottom_" <> show (length state.story)
     in
       HH.div
         [ HP.classes [ H.ClassName "App" ] ]
@@ -303,18 +389,36 @@ User instructions: {{prompt}}
                     , HH.div [] [ HH.text content ]
                     ]
             , if not state.processing then []
-              else [ Tuple (show transcript_processing_slotId) $ HH.div [] [ HH.text "processing..." ] ]
-            , [ Tuple (show transcript_bottom_slotId) $ HH.slot_ (Proxy @"ScrollToMe") (show transcript_bottom_slotId) Widget.scrollToMe unit ]
+              else [ Tuple transcript_processing_slotId $ HH.div [] [ HH.text "processing..." ] ]
+            , [ Tuple transcript_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") transcript_bottom_slotId Widget.scrollToMe unit ]
+            ]
+        , HHK.div [ HP.classes [ H.ClassName "Story" ] ] $ fold $
+            [ state.story # mapWithIndex \i { prompt, content } ->
+                Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "StoryItem" ] ] $ fold $
+                  [ [ HH.div [ HP.classes [ H.ClassName "StoryItemPrompt" ] ] [ HH.text prompt ] ]
+                  , content # String.split (Pattern "\n") # map String.trim # filter (not <<< String.null) # map \s ->
+                      HH.div [ HP.classes [ H.ClassName "StoryItemContent" ] ] [ HH.text s ]
+                  ]
+            , [ Tuple story_bottom_slotId $ HH.slot_ (Proxy @"ScrollToMe") story_bottom_slotId Widget.scrollToMe unit ]
             ]
         , HH.div [ HP.classes [ H.ClassName "World" ] ]
             [ HH.text $ describeWorld state.world ]
         , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
             [ HH.button
-                [ HE.onClick $ const Export ]
-                [ HH.text "export" ]
+                [ HE.onClick $ const ExportWorld ]
+                [ HH.text "export world" ]
             , HH.button
-                [ HE.onClick $ const Import ]
-                [ HH.text "import" ]
+                [ HE.onClick $ const ImportWorld ]
+                [ HH.text "import world" ]
+            , HH.button
+                [ HE.onClick $ const ExportStory ]
+                [ HH.text "export story (json)" ]
+            , HH.button
+                [ HE.onClick $ const ExportStoryMd ]
+                [ HH.text "export story (md)" ]
+            , HH.button
+                [ HE.onClick $ const ImportStory ]
+                [ HH.text "import story" ]
             ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
             [ HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]

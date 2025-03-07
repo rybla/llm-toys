@@ -77,6 +77,30 @@ html, body {
   white-space: pre-wrap;
 }
 
+.Story {
+  height: 20em;
+  padding: 1em;
+  overflow-y: scroll;
+  box-shadow: 0 0 0 1px black;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.StoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.StoryItemPrompt {
+  padding: 1em;
+  background-color: color-mix(in hsl, black, transparent 80%);
+}
+
+.StoryItemContent {}
+
 .Toolbar {
   display: flex;
   flex-direction: row;

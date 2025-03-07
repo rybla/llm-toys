@@ -8932,6 +8932,9 @@ ${str(snapshot)}`);
     l1.splice(i2, 1);
     return just(l1);
   };
+  var filterImpl = function(f, xs) {
+    return xs.filter(f);
+  };
   var sliceImpl = function(s, e, l) {
     return l.slice(s, e);
   };
@@ -9016,6 +9019,7 @@ ${str(snapshot)}`);
   // output/Data.Array/index.js
   var intercalate1 = /* @__PURE__ */ intercalate(foldableArray);
   var fromJust4 = /* @__PURE__ */ fromJust();
+  var foldMap12 = /* @__PURE__ */ foldMap(foldableArray);
   var unsafeIndex = function() {
     return runFn2(unsafeIndexImpl);
   };
@@ -9063,9 +9067,13 @@ ${str(snapshot)}`);
   var head = function(xs) {
     return index2(xs)(0);
   };
+  var foldMap2 = function(dictMonoid) {
+    return foldMap12(dictMonoid);
+  };
   var findIndex2 = /* @__PURE__ */ function() {
     return runFn4(findIndexImpl)(Just.create)(Nothing.value);
   }();
+  var filter2 = /* @__PURE__ */ runFn2(filterImpl);
   var deleteAt = /* @__PURE__ */ function() {
     return runFn4(_deleteAt)(Just.create)(Nothing.value);
   }();
@@ -9153,7 +9161,7 @@ ${str(snapshot)}`);
     return unsafeCoerce2;
   };
   var fold2 = /* @__PURE__ */ _foldM(applyFlipped);
-  var foldMap2 = function(dictMonoid) {
+  var foldMap3 = function(dictMonoid) {
     var append12 = append(dictMonoid.Semigroup0());
     var mempty3 = mempty(dictMonoid);
     return function(f) {
@@ -9182,9 +9190,9 @@ ${str(snapshot)}`);
       };
     },
     foldMap: function(dictMonoid) {
-      var foldMap12 = foldMap2(dictMonoid);
+      var foldMap13 = foldMap3(dictMonoid);
       return function(f) {
-        return foldMap12($$const(f));
+        return foldMap13($$const(f));
       };
     }
   };
@@ -9200,7 +9208,7 @@ ${str(snapshot)}`);
       };
     },
     foldMapWithIndex: function(dictMonoid) {
-      return foldMap2(dictMonoid);
+      return foldMap3(dictMonoid);
     },
     Foldable0: function() {
       return foldableObject;
@@ -10020,6 +10028,11 @@ ${str(snapshot)}`);
       };
     };
   };
+  var split = function(sep) {
+    return function(s) {
+      return s.split(sep);
+    };
+  };
   var trim = function(s) {
     return s.trim();
   };
@@ -10398,16 +10411,16 @@ ${str(snapshot)}`);
   var encodeMap2 = function(dictOrd) {
     var encodeMap1 = encodeMap(dictOrd);
     return function(dictEncodeJson) {
-      var encodeJson13 = encodeJson(dictEncodeJson);
+      var encodeJson14 = encodeJson(dictEncodeJson);
       return function(dictEncodeJson1) {
         return {
-          encodeJson: encodeMap1(encodeJson13)(encodeJson(dictEncodeJson1))
+          encodeJson: encodeMap1(encodeJson14)(encodeJson(dictEncodeJson1))
         };
       };
     };
   };
   var gEncodeJsonCons = function(dictEncodeJson) {
-    var encodeJson13 = encodeJson(dictEncodeJson);
+    var encodeJson14 = encodeJson(dictEncodeJson);
     return function(dictGEncodeJson) {
       var gEncodeJson1 = gEncodeJson(dictGEncodeJson);
       return function(dictIsSymbol) {
@@ -10417,7 +10430,7 @@ ${str(snapshot)}`);
           return {
             gEncodeJson: function(row) {
               return function(v) {
-                return insert(reflectSymbol2($$Proxy.value))(encodeJson13(get5($$Proxy.value)(row)))(gEncodeJson1(row)($$Proxy.value));
+                return insert(reflectSymbol2($$Proxy.value))(encodeJson14(get5($$Proxy.value)(row)))(gEncodeJson1(row)($$Proxy.value));
               };
             }
           };
@@ -14934,7 +14947,7 @@ ${str(snapshot)}`);
       }
       ;
       return intercalate6("\n")(["    - Characters:", intercalate6("\n")(mapFlipped3(toUnfoldable9(w.characters))(function(v) {
-        return format2(v.value1)(intercalate6("\n")(["    - {{name}}: {{description}}", "        - Current location: {{location_name}}", "        - Current status: {{status}}"]));
+        return format2(v.value1)(intercalate6("\n")(["        - {{name}}: {{description}}", "            - Current location: {{location_name}}", "            - Current status: {{status}}"]));
       }))]);
     }()]);
   };
@@ -16188,15 +16201,16 @@ ${str(snapshot)}`);
   var toEvent = unsafeCoerce2;
 
   // output/Example.MutableWorld.App/index.js
+  var show3 = /* @__PURE__ */ show(showInt);
   var fold4 = /* @__PURE__ */ fold(foldableArray)(monoidArray);
   var mapWithIndex4 = /* @__PURE__ */ mapWithIndex(functorWithIndexArray);
-  var show3 = /* @__PURE__ */ show(showInt);
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "ScrollToMe";
     }
   })(ordString);
   var scrollToMe2 = /* @__PURE__ */ scrollToMe(monadEffectAff);
+  var map32 = /* @__PURE__ */ map(functorArray);
   var value14 = /* @__PURE__ */ value(isPropString);
   var slot2 = /* @__PURE__ */ slot()({
     reflectSymbol: function() {
@@ -16216,20 +16230,24 @@ ${str(snapshot)}`);
   })()()(strongFn);
   var pure18 = /* @__PURE__ */ pure(applicativeMaybe);
   var when4 = /* @__PURE__ */ when(applicativeHalogenM);
+  var prop14 = /* @__PURE__ */ prop4({
+    reflectSymbol: function() {
+      return "processing";
+    }
+  })()()(strongFn);
   var format3 = /* @__PURE__ */ format();
   var intercalate7 = /* @__PURE__ */ intercalate2(monoidString);
-  var map32 = /* @__PURE__ */ map(functorArray);
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
-  var prop14 = /* @__PURE__ */ prop4({
+  var prop24 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "transcript";
     }
   })()()(strongFn);
   var lift3 = /* @__PURE__ */ lift(monadTransHalogenM)(monadAff);
   var put2 = /* @__PURE__ */ put(monadStateHalogenM);
-  var prop24 = /* @__PURE__ */ prop4({
+  var prop33 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
-      return "processing";
+      return "story";
     }
   })()()(strongFn);
   var updatesIsSymbol = {
@@ -16239,7 +16257,7 @@ ${str(snapshot)}`);
   };
   var generate_structure2 = /* @__PURE__ */ generate_structure(/* @__PURE__ */ toJsonSchemaRecord()(/* @__PURE__ */ toJsonSchema_RowListCons(updatesIsSymbol)()(/* @__PURE__ */ toJsonSchemaArray(toJsonSchemaWorldUpdate))(toJsonSchema_RowListNil)))(/* @__PURE__ */ decodeJsonFromSchemaRecor()(/* @__PURE__ */ decodeJsonFromSchema_RowL1(updatesIsSymbol)(/* @__PURE__ */ decodeJsonFromSchemaArray(decodeJsonFromSchemaWorld))()()(decodeJsonFromSchema_RowL)));
   var show12 = /* @__PURE__ */ show(showWorldUpdate);
-  var prop33 = /* @__PURE__ */ prop4({
+  var prop42 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "world";
     }
@@ -16285,6 +16303,19 @@ ${str(snapshot)}`);
   var gDecodeJsonCons4 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString));
   var gDecodeJsonCons13 = /* @__PURE__ */ gDecodeJsonCons4(gDecodeJsonNil);
   var fromJsonString3 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(statusIsSymbol2)()())(nameIsSymbol4)()())(location_nameIsSymbol2)()())(descriptionIsSymbol2)()())())))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeMap3(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(nameIsSymbol4)()())(descriptionIsSymbol2)()())())))(gDecodeJsonNil)(locationsIsSymbol)()())(charactersIsSymbol)()())());
+  var promptIsSymbol = {
+    reflectSymbol: function() {
+      return "prompt";
+    }
+  };
+  var contentIsSymbol2 = {
+    reflectSymbol: function() {
+      return "content";
+    }
+  };
+  var encodeJson13 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeJsonArray(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons14(promptIsSymbol)())(contentIsSymbol2)())()));
+  var foldMap4 = /* @__PURE__ */ foldMap2(monoidArray);
+  var fromJsonString12 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(/* @__PURE__ */ gDecodeJsonCons13(promptIsSymbol)()())(contentIsSymbol2)()())()));
   var liftEffect9 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindAff);
   var UpdateWorld_PromptSource = /* @__PURE__ */ function() {
@@ -16337,42 +16368,72 @@ ${str(snapshot)}`);
     };
     return InputKeyDown2;
   }();
-  var Import = /* @__PURE__ */ function() {
-    function Import2() {
+  var ImportWorld = /* @__PURE__ */ function() {
+    function ImportWorld2() {
     }
     ;
-    Import2.value = new Import2();
-    return Import2;
+    ImportWorld2.value = new ImportWorld2();
+    return ImportWorld2;
   }();
-  var Export = /* @__PURE__ */ function() {
-    function Export2() {
+  var ExportWorld = /* @__PURE__ */ function() {
+    function ExportWorld2() {
     }
     ;
-    Export2.value = new Export2();
-    return Export2;
+    ExportWorld2.value = new ExportWorld2();
+    return ExportWorld2;
+  }();
+  var ImportStory = /* @__PURE__ */ function() {
+    function ImportStory2() {
+    }
+    ;
+    ImportStory2.value = new ImportStory2();
+    return ImportStory2;
+  }();
+  var ExportStory = /* @__PURE__ */ function() {
+    function ExportStory2() {
+    }
+    ;
+    ExportStory2.value = new ExportStory2();
+    return ExportStory2;
+  }();
+  var ExportStoryMd = /* @__PURE__ */ function() {
+    function ExportStoryMd2() {
+    }
+    ;
+    ExportStoryMd2.value = new ExportStoryMd2();
+    return ExportStoryMd2;
   }();
   var main_component = /* @__PURE__ */ function() {
     var render = function(state3) {
-      var n = length3(state3.transcript);
-      var transcript_bottom_slotId = n + function() {
+      var transcript_processing_slotId = show3(length3(state3.transcript));
+      var transcript_bottom_slotId = "transcript_bottom_" + show3(length3(state3.transcript) + function() {
         if (state3.processing) {
           return 1;
         }
         ;
         return 0;
-      }() | 0;
+      }() | 0);
+      var story_bottom_slotId = "story_bottom_" + show3(length3(state3.story));
       return div2([classes(["App"])])([div3([classes(["Transcript"])])(fold4([mapWithIndex4(function(i2) {
         return function(v) {
           return new Tuple(show3(i2), div2([classes(["Msg"])])([div2([])([text(v.label)]), div2([])([text(v.content)])]));
         };
       })(state3.transcript), function() {
-        var $195 = !state3.processing;
-        if ($195) {
+        var $234 = !state3.processing;
+        if ($234) {
           return [];
         }
         ;
-        return [new Tuple(show3(n), div2([])([text("processing...")]))];
-      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(Export.value))])([text("export")]), button([onClick($$const(Import.value))])([text("import")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Manually modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
+        return [new Tuple(transcript_processing_slotId, div2([])([text("processing...")]))];
+      }(), [new Tuple(transcript_bottom_slotId, slot_2($$Proxy.value)(transcript_bottom_slotId)(scrollToMe2)(unit))]])), div3([classes(["Story"])])(fold4([mapWithIndex4(function(i2) {
+        return function(v) {
+          return new Tuple(show3(i2), div2([classes(["StoryItem"])])(fold4([[div2([classes(["StoryItemPrompt"])])([text(v.prompt)])], map32(function(s) {
+            return div2([classes(["StoryItemContent"])])([text(s)]);
+          })(filter2(function($292) {
+            return !$$null2($292);
+          })(map32(trim)(split("\n")(v.content))))])));
+        };
+      })(state3.story), [new Tuple(story_bottom_slotId, slot_2($$Proxy.value)(story_bottom_slotId)(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")]), button([onClick($$const(ExportStory.value))])([text("export world (json)")]), button([onClick($$const(ExportStoryMd.value))])([text("export world (md)")]), button([onClick($$const(ImportStory.value))])([text("import story")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Manually modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
         providerCategory: "Main",
         providers: providers_with_structured_output
       })(SetConfig.create)]);
@@ -16405,57 +16466,119 @@ ${str(snapshot)}`);
           return discard6(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
-            return bind10(pure17(mkSystemMsg(trim("\nYou are a helpful fiction writing assistant.\nYou are currently collaborating with the user to write a novel.\nThe way this collaboration works is that if the user has written a portion of the story already, they will show you the latest few paragraphs in the story.\nYou should read these paragraphs carefully to get an idea of what's going on right now in the story.\nThe user will also provide a description of the current state of the story world.\nNote that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in the story.\nBut, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.\nFinally, the user will provide a high-level suggestion for what they think should happen next in the story.\nConsider this suggestion, and find an interpretation that makes the most sense to make the story interesting and make progress in developing the plot and the worldbuilding.\n\nYou should reply with EXACTLY 1 PARAGRAPH as the next paragraph of the story, picking up right where the user left off if they've written anything in the story already.\n"))))(function(systemMsg) {
-              var userPrompt = trim(v.value1);
-              return bind10(bind10(get4)(function(v1) {
-                return pure17(mkUserMsg(trim(format3({
-                  story_so_far: function() {
-                    var $203 = length3(v1.story) === 0;
-                    if ($203) {
-                      return "I haven't written any of the story yet. So you are helping me write the very first paragraph.";
-                    }
-                    ;
-                    return intercalate7("\n\n")(["The following paragraphs are the most recent portion of the story I'm currently writing.", intercalate7("\n\n")(map32(function(v2) {
-                      return "    " + v2.content;
-                    })(take3(2)(v1.story)))]);
-                  }(),
-                  world: describeWorld(v1.world),
-                  prompt: userPrompt
-                })("\n{{story_so_far}}\n\nSo right now in the story, this is the current state of the world:\n\n{{world}}\n\nThis is my suggestion for what should happen next in the story:\n\n    {{prompt}}  \n"))));
-              }))(function(promptMsg) {
-                return bind10(get4)(function(state_backup) {
-                  return discard6(modifying2(prop14)(function(v1) {
-                    return snoc2(v1)({
-                      label: "Story / User Prompt",
-                      content: userPrompt
-                    });
-                  }))(function() {
-                    return bind10(bind10(lift3(generate({
-                      config,
-                      messages: [systemMsg, promptMsg]
-                    })))(function(err_msg) {
-                      if (err_msg instanceof Left) {
-                        return discard6(put2(state_backup))(function() {
-                          return throwError5(error("error when generating: " + err_msg.value0));
-                        });
+            return discard6(assign4(prop14)(true))(function() {
+              return bind10(bind10(pure17(mkSystemMsg(trim("\nYou are a helpful fiction writing assistant, and are currently collaborating with the user to write a novel.\n\nThe way this collaboration works is that if the user has written a portion of their story already, they will show you the latest few paragraphs in their story.\nYou should read these paragraphs carefully to get an idea of what's going on right now in their story.\n\nThe user will also provide a description of the current state of the world.\nNote that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in their story.\nBut, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.\nThe story takes place in this world, so make sure to use locations and characters by name, have named characters speak dialogue, and take into account their descriptions, statuses, and other properties.\n\nFinally, the user will provide a high-level suggestion for what they think should happen next in their story.\nConsider this suggestion, and find an interpretation that makes the most sense to make their story interesting and make progress in developing the plot and the worldbuilding.\n\nYou should reply with 1-3 paragraphs that continue the user's story, picking up right where the user left off (if they've written anything in their story already).\n  "))))(function(systemMsg) {
+                var userPrompt = trim(v.value1);
+                return bind10(bind10(get4)(function(v1) {
+                  return pure17(mkUserMsg(trim(format3({
+                    story_so_far: function() {
+                      var $245 = length3(v1.story) === 0;
+                      if ($245) {
+                        return "I haven't written any of the story yet. So you are helping me write the very first paragraph.";
                       }
                       ;
-                      if (err_msg instanceof Right) {
-                        return pure17(err_msg.value0);
-                      }
-                      ;
-                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 166, column 7 - line 170, column 30): " + [err_msg.constructor.name]);
-                    }))(function(result) {
-                      return discard6(modifying2(prop14)(function(v1) {
-                        return snoc2(v1)({
-                          label: "Story / Model",
-                          content: result.content
+                      return intercalate7("\n\n")(["The following paragraphs are the most recent portion of the story I'm currently writing.", intercalate7("\n\n")(map32(function(v2) {
+                        return "    " + v2.content;
+                      })(take3(2)(v1.story)))]);
+                    }(),
+                    world: describeWorld(v1.world),
+                    prompt: userPrompt
+                  })("\n{{story_so_far}}\n\nSo right now in the story, this is the current state of the world:\n\n{{world}}\n\nThis is my suggestion for what should happen next in the story:\n\n    {{prompt}}  \n  "))));
+                }))(function(promptMsg) {
+                  return bind10(get4)(function(state_backup) {
+                    return discard6(modifying2(prop24)(function(v1) {
+                      return snoc2(v1)({
+                        label: "Story / Next / User Prompt",
+                        content: userPrompt
+                      });
+                    }))(function() {
+                      return bind10(bind10(lift3(generate({
+                        config,
+                        messages: [systemMsg, promptMsg]
+                      })))(function(err_msg) {
+                        if (err_msg instanceof Left) {
+                          return discard6(put2(state_backup))(function() {
+                            return throwError5(error("error when generating: " + err_msg.value0));
+                          });
+                        }
+                        ;
+                        if (err_msg instanceof Right) {
+                          return pure17(err_msg.value0);
+                        }
+                        ;
+                        throw new Error("Failed pattern match at Example.MutableWorld.App (line 171, column 9 - line 175, column 32): " + [err_msg.constructor.name]);
+                      }))(function(result) {
+                        var story_content = trim(result.content);
+                        return discard6(modifying2(prop24)(function(v1) {
+                          return snoc2(v1)({
+                            label: "Story / Next / Model",
+                            content: story_content
+                          });
+                        }))(function() {
+                          return discard6(modifying2(prop33)(function(v1) {
+                            return snoc2(v1)({
+                              prompt: userPrompt,
+                              content: story_content
+                            });
+                          }))(function() {
+                            return pure17(story_content);
+                          });
                         });
-                      }))(function() {
-                        return pure17(unit);
                       });
                     });
                   });
+                });
+              }))(function(story_content) {
+                return discard6(function() {
+                  var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nThe user is currently writing a story.\nThey will present to you the current state of the world, and the most recent paragraph of their story which may imply some changes to the world state.\nIt is critically important to keep the world state updated to match the latest events in their story, so the user needs your help to update the world state.\nThe updates you produce should exactly reflect whatever changes to the world state are implied by the single story paragraph provided by the user.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\n  "));
+                  var userPrompt = trim(v.value1);
+                  return bind10(bind10(get4)(function(v1) {
+                    var prompt = trim(format3({
+                      world: describeWorld(v1.world),
+                      story_content
+                    })("\nThe current state of the world:\n\n{{world}}\n\nThe next paragraph of my story, which may imply some changes to the world state:\n\n    {{story_content}}\n    "));
+                    return pure17(mkUserMsg(prompt));
+                  }))(function(promptMsg) {
+                    return bind10(get4)(function(state_backup) {
+                      return discard6(modifying2(prop24)(function(v1) {
+                        return snoc2(v1)({
+                          label: "Story / Update World / User Prompt",
+                          content: userPrompt
+                        });
+                      }))(function() {
+                        return bind10(bind10(lift3(generate_structure2({
+                          config,
+                          name: "updates",
+                          messages: [systemMsg, promptMsg]
+                        })))(function(err_msg) {
+                          if (err_msg instanceof Left) {
+                            return discard6(put2(state_backup))(function() {
+                              return throwError5(error("error when generating: " + err_msg.value0));
+                            });
+                          }
+                          ;
+                          if (err_msg instanceof Right) {
+                            return pure17(err_msg.value0);
+                          }
+                          ;
+                          throw new Error("Failed pattern match at Example.MutableWorld.App (line 235, column 9 - line 239, column 32): " + [err_msg.constructor.name]);
+                        }))(function(result) {
+                          return discard6(modifying2(prop24)(function(v1) {
+                            return snoc2(v1)({
+                              label: "Story / Update World / Model Response",
+                              content: intercalate7("\n")(map32(show12)(result.updates))
+                            });
+                          }))(function() {
+                            return modifying2(prop42)(function(world) {
+                              return foldr5(applyWorldUpdate)(world)(result.updates);
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                }())(function() {
+                  return assign4(prop14)(false);
                 });
               });
             });
@@ -16468,19 +16591,18 @@ ${str(snapshot)}`);
           return discard6(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
-            return discard6(assign4(prop24)(true))(function() {
-              var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for write story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it!\n"));
+            return discard6(assign4(prop14)(true))(function() {
+              var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it!\n"));
               var userPrompt = trim(v.value1);
               return bind10(bind10(get4)(function(v1) {
-                var prelude = describeWorld(v1.world);
                 var prompt = trim(format3({
-                  prelude,
+                  world: describeWorld(v1.world),
                   prompt: userPrompt
-                })("\nCurrent state of the world:\n\n{{prelude}}\n\nUser instructions: {{prompt}}\n  "));
+                })("\nThe current state of the world:\n\n{{world}}\n\nMy instructions for how to update the world state:\n\n    {{prompt}}\n  "));
                 return pure17(mkUserMsg(prompt));
               }))(function(promptMsg) {
                 return bind10(get4)(function(state_backup) {
-                  return discard6(modifying2(prop14)(function(v1) {
+                  return discard6(modifying2(prop24)(function(v1) {
                     return snoc2(v1)({
                       label: "Manually modify world / User Prompt",
                       content: userPrompt
@@ -16501,18 +16623,18 @@ ${str(snapshot)}`);
                         return pure17(err_msg.value0);
                       }
                       ;
-                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 241, column 7 - line 245, column 30): " + [err_msg.constructor.name]);
+                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 312, column 7 - line 316, column 30): " + [err_msg.constructor.name]);
                     }))(function(result) {
-                      return discard6(modifying2(prop14)(function(v1) {
+                      return discard6(modifying2(prop24)(function(v1) {
                         return snoc2(v1)({
                           label: "Manually modify world / Model Response",
                           content: intercalate7("\n")(map32(show12)(result.updates))
                         });
                       }))(function() {
-                        return discard6(modifying2(prop33)(function(world) {
+                        return discard6(modifying2(prop42)(function(world) {
                           return foldr5(applyWorldUpdate)(world)(result.updates);
                         }))(function() {
-                          return assign4(prop24)(false);
+                          return assign4(prop14)(false);
                         });
                       });
                     });
@@ -16524,13 +16646,13 @@ ${str(snapshot)}`);
         });
       }
       ;
-      if (v instanceof Export) {
+      if (v instanceof ExportWorld) {
         return bind10(get4)(function(v1) {
           return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson12(v1.world)))));
         });
       }
       ;
-      if (v instanceof Import) {
+      if (v instanceof ImportWorld) {
         return bind10(liftAff2(readFromClipboard))(function(v1) {
           if (v1 instanceof Left) {
             return pure17(unit);
@@ -16543,13 +16665,50 @@ ${str(snapshot)}`);
             }
             ;
             if (v2 instanceof Right) {
+              return assign4(prop42)(v2.value0);
+            }
+            ;
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 335, column 18 - line 337, column 46): " + [v2.constructor.name]);
+          }
+          ;
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 333, column 37 - line 337, column 46): " + [v1.constructor.name]);
+        });
+      }
+      ;
+      if (v instanceof ExportStory) {
+        return bind10(get4)(function(v1) {
+          return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson13(v1.story)))));
+        });
+      }
+      ;
+      if (v instanceof ExportStoryMd) {
+        return bind10(get4)(function(v1) {
+          return $$void7(liftAff2(copyToClipboard(intercalate7("\n\n")(foldMap4(function(v2) {
+            return ["> " + v2.prompt, v2.content];
+          })(v1.story)))));
+        });
+      }
+      ;
+      if (v instanceof ImportStory) {
+        return bind10(liftAff2(readFromClipboard))(function(v1) {
+          if (v1 instanceof Left) {
+            return pure17(unit);
+          }
+          ;
+          if (v1 instanceof Right) {
+            var v2 = fromJsonString12(v1.value0);
+            if (v2 instanceof Left) {
+              return pure17(unit);
+            }
+            ;
+            if (v2 instanceof Right) {
               return assign4(prop33)(v2.value0);
             }
             ;
-            throw new Error("Failed pattern match at Example.MutableWorld.App (line 264, column 18 - line 266, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 355, column 18 - line 357, column 46): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 262, column 37 - line 266, column 46): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 353, column 37 - line 357, column 46): " + [v1.constructor.name]);
         });
       }
       ;
@@ -16567,7 +16726,7 @@ ${str(snapshot)}`);
         }));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.App (line 93, column 3 - line 95, column 14): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.App (line 98, column 3 - line 100, column 14): " + [v.constructor.name]);
     };
     var $$eval = mkEval({
       handleQuery: defaultEval.handleQuery,
