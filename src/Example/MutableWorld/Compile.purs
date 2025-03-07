@@ -123,7 +123,7 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: 1em;
-  
+
   padding: 1em;
   box-shadow: 0 0 0 1px black inset;
 }
@@ -141,6 +141,12 @@ html, body {
 }
 
 .PromptButton {
+  padding: 0.5em;
+  text-align: left;
+  font-family: Merienda;
+}
+
+textarea {
   padding: 0.5em;
   text-align: left;
   font-family: Merienda;

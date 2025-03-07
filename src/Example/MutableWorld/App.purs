@@ -21,9 +21,10 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
+import Effect.Class.Console as Console
 import Example.MutableWorld.Common (Engine)
 import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld)
-import Halogen (liftAff)
+import Halogen (liftAff, liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -35,6 +36,10 @@ import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
 import Utility (format, prop, todo)
+import Web.Event.Event as Event
+import Web.HTML.HTMLTextAreaElement as HTMLTextAreaElement
+import Web.UIEvent.KeyboardEvent (KeyboardEvent)
+import Web.UIEvent.KeyboardEvent as KeyboardEvent
 
 --------------------------------------------------------------------------------
 
@@ -58,6 +63,7 @@ data Action
   | SubmitPrompt String
   | ExportWorld
   | ImportWorld
+  | InputKeyDown KeyboardEvent
 
 main_component :: forall query output. H.Component query Input output Aff
 main_component = H.mkComponent { initialState, eval, render }
@@ -94,6 +100,10 @@ Have fun with it.
   handleAction (SubmitPrompt userPrompt_) = do
     config <- get >>= \{ config } -> config # flip maybe pure do
       throwError $ Aff.error "config has not been set"
+
+    get >>= \{ processing } ->
+      when processing do
+        throwError $ Aff.error $ "already processing! dont submit another prompt yet"
 
     prop @"processing" .= true
 
@@ -143,34 +153,28 @@ User instructions: {{prompt}}
         Left _ -> pure unit
         Right world -> prop @"world" .= world
 
+  handleAction (InputKeyDown event) = do
+    let
+      key = event # KeyboardEvent.key
+      cmd = (event # KeyboardEvent.ctrlKey) || (event # KeyboardEvent.metaKey)
+
+    when (key == "Enter" && cmd) do
+      el <- event
+        # KeyboardEvent.toEvent
+        # Event.target
+        # maybe (throwError $ Aff.error "impossible") \target -> target
+            # HTMLTextAreaElement.fromEventTarget
+            # maybe (throwError $ Aff.error "impossible") pure
+      v <- el # HTMLTextAreaElement.value # liftEffect
+      HTMLTextAreaElement.setValue "" el # liftEffect
+      handleAction (SubmitPrompt v)
+
   render state =
     let
       length_msgs = length state.msgs
 
       transcript_processing_slotId = length_msgs
       transcript_bottom_slotId = length_msgs + (if state.processing then 1 else 0)
-
-      mkPromptButton userPrompt_ =
-        let
-          prelude = describeWorld state.world
-          userPrompt = userPrompt_ # String.trim
-          prompt =
-            """
-{{prelude}}
-
-User instructions: {{prompt}}
-"""
-              # format
-                  { prelude
-                  , prompt: userPrompt
-                  }
-        in
-          HH.button
-            [ HP.classes [ H.ClassName "PromptButton" ]
-            , HE.onClick $ const $ SubmitPrompt prompt
-            , HP.disabled state.processing
-            ]
-            [ HH.text userPrompt ]
     in
       HH.div
         [ HP.classes [ H.ClassName "App" ] ]
@@ -187,7 +191,8 @@ User instructions: {{prompt}}
             , [ Tuple (show transcript_bottom_slotId) $ HH.slot_ (Proxy @"ScrollToMe") (show transcript_bottom_slotId) Widget.scrollToMe unit ]
             ]
         , HH.div [ HP.classes [ H.ClassName "World" ] ]
-            [ HH.text $ stringifyWithIndent 4 $ encodeJson state.world ]
+            -- [ HH.text $ stringifyWithIndent 4 $ encodeJson state.world ]
+            [ HH.text $ describeWorld state.world ]
         , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
             [ HH.button
                 [ HE.onClick $ const ExportWorld ]
@@ -197,10 +202,10 @@ User instructions: {{prompt}}
                 [ HH.text "import world" ]
             ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
-            [ mkPromptButton $
-                """
-Create some locations and characters for a medieval fantasy world. Be creative!
-"""
+            [ HH.textarea
+                [ HE.onKeyDown InputKeyDown
+                , HP.value "Create some locations and characters for a medieval fantasy world. Be creative!"
+                ]
             ]
         , HH.slot (Proxy @"provider") unit Provider.component { providerCategory: "Main", providers: Provider.providers_with_structured_output } SetConfig
         ]

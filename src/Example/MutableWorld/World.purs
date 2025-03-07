@@ -25,7 +25,6 @@ type Character =
   { name :: String
   , description :: String
   , location_name :: String
-  , health :: String
   , status :: String
   }
 
@@ -37,8 +36,6 @@ type Location =
 data WorldUpdate
   = CreateCharacter
       { name :: String, description :: String, location_name :: String, status :: String }
-  | SetCharacterHealth
-      { name :: String, health :: String }
   | SetCharacterStatus
       { name :: String, status :: String }
   | SetCharacterLocation
@@ -61,25 +58,33 @@ applyWorldUpdate :: WorldUpdate -> World -> World
 
 applyWorldUpdate (CreateLocation { name, description }) = prop @"locations" <<< at name .~ pure { name, description }
 
-applyWorldUpdate (CreateCharacter { name, description, location_name }) = prop @"characters" <<< at name .~ pure { name, description, location_name, health: "Healthy", status: "Normal" }
-applyWorldUpdate (SetCharacterHealth { name, health }) = prop @"characters" <<< at name %~ map (prop @"health" .~ health)
+applyWorldUpdate (CreateCharacter { name, description, location_name }) = prop @"characters" <<< at name .~ pure { name, description, location_name, status: "Normal" }
 applyWorldUpdate (SetCharacterStatus { name, status }) = prop @"characters" <<< at name %~ map (prop @"status" .~ status)
 applyWorldUpdate (SetCharacterLocation { name, location_name }) = prop @"characters" <<< at name %~ map (prop @"location_name" .~ location_name)
 
 describeWorld :: World -> String
 describeWorld w = intercalate "\n"
   [ "Current state of the world:"
-  , "  - Locations:"
-  , intercalate "\n" $
-      w.locations # Map.toUnfoldable <#> \(_ /\ l) ->
-        "   - {{name}}: {{description}}" # format l
   , ""
-  , "  - Characters:"
-  , intercalate "\n" $
-      w.characters # Map.toUnfoldable <#> \(_ /\ c) -> format c $ intercalate "\n"
-        [ "  - {{name}}: {{description}}"
-        , "    - Current location: {{location_name}}"
-        , "    - Current health: {{health}}"
-        , "    - Current status: {{status}}"
-        ]
+  , if Map.isEmpty w.locations then
+      "  - No locations have been created yet"
+    else intercalate "\n" $
+      [ "  - Locations:"
+      , intercalate "\n" $
+          w.locations # Map.toUnfoldable <#> \(_ /\ l) ->
+            "    - {{name}}: {{description}}" # format l
+      ]
+  , ""
+  , if Map.isEmpty w.characters then
+      "  - No characters have been created yet"
+    else intercalate "\n" $
+      [ "  - Characters:"
+      , intercalate "\n" $
+          w.characters # Map.toUnfoldable <#> \(_ /\ c) -> format c $ intercalate "\n"
+            [ "    - {{name}}: {{description}}"
+            , "      - Current location: {{location_name}}"
+            , "      - Current status: {{status}}"
+            ]
+      ]
   ]
+
