@@ -2,12 +2,11 @@ module Example.MutableWorld.App where
 
 import Prelude
 
-import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructureAssistantMsg, mkSystemMsg, mkUserMsg)
+import Ai2.Llm (Config, generate_structure, mkSystemMsg, mkUserMsg)
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Writer (tell)
-import Data.Argonaut (encodeJson, stringify, stringifyWithIndent)
+import Data.Argonaut (encodeJson, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
 import Data.Array (intercalate, length)
 import Data.Array as Array
@@ -35,7 +34,7 @@ import Halogen.Utility (copyToClipboard, readFromClipboard)
 import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
-import Utility (css, format, prop)
+import Utility (format, prop)
 import Web.Event.Event as Event
 import Web.HTML.HTMLTextAreaElement as HTMLTextAreaElement
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
