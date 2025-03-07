@@ -9,6 +9,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Lens ((%~), (.~))
 import Data.Lens.At (at)
 import Data.Map (Map)
+import Data.Show.Generic (genericShow)
 import Utility (prop)
 
 --------------------------------------------------------------------------------
@@ -30,17 +31,17 @@ type Location =
   , description :: String
   }
 
-data WorldUpdate
-  = CreateCharacter
-      { name :: String, status :: String, location_name :: String }
-  | SetCharacterHealth
-      { name :: String, health :: String }
-  | SetCharacterStatus
-      { name :: String, status :: String }
-  | SetCharacterLocation
-      { name :: String, location_name :: String }
-  | CreateLocation
-      { name :: String, description :: String }
+data WorldUpdate = CreateCharacter
+  { name :: String, status :: String, location_name :: String }
+
+-- | SetCharacterHealth
+--     { name :: String, health :: String }
+-- | SetCharacterStatus
+--     { name :: String, status :: String }
+-- | SetCharacterLocation
+--     { name :: String, location_name :: String }
+-- | CreateLocation
+--     { name :: String, description :: String }
 
 derive instance Generic WorldUpdate _
 
@@ -56,8 +57,27 @@ instance DecodeJsonFromSchema WorldUpdate where
 applyWorldUpdate :: WorldUpdate -> World -> World
 
 applyWorldUpdate (CreateCharacter { name, location_name }) = prop @"characters" <<< at name .~ pure { name, health: "Healthy", status: "Normal", location_name }
-applyWorldUpdate (SetCharacterHealth { name, health }) = prop @"characters" <<< at name %~ map (prop @"health" .~ health)
-applyWorldUpdate (SetCharacterStatus { name, status }) = prop @"characters" <<< at name %~ map (prop @"status" .~ status)
-applyWorldUpdate (SetCharacterLocation { name, location_name }) = prop @"characters" <<< at name %~ map (prop @"location_name" .~ location_name)
 
-applyWorldUpdate (CreateLocation { name, description }) = prop @"locations" <<< at name .~ pure { name, description }
+-- applyWorldUpdate (SetCharacterHealth { name, health }) = prop @"characters" <<< at name %~ map (prop @"health" .~ health)
+-- applyWorldUpdate (SetCharacterStatus { name, status }) = prop @"characters" <<< at name %~ map (prop @"status" .~ status)
+-- applyWorldUpdate (SetCharacterLocation { name, location_name }) = prop @"characters" <<< at name %~ map (prop @"location_name" .~ location_name)
+
+-- applyWorldUpdate (CreateLocation { name, description }) = prop @"locations" <<< at name .~ pure { name, description }
+
+data StringOrInt
+  = String String
+  | Int Int
+
+derive instance Generic StringOrInt _
+
+instance Show StringOrInt where
+  show x = genericShow x
+
+instance ToJsonSchema StringOrInt where
+  toJsonSchema = generic_toJsonSchema @StringOrInt
+
+instance EncodeJson StringOrInt where
+  encodeJson x = genericEncodeJson x
+
+instance DecodeJsonFromSchema StringOrInt where
+  decodeJsonFromSchema x = generic_decodeJsonFromSchema x

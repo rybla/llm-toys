@@ -26,7 +26,7 @@ module Ai2.Llm
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify, stringifyWithIndent)
 import Data.Argonaut.Core (stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Argonaut.JsonSchema (class DecodeJsonFromSchema, class ToJsonSchema, decodeJsonFromSchema, toJsonSchema)
@@ -42,6 +42,7 @@ import Data.Tuple.Nested ((/\))
 import Data.Unfoldable (none)
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Effect.Class.Console as Console
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Record as R
@@ -209,6 +210,14 @@ generate_structure
   => { config :: Config, name :: String, messages :: Array Msg }
   -> Aff (String \/ Record r)
 generate_structure args = do
+  Console.log $ stringifyWithIndent 4 $ encodeJson $
+    { type: "json_schema"
+    , json_schema:
+        { name: args.name
+        , strict: true
+        , schema: toJsonSchema @(Record r)
+        }
+    }
   ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
       { baseURL: args.config.baseURL
       , model: args.config.model

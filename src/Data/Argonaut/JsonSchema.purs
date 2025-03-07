@@ -27,8 +27,8 @@ class ToJsonSchema (a :: Type) where
 instance ToJsonSchema String where
   toJsonSchema = encodeJson { type: "string" }
 
-instance IsSymbol x => ToJsonSchema (Proxy s) where
-  toJsonSchema = encodeJson { type: "string", const: reflectSymbolAsTag @x }
+instance IsSymbol s => ToJsonSchema (Proxy s) where
+  toJsonSchema = encodeJson { type: "string", const: reflectSymbolAsTag @s }
 
 instance ToJsonSchema Number where
   toJsonSchema = encodeJson { type: "number" }
@@ -78,14 +78,14 @@ toJsonSchema_Cons_final = case toJsonSchema_Cons @a of
   [ con ] -> f con
   cons -> encodeJson { anyOf: cons # map f }
   where
-  f con = con.value # maybe (mkStringSchema con.type) \value -> encodeJson { type: mkStringSchema con.type, value }
+  f con = con.value # maybe (mkStringSchema con.tag) \value -> encodeJson { tag: mkStringSchema con.tag, value }
 
 class ToJsonSchema_Cons (a :: Type) where
-  toJsonSchema_Cons :: Array { type :: String, value :: Maybe Json }
+  toJsonSchema_Cons :: Array { tag :: String, value :: Maybe Json }
 
-toTaggedConstructor :: forall @name. IsSymbol name => Maybe Json -> Array { type :: String, value :: Maybe Json }
-toTaggedConstructor Nothing = [ { type: reflectSymbolAsTag @name, value: Nothing } ]
-toTaggedConstructor (Just arg) = [ { type: reflectSymbolAsTag @name, value: Just arg } ]
+toTaggedConstructor :: forall @name. IsSymbol name => Maybe Json -> Array { tag :: String, value :: Maybe Json }
+toTaggedConstructor Nothing = [ { tag: reflectSymbolAsTag @name, value: Nothing } ]
+toTaggedConstructor (Just arg) = [ { tag: reflectSymbolAsTag @name, value: Just arg } ]
 
 instance (IsSymbol name, ToJsonSchema_Args a) => ToJsonSchema_Cons (Constructor name a) where
   toJsonSchema_Cons = toTaggedConstructor @name (toJsonSchema_Args @a)
@@ -110,6 +110,13 @@ class DecodeJsonFromSchema a where
 
 instance DecodeJsonFromSchema String where
   decodeJsonFromSchema json = decodeJson json
+
+instance IsSymbol s => DecodeJsonFromSchema (Proxy s) where
+  decodeJsonFromSchema json = do
+    let s = reflectSymbol (Proxy @s)
+    s' <- decodeJson @String json
+    when (s /= s') do throwError $ UnexpectedValue json
+    pure Proxy
 
 instance DecodeJsonFromSchema Number where
   decodeJsonFromSchema json = decodeJson json
@@ -156,7 +163,7 @@ decodeJsonFromSchema_Cons_final :: forall @a. DecodeJsonFromSchema_Cons a => Jso
 decodeJsonFromSchema_Cons_final json = do
   let
     decodings :: Array (JsonDecodeError \/ a)
-    decodings = case decodeJson @{ type :: String, value :: Json } json of
+    decodings = case decodeJson @{ tag :: String, value :: Json } json of
       Right result -> decodeJsonFromSchema_Cons $ Tagged result
       Left _ -> case decodeJson @String json of
         Right result -> decodeJsonFromSchema_Cons $ String result
@@ -166,7 +173,7 @@ decodeJsonFromSchema_Cons_final json = do
     Just a -> a
 
 data DecodeJsonFromSchema_Cons_Input
-  = Tagged { type :: String, value :: Json }
+  = Tagged { tag :: String, value :: Json }
   | String String
   | Untagged Json
 
@@ -174,14 +181,14 @@ class DecodeJsonFromSchema_Cons a where
   decodeJsonFromSchema_Cons :: DecodeJsonFromSchema_Cons_Input -> Array (JsonDecodeError \/ a)
 
 instance (DecodeJsonFromSchema_Cons a, DecodeJsonFromSchema_Cons b) => DecodeJsonFromSchema_Cons (Sum a b) where
-  decodeJsonFromSchema_Cons type_value = (decodeJsonFromSchema_Cons @a type_value # map (map Inl)) <> (decodeJsonFromSchema_Cons @b type_value # map (map Inr))
+  decodeJsonFromSchema_Cons tag_value = (decodeJsonFromSchema_Cons @a tag_value # map (map Inl)) <> (decodeJsonFromSchema_Cons @b tag_value # map (map Inr))
 
 -- this handles the 0 arguments case, so doesn't have to be handled by DecodeJsonFromSchema_Args
 instance IsSymbol name => DecodeJsonFromSchema_Cons (Constructor name NoArguments) where
   decodeJsonFromSchema_Cons (String s) | reflectSymbolAsTag @name == s = [ Right $ Constructor NoArguments ]
   decodeJsonFromSchema_Cons _ = []
 else instance (IsSymbol name, DecodeJsonFromSchema_Args a) => DecodeJsonFromSchema_Cons (Constructor name a) where
-  decodeJsonFromSchema_Cons (Tagged { type: t, value }) | t == reflectSymbolAsTag @name = [ Constructor <$> decodeJsonFromSchema_Args @a value ]
+  decodeJsonFromSchema_Cons (Tagged { tag, value }) | tag == reflectSymbolAsTag @name = [ Constructor <$> decodeJsonFromSchema_Args @a value ]
   decodeJsonFromSchema_Cons (String s) = [ Constructor <$> decodeJsonFromSchema_Args @a (encodeJson s) ]
   decodeJsonFromSchema_Cons (Untagged json) = [ Constructor <$> decodeJsonFromSchema_Args @a json ]
   decodeJsonFromSchema_Cons _ = []

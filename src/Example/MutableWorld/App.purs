@@ -2,12 +2,11 @@ module Example.MutableWorld.App where
 
 import Prelude
 
-import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructureAssistantMsg, mkUserMsg)
+import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkUserMsg)
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get)
 import Control.Monad.Trans.Class (lift)
 import Data.Argonaut (encodeJson, stringify, stringifyWithIndent)
-import Data.Argonaut.JsonSchema (toJsonSchema)
 import Data.Array (length)
 import Data.Array as Array
 import Data.Either (Either(..))
@@ -23,7 +22,7 @@ import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
 import Effect.Class.Console as Console
 import Example.MutableWorld.Common (Engine)
-import Example.MutableWorld.World (World, WorldUpdate)
+import Example.MutableWorld.World (StringOrInt, World)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -84,21 +83,32 @@ main_component = H.mkComponent { initialState, eval, render }
 
     prop @"msgs" %= (_ `Array.snoc` mkUserMsg prompt)
 
-    Console.log $ "schema:\n" <> stringifyWithIndent 4 (toJsonSchema @{ update :: WorldUpdate })
+    -- msg <- do
+    --   { msgs } <- get
+    --   err_msg <- lift $
+    --     generate_structure @(update :: WorldUpdate)
+    --       { config
+    --       , name: "UpdateWorld"
+    --       , messages: msgs
+    --       }
+    --   case err_msg of
+    --     Left err -> throwError $ Aff.error $ "error when generating: " <> err
+    --     Right msg -> pure msg
+
+    -- prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson msg))
 
     msg <- do
       { msgs } <- get
       err_msg <- lift $
-        generate_structure @(update :: WorldUpdate)
+        generate_structure @(value :: StringOrInt)
           { config
-          , name: "UpdateWorld"
+          , name: "StringOrInt"
           , messages: msgs
           }
       case err_msg of
         Left err -> throwError $ Aff.error $ "error when generating: " <> err
         Right msg -> pure msg
-
-    prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson msg))
+    Console.logShow { msg }
 
     prop @"processing" .= false
 
