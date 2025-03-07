@@ -18,7 +18,7 @@
     return array;
   })();
   var limit = 1024;
-  var encode = (str2, _defaultEncoder, charset2, _kind, format5) => {
+  var encode = (str2, _defaultEncoder, charset2, _kind, format4) => {
     if (str2.length === 0) {
       return str2;
     }
@@ -46,7 +46,7 @@
         c >= 48 && c <= 57 || // 0-9
         c >= 65 && c <= 90 || // a-z
         c >= 97 && c <= 122 || // A-Z
-        format5 === RFC1738 && (c === 40 || c === 41)) {
+        format4 === RFC1738 && (c === 40 || c === 41)) {
           arr[arr.length] = segment.charAt(i2);
           continue;
         }
@@ -133,7 +133,7 @@
     return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
   }
   var sentinel = {};
-  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter3, sort2, allowDots, serializeDate, format5, formatter, encodeValuesOnly, charset2, sideChannel) {
+  function inner_stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter3, sort2, allowDots, serializeDate, format4, formatter, encodeValuesOnly, charset2, sideChannel) {
     let obj = object2;
     let tmp_sc = sideChannel;
     let step3 = 0;
@@ -168,17 +168,17 @@
       if (strictNullHandling) {
         return encoder && !encodeValuesOnly ? (
           // @ts-expect-error
-          encoder(prefix, defaults.encoder, charset2, "key", format5)
+          encoder(prefix, defaults.encoder, charset2, "key", format4)
         ) : prefix;
       }
       obj = "";
     }
     if (is_non_nullish_primitive(obj) || is_buffer(obj)) {
       if (encoder) {
-        const key_value = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset2, "key", format5);
+        const key_value = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset2, "key", format4);
         return [
           formatter?.(key_value) + "=" + // @ts-expect-error
-          formatter?.(encoder(obj, defaults.encoder, charset2, "value", format5))
+          formatter?.(encoder(obj, defaults.encoder, charset2, "value", format4))
         ];
       }
       return [formatter?.(prefix) + "=" + formatter?.(String(obj))];
@@ -233,7 +233,7 @@
         sort2,
         allowDots,
         serializeDate,
-        format5,
+        format4,
         formatter,
         encodeValuesOnly,
         charset2,
@@ -256,14 +256,14 @@
     if (typeof opts.charset !== "undefined" && opts.charset !== "utf-8" && opts.charset !== "iso-8859-1") {
       throw new TypeError("The charset option must be either utf-8, iso-8859-1, or undefined");
     }
-    let format5 = default_format;
+    let format4 = default_format;
     if (typeof opts.format !== "undefined") {
       if (!has.call(formatters, opts.format)) {
         throw new TypeError("Unknown format option provided.");
       }
-      format5 = opts.format;
+      format4 = opts.format;
     }
-    const formatter = formatters[format5];
+    const formatter = formatters[format4];
     let filter3 = defaults.filter;
     if (typeof opts.filter === "function" || is_array2(opts.filter)) {
       filter3 = opts.filter;
@@ -295,7 +295,7 @@
       encoder: typeof opts.encoder === "function" ? opts.encoder : defaults.encoder,
       encodeValuesOnly: typeof opts.encodeValuesOnly === "boolean" ? opts.encodeValuesOnly : defaults.encodeValuesOnly,
       filter: filter3,
-      format: format5,
+      format: format4,
       formatter,
       serializeDate: typeof opts.serializeDate === "function" ? opts.serializeDate : defaults.serializeDate,
       skipNulls: typeof opts.skipNulls === "boolean" ? opts.skipNulls : defaults.skipNulls,
@@ -5183,20 +5183,20 @@ ${str(snapshot)}`);
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map32 = map(dictApply.Functor0());
+    var map33 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map32($$const(identity2))(a2))(b2);
+        return apply1(map33($$const(identity2))(a2))(b2);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map32 = map(dictApply.Functor0());
+    var map33 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b2) {
-          return apply1(map32(f)(a2))(b2);
+          return apply1(map33(f)(a2))(b2);
         };
       };
     };
@@ -5493,15 +5493,6 @@ ${str(snapshot)}`);
       }
     ) + '"';
   };
-  var showArrayImpl = function(f) {
-    return function(xs) {
-      var ss = [];
-      for (var i2 = 0, l = xs.length; i2 < l; i2++) {
-        ss[i2] = f(xs[i2]);
-      }
-      return "[" + ss.join(",") + "]";
-    };
-  };
 
   // output/Data.Show/index.js
   var showString = {
@@ -5527,11 +5518,6 @@ ${str(snapshot)}`);
   };
   var show = function(dict) {
     return dict.show;
-  };
-  var showArray = function(dictShow) {
-    return {
-      show: showArrayImpl(show(dictShow))
-    };
   };
   var showRecordFieldsCons = function(dictIsSymbol) {
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
@@ -5621,22 +5607,6 @@ ${str(snapshot)}`);
     };
     return Just2;
   }();
-  var showMaybe = function(dictShow) {
-    var show4 = show(dictShow);
-    return {
-      show: function(v) {
-        if (v instanceof Just) {
-          return "(Just " + (show4(v.value0) + ")");
-        }
-        ;
-        if (v instanceof Nothing) {
-          return "Nothing";
-        }
-        ;
-        throw new Error("Failed pattern match at Data.Maybe (line 223, column 1 - line 225, column 28): " + [v.constructor.name]);
-      }
-    };
-  };
   var maybe$prime = function(v) {
     return function(v1) {
       return function(v2) {
@@ -5980,10 +5950,10 @@ ${str(snapshot)}`);
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map32 = map(Monad0.Bind1().Apply0().Functor0());
+    var map33 = map(Monad0.Bind1().Apply0().Functor0());
     var pure19 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map32(Right.create)(a2))(function($52) {
+      return catchError1(map33(Right.create)(a2))(function($52) {
         return pure19(Left.create($52));
       });
     };
@@ -6458,7 +6428,7 @@ ${str(snapshot)}`);
     };
   };
   var altExceptT = function(dictSemigroup) {
-    var append6 = append(dictSemigroup);
+    var append7 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind11 = bind(Bind1);
@@ -6479,7 +6449,7 @@ ${str(snapshot)}`);
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure19(new Left(append6(rm.value0)(rn.value0)));
+                    return pure19(new Left(append7(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -6603,7 +6573,7 @@ ${str(snapshot)}`);
   var intercalate = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictMonoid) {
-      var append6 = append(dictMonoid.Semigroup0());
+      var append7 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(sep) {
         return function(xs) {
@@ -6618,7 +6588,7 @@ ${str(snapshot)}`);
               ;
               return {
                 init: false,
-                acc: append6(v.acc)(append6(sep)(v1))
+                acc: append7(v.acc)(append7(sep)(v1))
               };
             };
           };
@@ -6681,12 +6651,12 @@ ${str(snapshot)}`);
   var foldMapDefaultR = function(dictFoldable) {
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
-      var append6 = append(dictMonoid.Semigroup0());
+      var append7 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x) {
           return function(acc) {
-            return append6(f(x))(acc);
+            return append7(f(x))(acc);
           };
         })(mempty3);
       };
@@ -6742,13 +6712,13 @@ ${str(snapshot)}`);
   var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
-      var append6 = append(dictMonoid.Semigroup0());
+      var append7 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x) {
             return function(acc) {
-              return append6(f(i2)(x))(acc);
+              return append7(f(i2)(x))(acc);
             };
           };
         })(mempty3);
@@ -6813,7 +6783,7 @@ ${str(snapshot)}`);
       };
     }
     return function(apply4) {
-      return function(map32) {
+      return function(map33) {
         return function(pure19) {
           return function(f) {
             return function(array) {
@@ -6822,14 +6792,14 @@ ${str(snapshot)}`);
                   case 0:
                     return pure19([]);
                   case 1:
-                    return map32(array1)(f(array[bot]));
+                    return map33(array1)(f(array[bot]));
                   case 2:
-                    return apply4(map32(array2)(f(array[bot])))(f(array[bot + 1]));
+                    return apply4(map33(array2)(f(array[bot])))(f(array[bot + 1]));
                   case 3:
-                    return apply4(apply4(map32(array3)(f(array[bot])))(f(array[bot + 1])))(f(array[bot + 2]));
+                    return apply4(apply4(map33(array3)(f(array[bot])))(f(array[bot + 1])))(f(array[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top2 - bot) / 4) * 2;
-                    return apply4(map32(concat2)(go2(bot, pivot)))(go2(pivot, top2));
+                    return apply4(map33(concat2)(go2(bot, pivot)))(go2(pivot, top2));
                 }
               }
               return go2(0, array.length);
@@ -8215,31 +8185,31 @@ ${str(snapshot)}`);
     };
   };
   var functorWriterT = function(dictFunctor) {
-    var map32 = map(dictFunctor);
+    var map33 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapWriterT(map32(function(v) {
+        return mapWriterT(map33(function(v) {
           return new Tuple(f(v.value0), v.value1);
         }));
       }
     };
   };
   var applyWriterT = function(dictSemigroup) {
-    var append6 = append(dictSemigroup);
+    var append7 = append(dictSemigroup);
     return function(dictApply) {
       var apply4 = apply(dictApply);
       var Functor0 = dictApply.Functor0();
-      var map32 = map(Functor0);
+      var map33 = map(Functor0);
       var functorWriterT1 = functorWriterT(Functor0);
       return {
         apply: function(v) {
           return function(v1) {
             var k = function(v3) {
               return function(v4) {
-                return new Tuple(v3.value0(v4.value0), append6(v3.value1)(v4.value1));
+                return new Tuple(v3.value0(v4.value0), append7(v3.value1)(v4.value1));
               };
             };
-            return apply4(map32(k)(v))(v1);
+            return apply4(map33(k)(v))(v1);
           };
         },
         Functor0: function() {
@@ -8249,20 +8219,20 @@ ${str(snapshot)}`);
     };
   };
   var bindWriterT = function(dictSemigroup) {
-    var append6 = append(dictSemigroup);
+    var append7 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
       var bind11 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
-      var map32 = map(Apply0.Functor0());
+      var map33 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v) {
           return function(k) {
             return bind11(v)(function(v1) {
               var v2 = k(v1.value0);
-              return map32(function(v3) {
-                return new Tuple(v3.value0, append6(v1.value1)(v3.value1));
+              return map33(function(v3) {
+                return new Tuple(v3.value0, append7(v1.value1)(v3.value1));
               })(v2);
             });
           };
@@ -9217,14 +9187,14 @@ ${str(snapshot)}`);
     traverseWithIndex: function(dictApplicative) {
       var Apply0 = dictApplicative.Apply0();
       var apply4 = apply(Apply0);
-      var map32 = map(Apply0.Functor0());
+      var map33 = map(Apply0.Functor0());
       var pure19 = pure(dictApplicative);
       return function(f) {
         return function(ms) {
           return fold2(function(acc) {
             return function(k) {
               return function(v) {
-                return apply4(map32(flip(insert(k)))(acc))(f(k)(v));
+                return apply4(map33(flip(insert(k)))(acc))(f(k)(v));
               };
             };
           })(pure19(empty2))(ms);
@@ -10405,16 +10375,16 @@ ${str(snapshot)}`);
   var encodeMap2 = function(dictOrd) {
     var encodeMap1 = encodeMap(dictOrd);
     return function(dictEncodeJson) {
-      var encodeJson13 = encodeJson(dictEncodeJson);
+      var encodeJson12 = encodeJson(dictEncodeJson);
       return function(dictEncodeJson1) {
         return {
-          encodeJson: encodeMap1(encodeJson13)(encodeJson(dictEncodeJson1))
+          encodeJson: encodeMap1(encodeJson12)(encodeJson(dictEncodeJson1))
         };
       };
     };
   };
   var gEncodeJsonCons = function(dictEncodeJson) {
-    var encodeJson13 = encodeJson(dictEncodeJson);
+    var encodeJson12 = encodeJson(dictEncodeJson);
     return function(dictGEncodeJson) {
       var gEncodeJson1 = gEncodeJson(dictGEncodeJson);
       return function(dictIsSymbol) {
@@ -10424,7 +10394,7 @@ ${str(snapshot)}`);
           return {
             gEncodeJson: function(row) {
               return function(v) {
-                return insert(reflectSymbol2($$Proxy.value))(encodeJson13(get5($$Proxy.value)(row)))(gEncodeJson1(row)($$Proxy.value));
+                return insert(reflectSymbol2($$Proxy.value))(encodeJson12(get5($$Proxy.value)(row)))(gEncodeJson1(row)($$Proxy.value));
               };
             }
           };
@@ -12442,7 +12412,6 @@ ${str(snapshot)}`);
   };
 
   // output/Ai2.Llm/index.js
-  var format2 = /* @__PURE__ */ format();
   var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
   var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonNil);
   var nameIsSymbol = {
@@ -12608,15 +12577,6 @@ ${str(snapshot)}`);
     };
     return ToolMsg2;
   }();
-  var showToolCall = {
-    show: function(v) {
-      return format2({
-        id: v.value0.id,
-        name: v.value0.name,
-        args: stringify2(v.value0.args)
-      })("{ id: {{id}}, name: {{name}}, args: {{args}} }");
-    }
-  };
   var encodeJsonToolCall = {
     encodeJson: function(v) {
       return encodeJson8({
@@ -12706,11 +12666,6 @@ ${str(snapshot)}`);
     return new SystemMsg({
       content: content3
     });
-  };
-  var mkStructureAssistantMsg = function(parsed) {
-    return new AssistantMsg(new StructureAssistantMsg({
-      parsed
-    }));
   };
   var generate_structure = function(dictToJsonSchema) {
     var toJsonSchema2 = toJsonSchema(dictToJsonSchema);
@@ -14586,93 +14541,6 @@ ${str(snapshot)}`);
     });
   }();
 
-  // output/Data.Argonaut.Types.Generic/index.js
-  var defaultEncoding = {
-    tagKey: "tag",
-    valuesKey: "values",
-    unwrapSingleArguments: false
-  };
-
-  // output/Data.Argonaut.Encode.Generic/index.js
-  var encodeRepWith = function(dict) {
-    return dict.encodeRepWith;
-  };
-  var genericEncodeJsonWith = function(dictGeneric) {
-    var from3 = from(dictGeneric);
-    return function(dictEncodeRep) {
-      var encodeRepWith1 = encodeRepWith(dictEncodeRep);
-      return function(e) {
-        var $73 = encodeRepWith1(e);
-        return function($74) {
-          return $73(from3($74));
-        };
-      };
-    };
-  };
-  var genericEncodeJson = function(dictGeneric) {
-    var genericEncodeJsonWith1 = genericEncodeJsonWith(dictGeneric);
-    return function(dictEncodeRep) {
-      return genericEncodeJsonWith1(dictEncodeRep)(defaultEncoding);
-    };
-  };
-  var encodeRepSum = function(dictEncodeRep) {
-    var encodeRepWith1 = encodeRepWith(dictEncodeRep);
-    return function(dictEncodeRep1) {
-      var encodeRepWith2 = encodeRepWith(dictEncodeRep1);
-      return {
-        encodeRepWith: function(v) {
-          return function(v1) {
-            if (v1 instanceof Inl) {
-              return encodeRepWith1(v)(v1.value0);
-            }
-            ;
-            if (v1 instanceof Inr) {
-              return encodeRepWith2(v)(v1.value0);
-            }
-            ;
-            throw new Error("Failed pattern match at Data.Argonaut.Encode.Generic (line 36, column 1 - line 38, column 50): " + [v.constructor.name, v1.constructor.name]);
-          };
-        }
-      };
-    };
-  };
-  var encodeRepArgsArgument = function(dictEncodeJson) {
-    var encodeJson13 = encodeJson(dictEncodeJson);
-    return {
-      encodeRepArgs: function(v) {
-        return [encodeJson13(v)];
-      }
-    };
-  };
-  var encodeRepArgs = function(dict) {
-    return dict.encodeRepArgs;
-  };
-  var encodeRepConstructor = function(dictIsSymbol) {
-    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
-    return function(dictEncodeRepArgs) {
-      var encodeRepArgs1 = encodeRepArgs(dictEncodeRepArgs);
-      return {
-        encodeRepWith: function(e) {
-          return function(v) {
-            var values2 = function() {
-              var vs = encodeRepArgs1(v);
-              if (e.unwrapSingleArguments) {
-                if (vs.length === 1) {
-                  return vs[0];
-                }
-                ;
-                return id(vs);
-              }
-              ;
-              return id(vs);
-            }();
-            return id(insert(e.tagKey)(id(reflectSymbol2($$Proxy.value)))(insert(e.valuesKey)(values2)(empty2)));
-          };
-        }
-      };
-    };
-  };
-
   // output/Data.Lens.AffineTraversal/index.js
   var identity14 = /* @__PURE__ */ identity(categoryFn);
   var fanout2 = /* @__PURE__ */ fanout(semigroupoidFn)(strongFn);
@@ -14752,67 +14620,137 @@ ${str(snapshot)}`);
     return dict.at;
   };
 
-  // output/Example.MutableWorld.World/index.js
-  var CreateCharacterIsSymbol = {
-    reflectSymbol: function() {
-      return "CreateCharacter";
-    }
+  // output/Data.Show.Generic/foreign.js
+  var intercalate5 = function(separator) {
+    return function(xs) {
+      return xs.join(separator);
+    };
   };
-  var toJsonSchemaRecord2 = /* @__PURE__ */ toJsonSchemaRecord();
+
+  // output/Data.Show.Generic/index.js
+  var append6 = /* @__PURE__ */ append(semigroupArray);
+  var genericShowArgsArgument = function(dictShow) {
+    var show4 = show(dictShow);
+    return {
+      genericShowArgs: function(v) {
+        return [show4(v)];
+      }
+    };
+  };
+  var genericShowArgs = function(dict) {
+    return dict.genericShowArgs;
+  };
+  var genericShowConstructor = function(dictGenericShowArgs) {
+    var genericShowArgs1 = genericShowArgs(dictGenericShowArgs);
+    return function(dictIsSymbol) {
+      var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+      return {
+        "genericShow'": function(v) {
+          var ctor = reflectSymbol2($$Proxy.value);
+          var v1 = genericShowArgs1(v);
+          if (v1.length === 0) {
+            return ctor;
+          }
+          ;
+          return "(" + (intercalate5(" ")(append6([ctor])(v1)) + ")");
+        }
+      };
+    };
+  };
+  var genericShow$prime = function(dict) {
+    return dict["genericShow'"];
+  };
+  var genericShowSum = function(dictGenericShow) {
+    var genericShow$prime1 = genericShow$prime(dictGenericShow);
+    return function(dictGenericShow1) {
+      var genericShow$prime2 = genericShow$prime(dictGenericShow1);
+      return {
+        "genericShow'": function(v) {
+          if (v instanceof Inl) {
+            return genericShow$prime1(v.value0);
+          }
+          ;
+          if (v instanceof Inr) {
+            return genericShow$prime2(v.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Show.Generic (line 26, column 1 - line 28, column 40): " + [v.constructor.name]);
+        }
+      };
+    };
+  };
+  var genericShow = function(dictGeneric) {
+    var from3 = from(dictGeneric);
+    return function(dictGenericShow) {
+      var genericShow$prime1 = genericShow$prime(dictGenericShow);
+      return function(x) {
+        return genericShow$prime1(from3(x));
+      };
+    };
+  };
+
+  // output/Example.MutableWorld.World/index.js
+  var showRecord2 = /* @__PURE__ */ showRecord()();
   var descriptionIsSymbol = {
     reflectSymbol: function() {
       return "description";
     }
   };
-  var toJsonSchema_RowListCons2 = /* @__PURE__ */ toJsonSchema_RowListCons(descriptionIsSymbol)()(toJsonSchemaString);
+  var showRecordFieldsCons2 = /* @__PURE__ */ showRecordFieldsCons(descriptionIsSymbol);
   var location_nameIsSymbol = {
     reflectSymbol: function() {
       return "location_name";
     }
   };
-  var toJsonSchema_RowListCons1 = /* @__PURE__ */ toJsonSchema_RowListCons(location_nameIsSymbol)()(toJsonSchemaString);
+  var showRecordFieldsCons1 = /* @__PURE__ */ showRecordFieldsCons(location_nameIsSymbol);
   var nameIsSymbol3 = {
     reflectSymbol: function() {
       return "name";
     }
   };
-  var toJsonSchema_RowListCons22 = /* @__PURE__ */ toJsonSchema_RowListCons(nameIsSymbol3)()(toJsonSchemaString);
   var statusIsSymbol = {
     reflectSymbol: function() {
       return "status";
     }
   };
-  var toJsonSchema_RowListCons3 = /* @__PURE__ */ toJsonSchema_RowListCons22(/* @__PURE__ */ toJsonSchema_RowListCons(statusIsSymbol)()(toJsonSchemaString)(toJsonSchema_RowListNil));
+  var showRecordFieldsCons22 = /* @__PURE__ */ showRecordFieldsCons(nameIsSymbol3)(/* @__PURE__ */ showRecordFieldsConsNil(statusIsSymbol)(showString))(showString);
+  var CreateCharacterIsSymbol = {
+    reflectSymbol: function() {
+      return "CreateCharacter";
+    }
+  };
   var SetCharacterStatusIsSymbol = {
     reflectSymbol: function() {
       return "SetCharacterStatus";
     }
   };
+  var showRecordFieldsConsNil2 = /* @__PURE__ */ showRecordFieldsConsNil(nameIsSymbol3)(showString);
   var SetCharacterLocationIsSymbol = {
     reflectSymbol: function() {
       return "SetCharacterLocation";
     }
   };
-  var toJsonSchema_RowListCons4 = /* @__PURE__ */ toJsonSchema_RowListCons22(toJsonSchema_RowListNil);
   var CreateLocationIsSymbol = {
     reflectSymbol: function() {
       return "CreateLocation";
     }
   };
-  var gEncodeJsonCons8 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
-  var gEncodeJsonCons14 = /* @__PURE__ */ gEncodeJsonCons8(gEncodeJsonNil);
-  var gEncodeJsonCons24 = /* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons14(statusIsSymbol)())(nameIsSymbol3)();
-  var gEncodeJsonCons33 = /* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons14(nameIsSymbol3)());
+  var toJsonSchemaRecord2 = /* @__PURE__ */ toJsonSchemaRecord();
+  var toJsonSchema_RowListCons2 = /* @__PURE__ */ toJsonSchema_RowListCons(descriptionIsSymbol)()(toJsonSchemaString);
+  var toJsonSchema_RowListCons1 = /* @__PURE__ */ toJsonSchema_RowListCons(location_nameIsSymbol)()(toJsonSchemaString);
+  var toJsonSchema_RowListCons22 = /* @__PURE__ */ toJsonSchema_RowListCons(nameIsSymbol3)()(toJsonSchemaString);
+  var toJsonSchema_RowListCons3 = /* @__PURE__ */ toJsonSchema_RowListCons22(/* @__PURE__ */ toJsonSchema_RowListCons(statusIsSymbol)()(toJsonSchemaString)(toJsonSchema_RowListNil));
+  var toJsonSchema_RowListCons4 = /* @__PURE__ */ toJsonSchema_RowListCons22(toJsonSchema_RowListNil);
   var decodeJsonFromSchemaRecor2 = /* @__PURE__ */ decodeJsonFromSchemaRecor();
   var decodeJsonFromSchema_RowL12 = /* @__PURE__ */ decodeJsonFromSchema_RowL1(descriptionIsSymbol)(decodeJsonFromSchemaStrin)()();
   var decodeJsonFromSchema_RowL11 = /* @__PURE__ */ decodeJsonFromSchema_RowL1(location_nameIsSymbol)(decodeJsonFromSchemaStrin)()();
   var decodeJsonFromSchema_RowL122 = /* @__PURE__ */ decodeJsonFromSchema_RowL1(nameIsSymbol3)(decodeJsonFromSchemaStrin)()();
   var decodeJsonFromSchema_RowL13 = /* @__PURE__ */ decodeJsonFromSchema_RowL122(/* @__PURE__ */ decodeJsonFromSchema_RowL1(statusIsSymbol)(decodeJsonFromSchemaStrin)()()(decodeJsonFromSchema_RowL));
   var decodeJsonFromSchema_RowL14 = /* @__PURE__ */ decodeJsonFromSchema_RowL122(decodeJsonFromSchema_RowL);
-  var intercalate5 = /* @__PURE__ */ intercalate2(monoidString);
+  var intercalate6 = /* @__PURE__ */ intercalate2(monoidString);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorArray);
   var toUnfoldable9 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
-  var format3 = /* @__PURE__ */ format();
+  var format2 = /* @__PURE__ */ format();
   var prop6 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "locations";
@@ -14886,7 +14824,7 @@ ${str(snapshot)}`);
         return new CreateLocation(x.value0.value0.value0);
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 46, column 1 - line 46, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 47, column 1 - line 47, column 38): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof CreateCharacter) {
@@ -14905,18 +14843,18 @@ ${str(snapshot)}`);
         return new Inr(new Inr(new Inr(x.value0)));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.World (line 46, column 1 - line 46, column 38): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.World (line 47, column 1 - line 47, column 38): " + [x.constructor.name]);
     }
   };
-  var genericEncodeJson2 = /* @__PURE__ */ genericEncodeJson(genericWorldUpdate_)(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(CreateCharacterIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons8(gEncodeJsonCons24)(location_nameIsSymbol)())(descriptionIsSymbol)())())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterStatusIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(gEncodeJsonCons24)())))(/* @__PURE__ */ encodeRepSum(/* @__PURE__ */ encodeRepConstructor(SetCharacterLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(location_nameIsSymbol)())())))(/* @__PURE__ */ encodeRepConstructor(CreateLocationIsSymbol)(/* @__PURE__ */ encodeRepArgsArgument(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons33(descriptionIsSymbol)())()))))));
+  var genericShow2 = /* @__PURE__ */ genericShow(genericWorldUpdate_)(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons2(/* @__PURE__ */ showRecordFieldsCons1(showRecordFieldsCons22)(showString))(showString))))(CreateCharacterIsSymbol))(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(showRecordFieldsCons22)))(SetCharacterStatusIsSymbol))(/* @__PURE__ */ genericShowSum(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons1(showRecordFieldsConsNil2)(showString))))(SetCharacterLocationIsSymbol))(/* @__PURE__ */ genericShowConstructor(/* @__PURE__ */ genericShowArgsArgument(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons2(showRecordFieldsConsNil2)(showString))))(CreateLocationIsSymbol)))));
   var generic_decodeJsonFromSchema2 = /* @__PURE__ */ generic_decodeJsonFromSchema(genericWorldUpdate_)(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateCharacterIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL13))))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterStatusIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(decodeJsonFromSchema_RowL13))))(/* @__PURE__ */ decodeJsonFromSchema_Cons2(/* @__PURE__ */ decodeJsonFromSchema_Cons3(SetCharacterLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL11(decodeJsonFromSchema_RowL14)))))(/* @__PURE__ */ decodeJsonFromSchema_Cons3(CreateLocationIsSymbol)(/* @__PURE__ */ decodeJsonFromSchema_Args1(/* @__PURE__ */ decodeJsonFromSchemaRecor2(/* @__PURE__ */ decodeJsonFromSchema_RowL12(decodeJsonFromSchema_RowL14))))))));
+  var showWorldUpdate = {
+    show: function(x) {
+      return genericShow2(x);
+    }
+  };
   var toJsonSchemaWorldUpdate = {
     toJsonSchema: /* @__PURE__ */ generic_toJsonSchema(genericWorldUpdate_)(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateCharacterIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons3))))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterStatusIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(toJsonSchema_RowListCons3))))(/* @__PURE__ */ toJsonSchema_ConsSum(/* @__PURE__ */ toJsonSchema_ConsConstruc(SetCharacterLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons1(toJsonSchema_RowListCons4)))))(/* @__PURE__ */ toJsonSchema_ConsConstruc(CreateLocationIsSymbol)(/* @__PURE__ */ toJsonSchema_ArgsArgument(/* @__PURE__ */ toJsonSchemaRecord2(/* @__PURE__ */ toJsonSchema_RowListCons2(toJsonSchema_RowListCons4))))))))
-  };
-  var encodeJsonWorldUpdate = {
-    encodeJson: function(x) {
-      return genericEncodeJson2(x);
-    }
   };
   var decodeJsonFromSchemaWorld = {
     decodeJsonFromSchema: function(x) {
@@ -14924,32 +14862,32 @@ ${str(snapshot)}`);
     }
   };
   var describeWorld = function(w) {
-    return intercalate5("\n")(["Current state of the world:", "", function() {
-      var $202 = isEmpty(w.locations);
-      if ($202) {
+    return intercalate6("\n")(["Current state of the world:", "", function() {
+      var $246 = isEmpty(w.locations);
+      if ($246) {
         return "  - No locations have been created yet";
       }
       ;
-      return intercalate5("\n")(["  - Locations:", intercalate5("\n")(mapFlipped3(toUnfoldable9(w.locations))(function(v) {
-        return format3(v.value1)("    - {{name}}: {{description}}");
+      return intercalate6("\n")(["  - Locations:", intercalate6("\n")(mapFlipped3(toUnfoldable9(w.locations))(function(v) {
+        return format2(v.value1)("    - {{name}}: {{description}}");
       }))]);
     }(), "", function() {
-      var $206 = isEmpty(w.characters);
-      if ($206) {
+      var $250 = isEmpty(w.characters);
+      if ($250) {
         return "  - No characters have been created yet";
       }
       ;
-      return intercalate5("\n")(["  - Characters:", intercalate5("\n")(mapFlipped3(toUnfoldable9(w.characters))(function(v) {
-        return format3(v.value1)(intercalate5("\n")(["    - {{name}}: {{description}}", "      - Current location: {{location_name}}", "      - Current status: {{status}}"]));
+      return intercalate6("\n")(["  - Characters:", intercalate6("\n")(mapFlipped3(toUnfoldable9(w.characters))(function(v) {
+        return format2(v.value1)(intercalate6("\n")(["    - {{name}}: {{description}}", "      - Current location: {{location_name}}", "      - Current status: {{status}}"]));
       }))]);
     }()]);
   };
   var applyWorldUpdate = function(v) {
     if (v instanceof CreateLocation) {
       return set2(function() {
-        var $224 = at2(v.value0.name)(strongFn);
-        return function($225) {
-          return prop6($224($225));
+        var $268 = at2(v.value0.name)(strongFn);
+        return function($269) {
+          return prop6($268($269));
         };
       }())(pure8({
         name: v.value0.name,
@@ -14959,9 +14897,9 @@ ${str(snapshot)}`);
     ;
     if (v instanceof CreateCharacter) {
       return set2(function() {
-        var $226 = at2(v.value0.name)(strongFn);
-        return function($227) {
-          return prop13($226($227));
+        var $270 = at2(v.value0.name)(strongFn);
+        return function($271) {
+          return prop13($270($271));
         };
       }())(pure8({
         name: v.value0.name,
@@ -14973,23 +14911,23 @@ ${str(snapshot)}`);
     ;
     if (v instanceof SetCharacterStatus) {
       return over2(function() {
-        var $228 = at2(v.value0.name)(strongFn);
-        return function($229) {
-          return prop13($228($229));
+        var $272 = at2(v.value0.name)(strongFn);
+        return function($273) {
+          return prop13($272($273));
         };
       }())(map23(set2(prop23)(v.value0.status)));
     }
     ;
     if (v instanceof SetCharacterLocation) {
       return over2(function() {
-        var $230 = at2(v.value0.name)(strongFn);
-        return function($231) {
-          return prop13($230($231));
+        var $274 = at2(v.value0.name)(strongFn);
+        return function($275) {
+          return prop13($274($275));
         };
       }())(map23(set2(prop32)(v.value0.location_name)));
     }
     ;
-    throw new Error("Failed pattern match at Example.MutableWorld.World (line 57, column 1 - line 57, column 50): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Example.MutableWorld.World (line 61, column 1 - line 61, column 50): " + [v.constructor.name]);
   };
 
   // output/Web.HTML/foreign.js
@@ -16197,19 +16135,6 @@ ${str(snapshot)}`);
   var fold4 = /* @__PURE__ */ fold(foldableArray)(monoidArray);
   var mapWithIndex4 = /* @__PURE__ */ mapWithIndex(functorWithIndexArray);
   var show3 = /* @__PURE__ */ show(showInt);
-  var showRecord2 = /* @__PURE__ */ showRecord()();
-  var contentIsSymbol2 = {
-    reflectSymbol: function() {
-      return "content";
-    }
-  };
-  var show12 = /* @__PURE__ */ show(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsConsNil(contentIsSymbol2)(showString)));
-  var show22 = /* @__PURE__ */ show(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons(contentIsSymbol2)(/* @__PURE__ */ showRecordFieldsConsNil({
-    reflectSymbol: function() {
-      return "toolCalls";
-    }
-  })(/* @__PURE__ */ showArray(showToolCall)))(/* @__PURE__ */ showMaybe(showString))));
-  var format4 = /* @__PURE__ */ format();
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "ScrollToMe";
@@ -16240,10 +16165,11 @@ ${str(snapshot)}`);
       return "processing";
     }
   })()()(strongFn);
+  var format3 = /* @__PURE__ */ format();
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
   var prop24 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
-      return "msgs";
+      return "transcript";
     }
   })()()(strongFn);
   var lift3 = /* @__PURE__ */ lift(monadTransHalogenM)(monadAff);
@@ -16254,7 +16180,9 @@ ${str(snapshot)}`);
   };
   var generate_structure2 = /* @__PURE__ */ generate_structure(/* @__PURE__ */ toJsonSchemaRecord()(/* @__PURE__ */ toJsonSchema_RowListCons(updatesIsSymbol)()(/* @__PURE__ */ toJsonSchemaArray(toJsonSchemaWorldUpdate))(toJsonSchema_RowListNil)))(/* @__PURE__ */ decodeJsonFromSchemaRecor()(/* @__PURE__ */ decodeJsonFromSchema_RowL1(updatesIsSymbol)(/* @__PURE__ */ decodeJsonFromSchemaArray(decodeJsonFromSchemaWorld))()()(decodeJsonFromSchema_RowL)));
   var put2 = /* @__PURE__ */ put(monadStateHalogenM);
-  var encodeJson11 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeJsonArray(encodeJsonWorldUpdate))(gEncodeJsonNil)(updatesIsSymbol)())());
+  var intercalate7 = /* @__PURE__ */ intercalate2(monoidString);
+  var map32 = /* @__PURE__ */ map(functorArray);
+  var show12 = /* @__PURE__ */ show(showWorldUpdate);
   var prop33 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
       return "world";
@@ -16264,8 +16192,8 @@ ${str(snapshot)}`);
   var $$void7 = /* @__PURE__ */ $$void(functorHalogenM);
   var liftAff2 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var encodeMap3 = /* @__PURE__ */ encodeMap2(ordString)(encodeJsonJString);
-  var gEncodeJsonCons9 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
-  var gEncodeJsonCons15 = /* @__PURE__ */ gEncodeJsonCons9(gEncodeJsonNil);
+  var gEncodeJsonCons8 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
+  var gEncodeJsonCons14 = /* @__PURE__ */ gEncodeJsonCons8(gEncodeJsonNil);
   var statusIsSymbol2 = {
     reflectSymbol: function() {
       return "status";
@@ -16296,7 +16224,7 @@ ${str(snapshot)}`);
       return "characters";
     }
   };
-  var encodeJson12 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(statusIsSymbol2)())(nameIsSymbol4)())(location_nameIsSymbol2)())(descriptionIsSymbol2)())()))(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons9(/* @__PURE__ */ gEncodeJsonCons15(nameIsSymbol4)())(descriptionIsSymbol2)())()))(gEncodeJsonNil)(locationsIsSymbol)())(charactersIsSymbol)())());
+  var encodeJson11 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons14(statusIsSymbol2)())(nameIsSymbol4)())(location_nameIsSymbol2)())(descriptionIsSymbol2)())()))(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeMap3(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons8(/* @__PURE__ */ gEncodeJsonCons14(nameIsSymbol4)())(descriptionIsSymbol2)())()))(gEncodeJsonNil)(locationsIsSymbol)())(charactersIsSymbol)())());
   var decodeMap3 = /* @__PURE__ */ decodeMap2(ordString)(decodeJsonString);
   var gDecodeJsonCons4 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString));
   var gDecodeJsonCons13 = /* @__PURE__ */ gDecodeJsonCons4(gDecodeJsonNil);
@@ -16370,8 +16298,8 @@ ${str(snapshot)}`);
   var main_component = /* @__PURE__ */ function() {
     var systemMsg_UpdateWorld = mkSystemMsg(trim("\nYou are a helpful assistant for write story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it.\n"));
     var render = function(state3) {
-      var length_msgs = length3(state3.msgs);
-      var transcript_bottom_slotId = length_msgs + function() {
+      var n = length3(state3.transcript);
+      var transcript_bottom_slotId = n + function() {
         if (state3.processing) {
           return 1;
         }
@@ -16380,42 +16308,16 @@ ${str(snapshot)}`);
       }() | 0;
       return div2([classes(["App"])])([div3([classes(["Transcript"])])(fold4([mapWithIndex4(function(i2) {
         return function(v) {
-          if (v instanceof SystemMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "System"])])([div2([])([text("System")]), div2([])([text(v.value0.content)])]));
-          }
-          ;
-          if (v instanceof UserMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "User"])])([div2([])([text("User")]), div2([])([text(v.value0.content)])]));
-          }
-          ;
-          if (v instanceof ToolMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "Tool"])])([div2([])([text("Tool")]), div2([])([text(v.value0.content)])]));
-          }
-          ;
-          if (v instanceof AssistantMsg && v.value0 instanceof TextAssistantMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "Assistant", "Text"])])([div2([])([text("Assistant")]), div2([])([text(show12(v.value0.value0))])]));
-          }
-          ;
-          if (v instanceof AssistantMsg && v.value0 instanceof ToolAssistantMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "Assistant", "Tool"])])([div2([])([text("Assistant Tool")]), div2([])([text(show22(v.value0.value0))])]));
-          }
-          ;
-          if (v instanceof AssistantMsg && v.value0 instanceof StructureAssistantMsg) {
-            return new Tuple(show3(i2), div2([classes(["Msg", "Assistant", "Structure"])])([div2([])([text("Assistant Structure")]), div2([])([text(format4({
-              parsed: stringify2(v.value0.value0.parsed)
-            })("{ parsed: {{parsed}} }"))])]));
-          }
-          ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 196, column 47 - line 202, column 311): " + [v.constructor.name]);
+          return new Tuple(show3(i2), div2([classes(["Msg"])])([div2([])([text(v.label)]), div2([])([text(v.content)])]));
         };
-      })(state3.msgs), function() {
-        var $218 = !state3.processing;
-        if ($218) {
+      })(state3.transcript), function() {
+        var $189 = !state3.processing;
+        if ($189) {
           return [];
         }
         ;
-        return [new Tuple(show3(length_msgs), div2([])([text("processing...")]))];
-      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Directly modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
+        return [new Tuple(show3(n), div2([])([text("processing...")]))];
+      }(), [new Tuple(show3(transcript_bottom_slotId), slot_2($$Proxy.value)(show3(transcript_bottom_slotId))(scrollToMe2)(unit))]])), div2([classes(["World"])])([text(describeWorld(state3.world))]), div2([classes(["Toolbar"])])([button([onClick($$const(ExportWorld.value))])([text("export world")]), button([onClick($$const(ImportWorld.value))])([text("import world")])]), div2([classes(["Prompts"])])([div2([classes(["PromptSectionTitle"])])([text("Manually modify world:")]), textarea([onKeyDown(InputKeyDown.create(UpdateWorld_PromptSource.value)), value14("Create some locations and characters for a medieval fantasy world. Be creative!")]), div2([classes(["PromptSectionTitle"])])([text("Prompt next portion of story:")]), textarea([onKeyDown(InputKeyDown.create(PromptStory_PromptSource.value)), value14("...")])]), slot2($$Proxy.value)(unit)(component)({
         providerCategory: "Main",
         providers: providers_with_structured_output
       })(SetConfig.create)]);
@@ -16425,7 +16327,7 @@ ${str(snapshot)}`);
         engine: engine2,
         config: Nothing.value,
         processing: false,
-        msgs: [],
+        transcript: [],
         world: {
           characters: empty3,
           locations: empty3
@@ -16452,10 +16354,10 @@ ${str(snapshot)}`);
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
             return discard6(assign4(prop14)(true))(function() {
+              var userPrompt = trim(v.value1);
               return bind10(bind10(get4)(function(v1) {
-                var userPrompt = trim(v.value1);
                 var prelude = describeWorld(v1.world);
-                var prompt = trim(format4({
+                var prompt = trim(format3({
                   prelude,
                   prompt: userPrompt
                 })("\n{{prelude}}\n\nUser instructions: {{prompt}}\n  "));
@@ -16463,7 +16365,10 @@ ${str(snapshot)}`);
               }))(function(promptMsg) {
                 return bind10(get4)(function(state_backup) {
                   return discard6(modifying2(prop24)(function(v1) {
-                    return snoc2(v1)(promptMsg);
+                    return snoc2(v1)({
+                      label: "Manually modify world / User Prompt",
+                      content: userPrompt
+                    });
                   }))(function() {
                     return bind10(bind10(lift3(generate_structure2({
                       config,
@@ -16480,10 +16385,13 @@ ${str(snapshot)}`);
                         return pure17(err_msg.value0);
                       }
                       ;
-                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 148, column 7 - line 152, column 30): " + [err_msg.constructor.name]);
+                      throw new Error("Failed pattern match at Example.MutableWorld.App (line 152, column 7 - line 156, column 30): " + [err_msg.constructor.name]);
                     }))(function(result) {
                       return discard6(modifying2(prop24)(function(v1) {
-                        return snoc2(v1)(mkStructureAssistantMsg(encodeJson11(result)));
+                        return snoc2(v1)({
+                          label: "Manually modify world / Model Response",
+                          content: intercalate7("\n")(map32(show12)(result.updates))
+                        });
                       }))(function() {
                         return discard6(modifying2(prop33)(function(world) {
                           return foldr5(applyWorldUpdate)(world)(result.updates);
@@ -16502,7 +16410,7 @@ ${str(snapshot)}`);
       ;
       if (v instanceof ExportWorld) {
         return bind10(get4)(function(v1) {
-          return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson12(v1.world)))));
+          return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson11(v1.world)))));
         });
       }
       ;
@@ -16522,10 +16430,10 @@ ${str(snapshot)}`);
               return assign4(prop33)(v2.value0);
             }
             ;
-            throw new Error("Failed pattern match at Example.MutableWorld.App (line 166, column 18 - line 168, column 46): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Example.MutableWorld.App (line 175, column 18 - line 177, column 46): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Example.MutableWorld.App (line 164, column 37 - line 168, column 46): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Example.MutableWorld.App (line 173, column 37 - line 177, column 46): " + [v1.constructor.name]);
         });
       }
       ;
@@ -16543,7 +16451,7 @@ ${str(snapshot)}`);
         }));
       }
       ;
-      throw new Error("Failed pattern match at Example.MutableWorld.App (line 104, column 3 - line 105, column 34): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Example.MutableWorld.App (line 103, column 3 - line 104, column 34): " + [v.constructor.name]);
     };
     var $$eval = mkEval({
       handleQuery: defaultEval.handleQuery,

@@ -6,9 +6,10 @@ import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructu
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get, put)
 import Control.Monad.Trans.Class (lift)
-import Data.Argonaut (decodeJson, encodeJson, stringify, stringifyWithIndent)
+import Control.Monad.Writer (tell)
+import Data.Argonaut (encodeJson, stringify, stringifyWithIndent)
 import Data.Argonaut.Decode (fromJsonString)
-import Data.Array (length)
+import Data.Array (intercalate, length)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (fold, foldr)
@@ -21,7 +22,6 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
-import Effect.Class.Console as Console
 import Example.MutableWorld.Common (Engine)
 import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld)
 import Halogen (liftAff, liftEffect)
@@ -35,7 +35,7 @@ import Halogen.Utility (copyToClipboard, readFromClipboard)
 import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
-import Utility (format, prop, todo)
+import Utility (css, format, prop)
 import Web.Event.Event as Event
 import Web.HTML.HTMLTextAreaElement as HTMLTextAreaElement
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
@@ -54,15 +54,15 @@ type State =
   { config :: Maybe Config
   , engine :: Engine
   , processing :: Boolean
-  , msgs :: Array Msg
   , world :: World
+  , transcript :: Array { label :: String, content :: String }
   }
 
 data Action
   = SetConfig Config
   | SubmitPrompt PromptSource String
-  | ExportWorld
-  | ImportWorld
+  | Export
+  | Import
   | InputKeyDown PromptSource KeyboardEvent
 
 data PromptSource
@@ -77,7 +77,7 @@ main_component = H.mkComponent { initialState, eval, render }
     { engine
     , config: Nothing
     , processing: false
-    , msgs: []
+    , transcript: []
     , world:
         { characters: Map.empty
         , locations: Map.empty
@@ -117,11 +117,11 @@ Have fun with it.
 
     prop @"processing" .= true
 
+    let userPrompt = userPrompt_ # String.trim
     promptMsg <- do
       { world } <- get
       let
         prelude = describeWorld world
-        userPrompt = userPrompt_ # String.trim
         prompt =
           """
 {{prelude}}
@@ -136,7 +136,12 @@ User instructions: {{prompt}}
       pure $ mkUserMsg prompt
 
     state_backup <- get
-    prop @"msgs" %= (_ `Array.snoc` promptMsg)
+    prop @"transcript" %=
+      ( _ `Array.snoc`
+          { label: "Manually modify world / User Prompt"
+          , content: userPrompt
+          }
+      )
 
     result <- do
       err_msg <- lift $
@@ -151,16 +156,21 @@ User instructions: {{prompt}}
           throwError $ Aff.error $ "error when generating: " <> err
         Right msg -> pure msg
 
-    prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson result))
+    prop @"transcript" %=
+      ( _ `Array.snoc`
+          { label: "Manually modify world / Model Response"
+          , content: result.updates # map show # intercalate "\n"
+          }
+      )
     prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
 
     prop @"processing" .= false
 
-  handleAction ExportWorld = do
+  handleAction Export = do
     { world } <- get
     copyToClipboard (stringifyWithIndent 4 $ encodeJson world) # liftAff # void
 
-  handleAction ImportWorld = do
+  handleAction Import = do
     readFromClipboard # liftAff >>= case _ of
       Left _ -> pure unit
       Right s -> case fromJsonString s of
@@ -185,21 +195,20 @@ User instructions: {{prompt}}
 
   render state =
     let
-      length_msgs = length state.msgs
+      n = length state.transcript
 
-      transcript_processing_slotId = length_msgs
-      transcript_bottom_slotId = length_msgs + (if state.processing then 1 else 0)
+      transcript_processing_slotId = n
+      transcript_bottom_slotId = n + (if state.processing then 1 else 0)
     in
       HH.div
         [ HP.classes [ H.ClassName "App" ] ]
         [ HHK.div [ HP.classes [ H.ClassName "Transcript" ] ] $ fold $
-            [ state.msgs # mapWithIndex \i -> case _ of
-                SystemMsg msg -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "System" ] ] [ HH.div [] [ HH.text "System" ], HH.div [] [ HH.text msg.content ] ]
-                UserMsg msg -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "User" ] ] [ HH.div [] [ HH.text "User" ], HH.div [] [ HH.text msg.content ] ]
-                ToolMsg msg -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Tool" ] ] [ HH.div [] [ HH.text "Tool" ], HH.div [] [ HH.text msg.content ] ]
-                AssistantMsg (TextAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Text" ] ] [ HH.div [] [ HH.text "Assistant" ], HH.div [] [ HH.text $ show msg ] ]
-                AssistantMsg (ToolAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Tool" ] ] [ HH.div [] [ HH.text "Assistant Tool" ], HH.div [] [ HH.text $ show msg ] ]
-                AssistantMsg (StructureAssistantMsg msg) -> Tuple (show i) $ HH.div [ HP.classes [ H.ClassName "Msg", H.ClassName "Assistant", H.ClassName "Structure" ] ] [ HH.div [] [ HH.text "Assistant Structure" ], HH.div [] [ HH.text $ "{ parsed: {{parsed}} }" # format { parsed: stringify msg.parsed } ] ]
+            [ state.transcript # mapWithIndex \i { label, content } ->
+                Tuple (show i) $
+                  HH.div [ HP.classes [ H.ClassName "Msg" ] ]
+                    [ HH.div [] [ HH.text label ]
+                    , HH.div [] [ HH.text content ]
+                    ]
             , if not state.processing then []
               else [ Tuple (show transcript_processing_slotId) $ HH.div [] [ HH.text "processing..." ] ]
             , [ Tuple (show transcript_bottom_slotId) $ HH.slot_ (Proxy @"ScrollToMe") (show transcript_bottom_slotId) Widget.scrollToMe unit ]
@@ -208,15 +217,15 @@ User instructions: {{prompt}}
             [ HH.text $ describeWorld state.world ]
         , HH.div [ HP.classes [ H.ClassName "Toolbar" ] ]
             [ HH.button
-                [ HE.onClick $ const ExportWorld ]
-                [ HH.text "export world" ]
+                [ HE.onClick $ const Export ]
+                [ HH.text "export" ]
             , HH.button
-                [ HE.onClick $ const ImportWorld ]
-                [ HH.text "import world" ]
+                [ HE.onClick $ const Import ]
+                [ HH.text "import" ]
             ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
             [ HH.div [ HP.classes [ H.ClassName "PromptSectionTitle" ] ]
-                [ HH.text "Directly modify world:" ]
+                [ HH.text "Manually modify world:" ]
             , HH.textarea
                 [ HE.onKeyDown $ InputKeyDown UpdateWorld_PromptSource
                 , HP.value "Create some locations and characters for a medieval fantasy world. Be creative!"

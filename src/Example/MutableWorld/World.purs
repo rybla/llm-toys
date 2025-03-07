@@ -11,6 +11,7 @@ import Data.Lens ((%~), (.~))
 import Data.Lens.At (at)
 import Data.Map (Map)
 import Data.Map as Map
+import Data.Show.Generic (genericShow)
 import Data.Tuple.Nested ((/\))
 import Utility (format, prop)
 
@@ -44,6 +45,9 @@ data WorldUpdate
       { name :: String, description :: String }
 
 derive instance Generic WorldUpdate _
+
+instance Show WorldUpdate where
+  show x = genericShow x
 
 instance ToJsonSchema WorldUpdate where
   toJsonSchema = generic_toJsonSchema @WorldUpdate

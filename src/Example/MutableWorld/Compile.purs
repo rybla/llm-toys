@@ -71,7 +71,7 @@ html, body {
   overflow-y: scroll;
   
   padding: 1em;
-  box-shadow: 0 0 0 1px black inset;
+  box-shadow: 0 0 0 1px black;
 
   display: flex;
   flex-direction: column;
@@ -79,7 +79,7 @@ html, body {
 }
 
 .Msg {
-  box-shadow: 0 0 0 1px black inset;
+  box-shadow: 0 0 0 1px black;
 
   display: flex;
   flex-direction: row;
@@ -114,7 +114,7 @@ html, body {
   overflow-y: scroll;
 
   padding: 1em;
-  box-shadow: 0 0 0 1px black inset;
+  box-shadow: 0 0 0 1px black;
 
   white-space: pre-wrap;
 }
@@ -125,7 +125,7 @@ html, body {
   gap: 1em;
 
   padding: 1em;
-  box-shadow: 0 0 0 1px black inset;
+  box-shadow: 0 0 0 1px black;
 }
 
 .Prompts {
@@ -133,7 +133,7 @@ html, body {
   overflow-y: scroll;
 
   padding: 1em;
-  box-shadow: 0 0 0 1px black inset;
+  box-shadow: 0 0 0 1px black;
 
   display: flex;
   flex-direction: column;
@@ -146,11 +146,21 @@ html, body {
   font-family: Merienda;
 }
 
+.PromptSectionTitle {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
 textarea {
   padding: 0.5em;
   height: 5em;
   resize: none;
   overflow: auto;
+  font-family: Merienda;
+}
+
+button {
+  padding: 0.5em;
   font-family: Merienda;
 }
 </style>
