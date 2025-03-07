@@ -2,7 +2,7 @@ module Example.MutableWorld.App where
 
 import Prelude
 
-import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkUserMsg)
+import Ai2.Llm (AssistantMsg(..), Config, Msg(..), generate_structure, mkStructureAssistantMsg, mkSystemMsg, mkUserMsg)
 import Ai2.Widget.Provider as Provider
 import Control.Monad.State (get)
 import Control.Monad.Trans.Class (lift)
@@ -10,7 +10,7 @@ import Data.Argonaut (encodeJson, stringify, stringifyWithIndent)
 import Data.Array (length)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (fold)
+import Data.Foldable (fold, foldr)
 import Data.FunctorWithIndex (mapWithIndex)
 import Data.Lens ((%=), (.=))
 import Data.Map as Map
@@ -20,9 +20,8 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Aff as Aff
-import Effect.Class.Console as Console
 import Example.MutableWorld.Common (Engine)
-import Example.MutableWorld.World (StringOrInt, World)
+import Example.MutableWorld.World (World, WorldUpdate, applyWorldUpdate, describeWorld)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -32,7 +31,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver as HVD
 import Halogen.Widget as Widget
 import Type.Prelude (Proxy(..))
-import Utility (format, prop)
+import Utility (format, prop, todo)
 
 --------------------------------------------------------------------------------
 
@@ -63,7 +62,19 @@ main_component = H.mkComponent { initialState, eval, render }
     { engine
     , config: Nothing
     , processing: false
-    , msgs: []
+    , msgs:
+        [ mkSystemMsg $ String.trim
+            """
+You are a helpful assistant for write story-related content.
+You are interacting with a fictional world in collaboration with the user.
+The world starts off with no content.
+The user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.
+The idea is that these changes will reflect a story progressing in the fictional world.
+You will always output in a structured form with an array of updates to apply simultaneously to the world.
+Make sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!
+Have fun with it.
+"""
+        ]
     , world:
         { characters: Map.empty
         , locations: Map.empty
@@ -83,32 +94,34 @@ main_component = H.mkComponent { initialState, eval, render }
 
     prop @"msgs" %= (_ `Array.snoc` mkUserMsg prompt)
 
-    -- msg <- do
-    --   { msgs } <- get
-    --   err_msg <- lift $
-    --     generate_structure @(update :: WorldUpdate)
-    --       { config
-    --       , name: "UpdateWorld"
-    --       , messages: msgs
-    --       }
-    --   case err_msg of
-    --     Left err -> throwError $ Aff.error $ "error when generating: " <> err
-    --     Right msg -> pure msg
-
-    -- prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson msg))
-
-    msg <- do
+    result <- do
       { msgs } <- get
       err_msg <- lift $
-        generate_structure @(value :: StringOrInt)
+        generate_structure @(updates :: Array WorldUpdate)
           { config
-          , name: "StringOrInt"
+          , name: "updates"
           , messages: msgs
           }
       case err_msg of
         Left err -> throwError $ Aff.error $ "error when generating: " <> err
         Right msg -> pure msg
-    Console.logShow { msg }
+
+    prop @"msgs" %= (_ `Array.snoc` mkStructureAssistantMsg (encodeJson result))
+
+    prop @"world" %= \world -> foldr applyWorldUpdate world result.updates
+
+    -- msg <- do
+    --   { msgs } <- get
+    --   err_msg <- lift $
+    --     generate_structure @(value :: StringOrInt)
+    --       { config
+    --       , name: "StringOrInt"
+    --       , messages: msgs
+    --       }
+    --   case err_msg of
+    --     Left err -> throwError $ Aff.error $ "error when generating: " <> err
+    --     Right msg -> pure msg
+    -- Console.logShow { msg }
 
     prop @"processing" .= false
 
@@ -119,9 +132,19 @@ main_component = H.mkComponent { initialState, eval, render }
       transcript_processing_slotId = length_msgs
       transcript_bottom_slotId = length_msgs + (if state.processing then 1 else 0)
 
-      mkPromptButton prompt_ =
+      mkPromptButton userPrompt =
         let
-          prompt = String.trim prompt_
+          prelude = describeWorld state.world
+          prompt =
+            """
+{{prelude}}
+
+User instructions: {{prompt}}
+"""
+              # format
+                  { prelude
+                  , prompt: String.trim userPrompt
+                  }
         in
           HH.button
             [ HP.classes [ H.ClassName "PromptButton" ]
@@ -148,10 +171,6 @@ main_component = H.mkComponent { initialState, eval, render }
             [ HH.text $ stringifyWithIndent 4 $ encodeJson state.world ]
         , HH.div [ HP.classes [ H.ClassName "Prompts" ] ]
             [ mkPromptButton $
-                """
-Create some locations and characters for a medieval fantasy world. Be creative!
-"""
-            , mkPromptButton $
                 """
 Create some locations and characters for a medieval fantasy world. Be creative!
 """

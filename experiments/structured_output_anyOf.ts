@@ -67,18 +67,38 @@ const response = await openai.chat.completions.create({
           "value": {
             "anyOf": [
               {
-                "type": "string",
-                "tag": {
-                  "type": "string",
-                  "const": "String"
-                }
+                "type": "object",
+                "properties": {
+                  "tag": {
+                    "type": "string",
+                    "const": "String",
+                  },
+                  "value": {
+                    "type": "string",
+                  }
+                },
+                "required": [
+                  "tag",
+                  "value",
+                ],
+                "additionalProperties": false
               },
               {
-                "type": "integer",
-                "tag": {
-                  "type": "string",
-                  "const": "Int"
-                }
+                "type": "object",
+                "properties": {
+                  "tag": {
+                    "type": "string",
+                    "const": "Int",
+                  },
+                  "value": {
+                    "type": "integer",
+                  },
+                },
+                "required": [
+                  "tag",
+                  "value",
+                ],
+                "additionalProperties": false
               }
             ]
           }

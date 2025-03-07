@@ -48,14 +48,23 @@ html, body {
 }
 
 .Msg>div:nth-child(1) {
-  width: 6em;
+  flex-grow: 0;
+  flex-shrink: 0;
+  
+  width: 8em;
+  
   background-color: black;
   color: white;
 }
 
 .Msg>div:nth-child(2) {
+  flex-grow: 1;
+  flex-shrink: 1;
+
   background-color: transparent;
   color: black;
+
+  whitespace: pre-wrap;
 }
 
 .World {  

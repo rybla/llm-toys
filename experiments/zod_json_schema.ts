@@ -15,8 +15,10 @@ function check<ZodInput extends ZodType>(schema: ZodInput) {
 // check(z.tuple([z.string(), z.string(), z.string()]))
 // check(z.boolean())
 // check(z.object({ arg: z.array(z.string()) }))
-check(z.object({ arg: z.nullable(z.string()) }))
+// check(z.object({ arg: z.nullable(z.string()) }))
+// check(z.object({ arg: z.tuple([]) }))
+check(z.object({ arg: z.literal("hello") }))
 
-console.log(zodToJsonSchema(z.object({ name: z.string(), age: z.number().int() }), { target: "openApi3" }))
-console.log(zodToJsonSchema(z.object({ name: z.string(), age: z.number().int() }), { target: "openAi" }))
+// console.log(zodToJsonSchema(z.object({ name: z.string(), age: z.number().int() }), { target: "openApi3" }))
+// console.log(zodToJsonSchema(z.object({ name: z.string(), age: z.number().int() }), { target: "openAi" }))
 

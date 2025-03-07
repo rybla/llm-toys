@@ -78,7 +78,7 @@ toJsonSchema_Cons_final = case toJsonSchema_Cons @a of
   [ con ] -> f con
   cons -> encodeJson { anyOf: cons # map f }
   where
-  f con = con.value # maybe (mkStringSchema con.tag) \value -> encodeJson { tag: mkStringSchema con.tag, value }
+  f con = con.value # maybe (mkStringSchema con.tag) \value -> encodeJson { type: "object", properties: { tag: mkStringSchema con.tag, value }, required: [ "tag", "value" ], additionalProperties: false }
 
 class ToJsonSchema_Cons (a :: Type) where
   toJsonSchema_Cons :: Array { tag :: String, value :: Maybe Json }
