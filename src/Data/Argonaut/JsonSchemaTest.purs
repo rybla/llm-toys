@@ -32,7 +32,7 @@ main :: Effect Unit
 main = launchAff_ do
   person <- Llm.generate_structure @(value :: Value)
     { config:
-        { apiKey: "AIzaSyDHzXdhzpqf_ZCXG5a-PMderxWk0WO8sQI"
+        { apiKey: "AIzaSyDHzXdhzpqf_ZCXG5a-PMderx"
         , baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
         , model: "gemini-2.0-flash"
         }
