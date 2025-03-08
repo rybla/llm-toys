@@ -19,7 +19,7 @@ main = do
   let index_path = dist_path <> "index.html"
 
   labels_hrefs <-
-    if false then do
+    if true then do
       sequence
         [ Example.DiscreteAdventure.Engine1.Compile.compile
         , Example.NaturalRobot.Compile.compile

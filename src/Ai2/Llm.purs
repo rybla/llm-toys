@@ -26,7 +26,7 @@ module Ai2.Llm
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, parseJson, stringify, stringifyWithIndent)
 import Data.Argonaut.Core (stringify)
 import Data.Argonaut.Decode.Error (printJsonDecodeError)
 import Data.Argonaut.JsonSchema (class DecodeJsonFromSchema, class ToJsonSchema, decodeJsonFromSchema, toJsonSchema)
@@ -36,7 +36,8 @@ import Data.Either.Nested (type (\/))
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Utility (format)
+import Effect.Class.Console as Console
+import Utility (format, todo)
 
 --------------------------------------------------------------------------------
 -- types
@@ -192,6 +193,12 @@ generate_tools args =
           Right { content } -> Right $ Left { content }
           Left err3 -> Left $ "generate_tools:\n" <> Array.intercalate "\n" ([ err1, err2, err3 ] # map printJsonDecodeError)
 
+foreign import generate_structure_
+  :: forall @a
+   . { error :: String -> a, ok :: Json -> a }
+  -> Json
+  -> Effect (Promise a)
+
 generate_structure
   :: forall @r
    . ToJsonSchema (Record r)
@@ -207,27 +214,36 @@ generate_structure args = do
   --       , schema: toJsonSchema @(Record r)
   --       }
   --   }
-  ( toAffE $ generate_ { error: Left, ok: Right } $ encodeJson
-      { baseURL: args.config.baseURL
-      , model: args.config.model
-      , apiKey: args.config.apiKey
-      , messages: args.messages
-      , response_format: encodeJson $
-          { type: "json_schema"
-          , json_schema:
-              { name: args.name
-              , strict: true
-              , schema: toJsonSchema @(Record r)
-              }
-          }
-      }
-  ) <#> case _ of
-    Left err -> Left $ "generate_structure: " <> err
-    Right response -> case response # decodeJson @{ content :: String } of
-      Right { content } -> case parseJson content of
-        Left err -> Left $ printJsonDecodeError err
-        Right parsed -> case parsed # decodeJsonFromSchema of
-          Left err -> Left $ printJsonDecodeError err
-          Right a -> pure a
-      Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
+  err_result <-
+    ( toAffE $ generate_structure_ { error: Left, ok: Right } $ encodeJson
+        { baseURL: args.config.baseURL
+        , model: args.config.model
+        , apiKey: args.config.apiKey
+        , messages: args.messages
+        , response_format: encodeJson $
+            { type: "json_schema"
+            , json_schema:
+                { name: args.name
+                , strict: true
+                , schema: toJsonSchema @(Record r)
+                }
+            }
+        }
+    ) <#> case _ of
+      Left err -> Left $ "generate_structure: " <> err
+      -- Right response -> case response # decodeJson @{ content :: String } of
+      --   Right { content } -> case parseJson content of
+      --     Left err -> Left $ printJsonDecodeError err
+      --     Right parsed -> case parsed # decodeJsonFromSchema of
+      --       Left err -> Left $ printJsonDecodeError err
+      --       Right a -> pure a
+      --   Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
+      Right response -> pure response
+  case err_result of
+    Left err -> do
+      Console.log $ "error: " <> err
+      todo "end"
+    Right result -> do
+      Console.log $ "result: " <> stringifyWithIndent 4 result
+      todo "end"
 

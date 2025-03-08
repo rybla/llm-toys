@@ -15,7 +15,6 @@ import Data.Either (Either(..))
 import Data.Foldable (fold, foldr)
 import Data.FunctorWithIndex (mapWithIndex)
 import Data.Lens ((%=), (.=))
-import Data.List (Pattern)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), maybe)
 import Data.String (Pattern(..))
