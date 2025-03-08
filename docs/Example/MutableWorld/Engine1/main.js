@@ -5298,42 +5298,6 @@ ${str(snapshot)}`);
     }
   };
 
-  // output/Control.Bind/index.js
-  var discard = function(dict) {
-    return dict.discard;
-  };
-  var bind = function(dict) {
-    return dict.bind;
-  };
-  var bindFlipped = function(dictBind) {
-    return flip(bind(dictBind));
-  };
-  var composeKleisliFlipped = function(dictBind) {
-    var bindFlipped12 = bindFlipped(dictBind);
-    return function(f) {
-      return function(g) {
-        return function(a2) {
-          return bindFlipped12(f)(g(a2));
-        };
-      };
-    };
-  };
-  var composeKleisli = function(dictBind) {
-    var bind15 = bind(dictBind);
-    return function(f) {
-      return function(g) {
-        return function(a2) {
-          return bind15(f(a2))(g);
-        };
-      };
-    };
-  };
-  var discardUnit = {
-    discard: function(dictBind) {
-      return bind(dictBind);
-    }
-  };
-
   // output/Control.Promise/foreign.js
   function thenImpl(promise2) {
     return function(errCB) {
@@ -5404,6 +5368,42 @@ ${str(snapshot)}`);
   // output/Control.Alt/index.js
   var alt = function(dict) {
     return dict.alt;
+  };
+
+  // output/Control.Bind/index.js
+  var discard = function(dict) {
+    return dict.discard;
+  };
+  var bind = function(dict) {
+    return dict.bind;
+  };
+  var bindFlipped = function(dictBind) {
+    return flip(bind(dictBind));
+  };
+  var composeKleisliFlipped = function(dictBind) {
+    var bindFlipped12 = bindFlipped(dictBind);
+    return function(f) {
+      return function(g) {
+        return function(a2) {
+          return bindFlipped12(f)(g(a2));
+        };
+      };
+    };
+  };
+  var composeKleisli = function(dictBind) {
+    var bind15 = bind(dictBind);
+    return function(f) {
+      return function(g) {
+        return function(a2) {
+          return bind15(f(a2))(g);
+        };
+      };
+    };
+  };
+  var discardUnit = {
+    discard: function(dictBind) {
+      return bind(dictBind);
+    }
   };
 
   // output/Data.Bounded/foreign.js
@@ -5826,23 +5826,23 @@ ${str(snapshot)}`);
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind15 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var unless2 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind15(mb)(function(b2) {
+        return bind11(mb)(function(b2) {
           return unless2(b2)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind15 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var pure19 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind15(f)(function(f$prime) {
-          return bind15(a2)(function(a$prime) {
+        return bind11(f)(function(f$prime) {
+          return bind11(a2)(function(a$prime) {
             return pure19(f$prime(a$prime));
           });
         });
@@ -6371,12 +6371,12 @@ ${str(snapshot)}`);
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind15 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var pure19 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind15(v)(either(function($193) {
+          return bind11(v)(either(function($193) {
             return pure19(Left.create($193));
           })(function(a2) {
             var v1 = k(a2);
@@ -6429,19 +6429,19 @@ ${str(snapshot)}`);
     var append7 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind15 = bind(Bind1);
+      var bind11 = bind(Bind1);
       var pure19 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind15(v)(function(rm) {
+            return bind11(v)(function(rm) {
               if (rm instanceof Right) {
                 return pure19(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind15(v1)(function(rn) {
+                return bind11(v1)(function(rn) {
                   if (rn instanceof Right) {
                     return pure19(new Right(rn.value0));
                   }
@@ -8220,14 +8220,14 @@ ${str(snapshot)}`);
     var append7 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
-      var bind15 = bind(dictBind);
+      var bind11 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
       var map33 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v) {
           return function(k) {
-            return bind15(v)(function(v1) {
+            return bind11(v)(function(v1) {
               var v2 = k(v1.value0);
               return map33(function(v3) {
                 return new Tuple(v3.value0, append7(v1.value1)(v3.value1));
@@ -8855,7 +8855,7 @@ ${str(snapshot)}`);
     }
     return m;
   }
-  function _foldM(bind15) {
+  function _foldM(bind11) {
     return function(f) {
       return function(mz) {
         return function(m) {
@@ -8867,7 +8867,7 @@ ${str(snapshot)}`);
           }
           for (var k in m) {
             if (hasOwnProperty.call(m, k)) {
-              acc = bind15(acc)(g(k));
+              acc = bind11(acc)(g(k));
             }
           }
           return acc;
@@ -10282,6 +10282,30 @@ ${str(snapshot)}`);
       decodeJson: decodeArray(decodeJson(dictDecodeJson))
     };
   };
+
+  // output/Data.Argonaut.Parser/foreign.js
+  function _jsonParser(fail2, succ2, s) {
+    try {
+      return succ2(JSON.parse(s));
+    } catch (e) {
+      return fail2(e.message);
+    }
+  }
+
+  // output/Data.Argonaut.Parser/index.js
+  var jsonParser = function(j) {
+    return _jsonParser(Left.create, Right.create, j);
+  };
+
+  // output/Data.Argonaut.Decode.Parser/index.js
+  var parseJson = /* @__PURE__ */ function() {
+    var $3 = lmap(bifunctorEither)(function(v) {
+      return new TypeMismatch2("JSON");
+    });
+    return function($4) {
+      return $3(jsonParser($4));
+    };
+  }();
 
   // output/Data.Argonaut.Encode.Encoders/index.js
   var map14 = /* @__PURE__ */ map(functorArray);
@@ -11959,11 +11983,6 @@ ${str(snapshot)}`);
   var toUnfoldable12 = /* @__PURE__ */ toUnfoldable3(unfoldableList);
   var fromHomogeneous2 = /* @__PURE__ */ fromHomogeneous();
   var intercalate4 = /* @__PURE__ */ intercalate2(monoidString);
-  var todo = function() {
-    return function(msg) {
-      return unsafeCrashWith("[[TODO]]\n" + msg);
-    };
-  };
   var replaceFormatVars = function(sigma) {
     var go2 = function($copy_v) {
       return function($copy_v1) {
@@ -12426,26 +12445,6 @@ ${str(snapshot)}`);
     };
   };
 
-  // output/Effect.Console/foreign.js
-  var log2 = function(s) {
-    return function() {
-      console.log(s);
-    };
-  };
-  var warn = function(s) {
-    return function() {
-      console.warn(s);
-    };
-  };
-
-  // output/Effect.Class.Console/index.js
-  var log3 = function(dictMonadEffect) {
-    var $67 = liftEffect(dictMonadEffect);
-    return function($68) {
-      return $67(log2($68));
-    };
-  };
-
   // output/Ai2.Llm/index.js
   var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
   var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonNil);
@@ -12532,7 +12531,6 @@ ${str(snapshot)}`);
     }
   };
   var decodeJson1 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(contentIsSymbol)()())());
-  var bind5 = /* @__PURE__ */ bind(bindAff);
   var encodeJson52 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons42({
     reflectSymbol: function() {
       return "schema";
@@ -12543,9 +12541,6 @@ ${str(snapshot)}`);
     }
   })())());
   var pure4 = /* @__PURE__ */ pure(applicativeEither);
-  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindAff);
-  var log4 = /* @__PURE__ */ log3(monadEffectAff);
-  var todo2 = /* @__PURE__ */ todo();
   var TextAssistantMsg = /* @__PURE__ */ function() {
     function TextAssistantMsg2(value0) {
       this.value0 = value0;
@@ -12710,8 +12705,9 @@ ${str(snapshot)}`);
   var generate_structure = function(dictToJsonSchema) {
     var toJsonSchema2 = toJsonSchema(dictToJsonSchema);
     return function(dictDecodeJsonFromSchema) {
+      var decodeJsonFromSchema2 = decodeJsonFromSchema(dictDecodeJsonFromSchema);
       return function(args) {
-        return bind5(mapFlipped2(toAffE(generate_structure_({
+        return mapFlipped2(toAffE(generate_structure_({
           error: Left.create,
           ok: Right.create
         })(encodeJson9({
@@ -12733,24 +12729,37 @@ ${str(snapshot)}`);
           }
           ;
           if (v instanceof Right) {
-            return pure4(v.value0);
+            var v1 = decodeJson1(v.value0);
+            if (v1 instanceof Right) {
+              var v2 = parseJson(v1.value0.content);
+              if (v2 instanceof Left) {
+                return new Left(printJsonDecodeError(v2.value0));
+              }
+              ;
+              if (v2 instanceof Right) {
+                var v3 = decodeJsonFromSchema2(v2.value0);
+                if (v3 instanceof Left) {
+                  return new Left(printJsonDecodeError(v3.value0));
+                }
+                ;
+                if (v3 instanceof Right) {
+                  return pure4(v3.value0);
+                }
+                ;
+                throw new Error("Failed pattern match at Ai2.Llm (line 236, column 25 - line 238, column 28): " + [v3.constructor.name]);
+              }
+              ;
+              throw new Error("Failed pattern match at Ai2.Llm (line 234, column 28 - line 238, column 28): " + [v2.constructor.name]);
+            }
+            ;
+            if (v1 instanceof Left) {
+              return new Left("generate_structure: failed to parsed content as JSON: " + printJsonDecodeError(v1.value0));
+            }
+            ;
+            throw new Error("Failed pattern match at Ai2.Llm (line 233, column 23 - line 239, column 110): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Llm (line 232, column 11 - line 241, column 38): " + [v.constructor.name]);
-        }))(function(err_result) {
-          if (err_result instanceof Left) {
-            return discard2(log4("error: " + err_result.value0))(function() {
-              return todo2("end");
-            });
-          }
-          ;
-          if (err_result instanceof Right) {
-            return discard2(log4("result: " + stringifyWithIndent(4)(err_result.value0)))(function() {
-              return todo2("end");
-            });
-          }
-          ;
-          throw new Error("Failed pattern match at Ai2.Llm (line 242, column 3 - line 248, column 17): " + [err_result.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Llm (line 231, column 9 - line 239, column 110): " + [v.constructor.name]);
         });
       };
     };
@@ -12787,30 +12796,6 @@ ${str(snapshot)}`);
       throw new Error("Failed pattern match at Ai2.Llm (line 170, column 9 - line 174, column 66): " + [v.constructor.name]);
     });
   };
-
-  // output/Data.Argonaut.Parser/foreign.js
-  function _jsonParser(fail2, succ2, s) {
-    try {
-      return succ2(JSON.parse(s));
-    } catch (e) {
-      return fail2(e.message);
-    }
-  }
-
-  // output/Data.Argonaut.Parser/index.js
-  var jsonParser = function(j) {
-    return _jsonParser(Left.create, Right.create, j);
-  };
-
-  // output/Data.Argonaut.Decode.Parser/index.js
-  var parseJson = /* @__PURE__ */ function() {
-    var $3 = lmap(bifunctorEither)(function(v) {
-      return new TypeMismatch2("JSON");
-    });
-    return function($4) {
-      return $3(jsonParser($4));
-    };
-  }();
 
   // output/Data.Argonaut.Decode/index.js
   var composeKleisli3 = /* @__PURE__ */ composeKleisli(bindEither);
@@ -12851,6 +12836,26 @@ ${str(snapshot)}`);
       return function(b2) {
         return $$void8(modify5(set2(p2)(b2)));
       };
+    };
+  };
+
+  // output/Effect.Console/foreign.js
+  var log2 = function(s) {
+    return function() {
+      console.log(s);
+    };
+  };
+  var warn = function(s) {
+    return function() {
+      console.warn(s);
+    };
+  };
+
+  // output/Effect.Class.Console/index.js
+  var log3 = function(dictMonadEffect) {
+    var $67 = liftEffect(dictMonadEffect);
+    return function($68) {
+      return $67(log2($68));
     };
   };
 
@@ -13602,7 +13607,7 @@ ${str(snapshot)}`);
 
   // output/Halogen.Subscription/index.js
   var $$void4 = /* @__PURE__ */ $$void(functorEffect);
-  var bind6 = /* @__PURE__ */ bind(bindEffect);
+  var bind5 = /* @__PURE__ */ bind(bindEffect);
   var append5 = /* @__PURE__ */ append(semigroupArray);
   var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_1 = /* @__PURE__ */ traverse_2(foldableArray);
@@ -13633,7 +13638,7 @@ ${str(snapshot)}`);
         };
       },
       listener: function(a2) {
-        return bind6(read(subscribers))(traverse_1(function(k) {
+        return bind5(read(subscribers))(traverse_1(function(k) {
           return k(a2);
         }));
       }
@@ -14201,7 +14206,7 @@ ${str(snapshot)}`);
   // output/Ai2.Widget.Provider/index.js
   var fromFoldable8 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
   var tell2 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
-  var bind7 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind6 = /* @__PURE__ */ bind(bindHalogenM);
   var get3 = /* @__PURE__ */ get(monadStateHalogenM);
   var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
@@ -14241,8 +14246,8 @@ ${str(snapshot)}`);
       return "set_open";
     }
   });
-  var discard3 = /* @__PURE__ */ discard(discardUnit);
-  var discard1 = /* @__PURE__ */ discard3(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var discard2 = /* @__PURE__ */ discard(discardUnit);
+  var discard1 = /* @__PURE__ */ discard2(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var value3 = /* @__PURE__ */ value(isPropString);
   var inj22 = /* @__PURE__ */ inj3({
     reflectSymbol: function() {
@@ -14273,8 +14278,8 @@ ${str(snapshot)}`);
   var lookup6 = /* @__PURE__ */ lookup2(ordString);
   var modify_3 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var show2 = /* @__PURE__ */ show(showString);
-  var discard22 = /* @__PURE__ */ discard3(bindHalogenM);
-  var log5 = /* @__PURE__ */ log3(monadEffectHalogenM2);
+  var discard22 = /* @__PURE__ */ discard2(bindHalogenM);
+  var log4 = /* @__PURE__ */ log3(monadEffectHalogenM2);
   var encodeJson11 = /* @__PURE__ */ encodeJson(encodeRecord1);
   var fromJsonString1 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeRecord2))(/* @__PURE__ */ gDecodeJsonCons12(nameIsSymbol2)()())(configIsSymbol)()())());
   var assign2 = /* @__PURE__ */ assign(monadStateHalogenM);
@@ -14310,7 +14315,7 @@ ${str(snapshot)}`);
   };
   var component = /* @__PURE__ */ function() {
     var setProviderConfig = function(providerConfig) {
-      return bind7(get3)(function(state3) {
+      return bind6(get3)(function(state3) {
         return liftEffect4(save(state3.providerConfig_localStorageKey)(toJsonString2(providerConfig)));
       });
     };
@@ -14346,8 +14351,8 @@ ${str(snapshot)}`);
         apiKey: ""
       };
     };
-    var getSavedProviderConfigs = bind7(get3)(function(state3) {
-      return bind7(liftEffect4(load2(state3.savedProviderConfigs_localStorageKey)))(function(v) {
+    var getSavedProviderConfigs = bind6(get3)(function(state3) {
+      return bind6(liftEffect4(load2(state3.savedProviderConfigs_localStorageKey)))(function(v) {
         if (v instanceof Nothing) {
           return pure7(empty3);
         }
@@ -14370,14 +14375,14 @@ ${str(snapshot)}`);
     });
     var insertSavedProviderConfig = function(provider) {
       return function(config) {
-        return bind7(getSavedProviderConfigs)(function(savedProviderConfigs) {
-          return bind7(get3)(function(state3) {
+        return bind6(getSavedProviderConfigs)(function(savedProviderConfigs) {
+          return bind6(get3)(function(state3) {
             return liftEffect4(save(state3.savedProviderConfigs_localStorageKey)(toJsonString1(insert7(provider)(config)(savedProviderConfigs))));
           });
         });
       };
     };
-    var submit2 = bind7(get3)(function(state3) {
+    var submit2 = bind6(get3)(function(state3) {
       var v = lookup6(state3.provider)(state3.providers);
       if (v instanceof Nothing) {
         return modify_3(function(v1) {
@@ -14436,7 +14441,7 @@ ${str(snapshot)}`);
           name: state3.provider,
           config
         };
-        return discard22(log5("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson11(providerConfig))))))(function() {
+        return discard22(log4("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson11(providerConfig))))))(function() {
           return discard22(insertSavedProviderConfig(state3.provider)(config))(function() {
             return discard22(setProviderConfig(providerConfig))(function() {
               return discard22(modify_3(function(v1) {
@@ -14474,7 +14479,7 @@ ${str(snapshot)}`);
         $179.provider = provider;
         return $179;
       }))(function() {
-        return bind7(getSavedProviderConfigs)(function(savedProviderConfigs) {
+        return bind6(getSavedProviderConfigs)(function(savedProviderConfigs) {
           var v = lookup6(provider)(savedProviderConfigs);
           if (v instanceof Nothing) {
             return modify_3(function(v1) {
@@ -14511,8 +14516,8 @@ ${str(snapshot)}`);
         });
       });
     };
-    var getProviderConfig = bind7(get3)(function(state3) {
-      return bind7(liftEffect4(load2(state3.providerConfig_localStorageKey)))(function(v) {
+    var getProviderConfig = bind6(get3)(function(state3) {
+      return bind6(liftEffect4(load2(state3.providerConfig_localStorageKey)))(function(v) {
         if (v instanceof Nothing) {
           return pure7(Nothing.value);
         }
@@ -14557,7 +14562,7 @@ ${str(snapshot)}`);
       })(unit)),
       handleAction: match()()()({
         initialize: function(v1) {
-          return bind7(getProviderConfig)(function(v2) {
+          return bind6(getProviderConfig)(function(v2) {
             if (v2 instanceof Nothing) {
               return pure7(unit);
             }
@@ -15100,7 +15105,7 @@ ${str(snapshot)}`);
   var toEventTarget = unsafeCoerce2;
 
   // output/Halogen.Aff.Util/index.js
-  var bind8 = /* @__PURE__ */ bind(bindAff);
+  var bind7 = /* @__PURE__ */ bind(bindAff);
   var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
@@ -15108,10 +15113,10 @@ ${str(snapshot)}`);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure1 = /* @__PURE__ */ pure(applicativeEffect);
   var map25 = /* @__PURE__ */ map(functorEffect);
-  var discard4 = /* @__PURE__ */ discard(discardUnit);
+  var discard3 = /* @__PURE__ */ discard(discardUnit);
   var throwError4 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query2) {
-    return bind8(liftEffect5(bindFlipped4(composeKleisliFlipped4(function() {
+    return bind7(liftEffect5(bindFlipped4(composeKleisliFlipped4(function() {
       var $16 = querySelector(query2);
       return function($17) {
         return $16(toParentNode($17));
@@ -15137,8 +15142,8 @@ ${str(snapshot)}`);
       return nonCanceler;
     };
   });
-  var awaitBody = /* @__PURE__ */ discard4(bindAff)(awaitLoad)(function() {
-    return bind8(selectElement("body"))(function(body2) {
+  var awaitBody = /* @__PURE__ */ discard3(bindAff)(awaitLoad)(function() {
+    return bind7(selectElement("body"))(function(body2) {
       return maybe(throwError4(error("Could not find body")))(pure10)(body2);
     });
   });
@@ -15287,8 +15292,8 @@ ${str(snapshot)}`);
   var lookup7 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind12 = /* @__PURE__ */ bind(bindAff);
   var liftEffect6 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard5 = /* @__PURE__ */ discard(discardUnit);
-  var discard12 = /* @__PURE__ */ discard5(bindAff);
+  var discard4 = /* @__PURE__ */ discard(discardUnit);
+  var discard12 = /* @__PURE__ */ discard4(bindAff);
   var traverse_12 = /* @__PURE__ */ traverse_(applicativeAff);
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
   var fork3 = /* @__PURE__ */ fork(monadForkAff);
@@ -15565,8 +15570,8 @@ ${str(snapshot)}`);
   };
 
   // output/Halogen.Aff.Driver/index.js
-  var bind9 = /* @__PURE__ */ bind(bindEffect);
-  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var bind8 = /* @__PURE__ */ bind(bindEffect);
+  var discard5 = /* @__PURE__ */ discard(discardUnit);
   var for_2 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var traverse_5 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
   var fork4 = /* @__PURE__ */ fork(monadForkAff);
@@ -15574,7 +15579,7 @@ ${str(snapshot)}`);
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
-  var discard23 = /* @__PURE__ */ discard6(bindAff);
+  var discard23 = /* @__PURE__ */ discard5(bindAff);
   var parSequence_4 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var pure12 = /* @__PURE__ */ pure(applicativeEffect);
@@ -15711,7 +15716,7 @@ ${str(snapshot)}`);
                     })(read(childrenOutRef))();
                     when2(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_(slot3.set($$var2))(childrenOutRef)();
-                    return bind9(read($$var2))(renderStateX2(function(v) {
+                    return bind8(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
                         return $$throw("Halogen internal error: child was not initialized in renderChild");
                       }
@@ -16121,7 +16126,7 @@ ${str(snapshot)}`);
 
   // output/Halogen.Widget/index.js
   var pure15 = /* @__PURE__ */ pure(applicativeMaybe);
-  var bind10 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind9 = /* @__PURE__ */ bind(bindHalogenM);
   var pure16 = /* @__PURE__ */ pure(applicativeHalogenM);
   var scrollToMe = function(dictMonadEffect) {
     var liftEffect10 = liftEffect(monadEffectHalogenM(dictMonadEffect));
@@ -16132,7 +16137,7 @@ ${str(snapshot)}`);
         receive: defaultEval.receive,
         finalize: defaultEval.finalize,
         initialize: pure15(unit),
-        handleAction: $$const(bind10(getHTMLElementRef("this"))(function(v1) {
+        handleAction: $$const(bind9(getHTMLElementRef("this"))(function(v1) {
           if (v1 instanceof Nothing) {
             return pure16(unit);
           }
@@ -16179,12 +16184,12 @@ ${str(snapshot)}`);
     }
   })(ordUnit);
   var value14 = /* @__PURE__ */ value(isPropString);
-  var bind11 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind10 = /* @__PURE__ */ bind(bindHalogenM);
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure17 = /* @__PURE__ */ pure(applicativeHalogenM);
   var throwError5 = /* @__PURE__ */ throwError(/* @__PURE__ */ monadThrowHalogenM(monadThrowAff));
-  var discard7 = /* @__PURE__ */ discard(discardUnit);
-  var discard13 = /* @__PURE__ */ discard7(bindHalogenM);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var discard13 = /* @__PURE__ */ discard6(bindHalogenM);
   var assign4 = /* @__PURE__ */ assign(monadStateHalogenM);
   var prop7 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -16220,7 +16225,7 @@ ${str(snapshot)}`);
   };
   var generate_structure2 = /* @__PURE__ */ generate_structure(/* @__PURE__ */ toJsonSchemaRecord()(/* @__PURE__ */ toJsonSchema_RowListCons(updatesIsSymbol)()(/* @__PURE__ */ toJsonSchemaArray(toJsonSchemaWorldUpdate))(toJsonSchema_RowListNil)))(/* @__PURE__ */ decodeJsonFromSchemaRecor()(/* @__PURE__ */ decodeJsonFromSchema_RowL1(updatesIsSymbol)(/* @__PURE__ */ decodeJsonFromSchemaArray(decodeJsonFromSchemaWorld))()()(decodeJsonFromSchema_RowL)));
   var tell4 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
-  var discard24 = /* @__PURE__ */ discard7(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var discard24 = /* @__PURE__ */ discard6(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var pure23 = /* @__PURE__ */ pure(applicativeArray);
   var prop42 = /* @__PURE__ */ prop4({
     reflectSymbol: function() {
@@ -16435,7 +16440,7 @@ ${str(snapshot)}`);
         }
       };
     };
-    var getConfig = bind11(get4)(function(v) {
+    var getConfig = bind10(get4)(function(v) {
       return flip(maybe)(pure17)(throwError5(error("config has not been set")))(v.config);
     });
     var handleAction = function(v) {
@@ -16446,14 +16451,14 @@ ${str(snapshot)}`);
       }
       ;
       if (v instanceof SubmitPrompt && v.value0 instanceof PromptStory_PromptSource) {
-        return bind11(getConfig)(function(config) {
-          return discard13(bind11(get4)(function(v1) {
+        return bind10(getConfig)(function(config) {
+          return discard13(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
             return discard13(assign4(prop14)(true))(function() {
-              return bind11(bind11(pure17(mkSystemMsg(trim("\nYou are a helpful fiction writing assistant, and are currently collaborating with the user to write a novel.\n\nThe way this collaboration works is that if the user has written a portion of their story already, they will show you the latest few paragraphs in their story.\nYou should read these paragraphs carefully to get an idea of what's going on right now in their story.\n\nThe user will also provide a description of the current state of the world.\nNote that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in their story.\nBut, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.\nThe story takes place in this world, so make sure to use locations and characters by name, have named characters speak dialogue, and take into account their descriptions, statuses, and other properties.\n\nFinally, the user will provide a high-level suggestion for what they think should happen next in their story.\nConsider this suggestion, and find an interpretation that makes the most sense to make their story interesting and make progress in developing the plot and the worldbuilding.\n\nYou should reply with 1-3 paragraphs that continue the user's story, picking up right where the user left off (if they've written anything in their story already).\n  "))))(function(systemMsg) {
+              return bind10(bind10(pure17(mkSystemMsg(trim("\nYou are a helpful fiction writing assistant, and are currently collaborating with the user to write a novel.\n\nThe way this collaboration works is that if the user has written a portion of their story already, they will show you the latest few paragraphs in their story.\nYou should read these paragraphs carefully to get an idea of what's going on right now in their story.\n\nThe user will also provide a description of the current state of the world.\nNote that this description is fairly comprehensive -- it may include many details about the world that are not immediately relevant to what's going on right now in their story.\nBut, also note that even less-immediate details will be very useful to have in the back of your mind when considering what direction things should go in the short term, in order for the course of action to eventually lead to resolving other far-away situations in the world.\nThe story takes place in this world, so make sure to use locations and characters by name, have named characters speak dialogue, and take into account their descriptions, statuses, and other properties.\n\nFinally, the user will provide a high-level suggestion for what they think should happen next in their story.\nConsider this suggestion, and find an interpretation that makes the most sense to make their story interesting and make progress in developing the plot and the worldbuilding.\n\nYou should reply with 1-3 paragraphs that continue the user's story, picking up right where the user left off (if they've written anything in their story already).\n  "))))(function(systemMsg) {
                 var userPrompt = trim(v.value1);
-                return bind11(bind11(get4)(function(v1) {
+                return bind10(bind10(get4)(function(v1) {
                   return pure17(mkUserMsg(trim(format3({
                     story_so_far: function() {
                       var $251 = length3(v1.story) === 0;
@@ -16469,14 +16474,14 @@ ${str(snapshot)}`);
                     prompt: userPrompt
                   })("\n{{story_so_far}}\n\nSo right now in the story, this is the current state of the world:\n\n{{world}}\n\nThis is my suggestion for what should happen next in the story:\n\n    {{prompt}}  \n  "))));
                 }))(function(promptMsg) {
-                  return bind11(get4)(function(state_backup) {
+                  return bind10(get4)(function(state_backup) {
                     return discard13(modifying2(prop24)(function(v1) {
                       return snoc2(v1)({
                         label: "Story / Next / User Prompt",
                         content: text(userPrompt)
                       });
                     }))(function() {
-                      return bind11(bind11(lift3(generate({
+                      return bind10(bind10(lift3(generate({
                         config,
                         messages: [systemMsg, promptMsg]
                       })))(function(err_msg) {
@@ -16516,21 +16521,21 @@ ${str(snapshot)}`);
                 return discard13(function() {
                   var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nThe user is currently writing a story.\nThey will present to you the current state of the world, and the most recent paragraph of their story which may imply some changes to the world state.\nIt is critically important to keep the world state updated to match the latest events in their story, so the user needs your help to update the world state.\nThe updates you produce should exactly reflect whatever changes to the world state are implied by the single story paragraph provided by the user.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\n  "));
                   var userPrompt = trim(v.value1);
-                  return bind11(bind11(get4)(function(v1) {
+                  return bind10(bind10(get4)(function(v1) {
                     var prompt = trim(format3({
                       world: describeWorld(v1.world),
                       story_content
                     })("\nThe current state of the world:\n\n{{world}}\n\nThe next paragraph of my story, which may imply some changes to the world state:\n\n    {{story_content}}\n    "));
                     return pure17(mkUserMsg(prompt));
                   }))(function(promptMsg) {
-                    return bind11(get4)(function(state_backup) {
+                    return bind10(get4)(function(state_backup) {
                       return discard13(modifying2(prop24)(function(v1) {
                         return snoc2(v1)({
                           label: "Story / Update World / User Prompt",
                           content: text(userPrompt)
                         });
                       }))(function() {
-                        return bind11(bind11(lift3(generate_structure2({
+                        return bind10(bind10(lift3(generate_structure2({
                           config,
                           name: "updates",
                           messages: [systemMsg, promptMsg]
@@ -16578,28 +16583,28 @@ ${str(snapshot)}`);
       }
       ;
       if (v instanceof SubmitPrompt && v.value0 instanceof UpdateWorld_PromptSource) {
-        return bind11(getConfig)(function(config) {
-          return discard13(bind11(get4)(function(v1) {
+        return bind10(getConfig)(function(config) {
+          return discard13(bind10(get4)(function(v1) {
             return when4(v1.processing)(throwError5(error("already processing! dont submit another prompt yet")));
           }))(function() {
             return discard13(assign4(prop14)(true))(function() {
               var systemMsg = mkSystemMsg(trim("\nYou are a helpful assistant for writing story-related content.\nYou are interacting with a fictional world in collaboration with the user.\nThe world may start off empty, of pre-filled with some existing content from the user.\nThe user will give you instructions for how to update the world, by creating new content to put into the world or modifying existing content.\nThe idea is that these changes will reflect a story progressing in the fictional world.\nYou will always output in a structured form with an array of updates to apply simultaneously to the world.\nMake sure to always keep the user's specific instructions in mind, but also feel free to take creative liberties and extrapolate interesting details in order to make the updates reflect an interesting sequence of events for a story!\nHave fun with it!\n"));
               var userPrompt = trim(v.value1);
-              return bind11(bind11(get4)(function(v1) {
+              return bind10(bind10(get4)(function(v1) {
                 var prompt = trim(format3({
                   world: describeWorld(v1.world),
                   prompt: userPrompt
                 })("\nThe current state of the world:\n\n{{world}}\n\nMy instructions for how to update the world state:\n\n    {{prompt}}\n  "));
                 return pure17(mkUserMsg(prompt));
               }))(function(promptMsg) {
-                return bind11(get4)(function(state_backup) {
+                return bind10(get4)(function(state_backup) {
                   return discard13(modifying2(prop24)(function(v1) {
                     return snoc2(v1)({
                       label: "Manually modify world / User Prompt",
                       content: text(userPrompt)
                     });
                   }))(function() {
-                    return bind11(bind11(lift3(generate_structure2({
+                    return bind10(bind10(lift3(generate_structure2({
                       config,
                       name: "updates",
                       messages: [systemMsg, promptMsg]
@@ -16645,13 +16650,13 @@ ${str(snapshot)}`);
       }
       ;
       if (v instanceof ExportWorld) {
-        return bind11(get4)(function(v1) {
+        return bind10(get4)(function(v1) {
           return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson12(v1.world)))));
         });
       }
       ;
       if (v instanceof ImportWorld) {
-        return bind11(liftAff2(readFromClipboard))(function(v1) {
+        return bind10(liftAff2(readFromClipboard))(function(v1) {
           if (v1 instanceof Left) {
             return pure17(unit);
           }
@@ -16674,13 +16679,13 @@ ${str(snapshot)}`);
       }
       ;
       if (v instanceof ExportStory) {
-        return bind11(get4)(function(v1) {
+        return bind10(get4)(function(v1) {
           return $$void7(liftAff2(copyToClipboard(stringifyWithIndent(4)(encodeJson13(v1.story)))));
         });
       }
       ;
       if (v instanceof ExportStoryMd) {
-        return bind11(get4)(function(v1) {
+        return bind10(get4)(function(v1) {
           return $$void7(liftAff2(copyToClipboard(intercalate7("\n\n")(foldMap4(function(v2) {
             return ["> " + v2.prompt, v2.content];
           })(v1.story)))));
@@ -16688,7 +16693,7 @@ ${str(snapshot)}`);
       }
       ;
       if (v instanceof ImportStory) {
-        return bind11(liftAff2(readFromClipboard))(function(v1) {
+        return bind10(liftAff2(readFromClipboard))(function(v1) {
           if (v1 instanceof Left) {
             return pure17(unit);
           }
@@ -16713,10 +16718,10 @@ ${str(snapshot)}`);
       if (v instanceof InputKeyDown) {
         var key2 = key(v.value1);
         var cmd = ctrlKey(v.value1) || metaKey(v.value1);
-        return when4(key2 === "Enter" && cmd)(bind11(maybe(throwError5(error("impossible")))(function(target6) {
+        return when4(key2 === "Enter" && cmd)(bind10(maybe(throwError5(error("impossible")))(function(target6) {
           return maybe(throwError5(error("impossible")))(pure17)(fromEventTarget2(target6));
         })(target(toEvent(v.value1))))(function(el) {
-          return bind11(liftEffect9(value13(el)))(function(v1) {
+          return bind10(liftEffect9(value13(el)))(function(v1) {
             return discard13(liftEffect9(setValue11("")(el)))(function() {
               return handleAction(new SubmitPrompt(v.value0, v1));
             });

@@ -1106,23 +1106,23 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind11 = bind(dictMonad.Bind1());
+    var bind10 = bind(dictMonad.Bind1());
     var unless2 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind11(mb)(function(b2) {
+        return bind10(mb)(function(b2) {
           return unless2(b2)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind11 = bind(dictMonad.Bind1());
+    var bind10 = bind(dictMonad.Bind1());
     var pure16 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind11(f)(function(f$prime) {
-          return bind11(a2)(function(a$prime) {
+        return bind10(f)(function(f$prime) {
+          return bind10(a2)(function(a$prime) {
             return pure16(f$prime(a$prime));
           });
         });
@@ -2168,12 +2168,12 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind11 = bind(dictMonad.Bind1());
+    var bind10 = bind(dictMonad.Bind1());
     var pure16 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind11(v)(either(function($193) {
+          return bind10(v)(either(function($193) {
             return pure16(Left.create($193));
           })(function(a2) {
             var v1 = k(a2);
@@ -2226,19 +2226,19 @@
     var append5 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind11 = bind(Bind1);
+      var bind10 = bind(Bind1);
       var pure16 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind11(v)(function(rm) {
+            return bind10(v)(function(rm) {
               if (rm instanceof Right) {
                 return pure16(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind11(v1)(function(rn) {
+                return bind10(v1)(function(rn) {
                   if (rn instanceof Right) {
                     return pure16(new Right(rn.value0));
                   }
@@ -2316,13 +2316,13 @@
     };
   };
   var bindReaderT = function(dictBind) {
-    var bind11 = bind(dictBind);
+    var bind10 = bind(dictBind);
     var applyReaderT1 = applyReaderT(dictBind.Apply0());
     return {
       bind: function(v) {
         return function(k) {
           return function(r) {
-            return bind11(v(r))(function(a2) {
+            return bind10(v(r))(function(a2) {
               var v1 = k(a2);
               return v1(r);
             });
@@ -2420,14 +2420,14 @@
     var append5 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
-      var bind11 = bind(dictBind);
+      var bind10 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
       var map33 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v) {
           return function(k) {
-            return bind11(v)(function(v1) {
+            return bind10(v)(function(v1) {
               var v2 = k(v1.value0);
               return map33(function(v3) {
                 return new Tuple(v3.value0, append5(v1.value1)(v3.value1));
@@ -8951,7 +8951,7 @@ ${str(snapshot)}`);
     }
     return m;
   }
-  function _foldM(bind11) {
+  function _foldM(bind10) {
     return function(f) {
       return function(mz) {
         return function(m) {
@@ -8963,7 +8963,7 @@ ${str(snapshot)}`);
           }
           for (var k in m) {
             if (hasOwnProperty.call(m, k)) {
-              acc = bind11(acc)(g(k));
+              acc = bind10(acc)(g(k));
             }
           }
           return acc;
@@ -10243,6 +10243,30 @@ ${str(snapshot)}`);
       decodeJson: decodeArray(decodeJson(dictDecodeJson))
     };
   };
+
+  // output/Data.Argonaut.Parser/foreign.js
+  function _jsonParser(fail2, succ2, s) {
+    try {
+      return succ2(JSON.parse(s));
+    } catch (e) {
+      return fail2(e.message);
+    }
+  }
+
+  // output/Data.Argonaut.Parser/index.js
+  var jsonParser = function(j) {
+    return _jsonParser(Left.create, Right.create, j);
+  };
+
+  // output/Data.Argonaut.Decode.Parser/index.js
+  var parseJson = /* @__PURE__ */ function() {
+    var $3 = lmap(bifunctorEither)(function(v) {
+      return new TypeMismatch2("JSON");
+    });
+    return function($4) {
+      return $3(jsonParser($4));
+    };
+  }();
 
   // output/Data.Argonaut.Encode.Encoders/index.js
   var map14 = /* @__PURE__ */ map(functorArray);
@@ -11857,11 +11881,6 @@ ${str(snapshot)}`);
   var toUnfoldable7 = /* @__PURE__ */ toUnfoldable3(unfoldableList);
   var inj1 = /* @__PURE__ */ inj();
   var intercalate4 = /* @__PURE__ */ intercalate2(monoidString);
-  var todo = function() {
-    return function(msg) {
-      return unsafeCrashWith("[[TODO]]\n" + msg);
-    };
-  };
   var replaceFormatVars = function(sigma) {
     var go2 = function($copy_v) {
       return function($copy_v1) {
@@ -12074,37 +12093,6 @@ ${str(snapshot)}`);
     };
   };
 
-  // output/Effect.Console/foreign.js
-  var log2 = function(s) {
-    return function() {
-      console.log(s);
-    };
-  };
-  var warn = function(s) {
-    return function() {
-      console.warn(s);
-    };
-  };
-  var error2 = function(s) {
-    return function() {
-      console.error(s);
-    };
-  };
-
-  // output/Effect.Class.Console/index.js
-  var log3 = function(dictMonadEffect) {
-    var $67 = liftEffect(dictMonadEffect);
-    return function($68) {
-      return $67(log2($68));
-    };
-  };
-  var error3 = function(dictMonadEffect) {
-    var $79 = liftEffect(dictMonadEffect);
-    return function($80) {
-      return $79(error2($80));
-    };
-  };
-
   // output/Ai2.Llm/index.js
   var gEncodeJsonCons6 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
   var gEncodeJsonCons12 = /* @__PURE__ */ gEncodeJsonCons6(gEncodeJsonNil);
@@ -12191,7 +12179,6 @@ ${str(snapshot)}`);
     }
   };
   var decodeJson1 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(contentIsSymbol)()())());
-  var bind5 = /* @__PURE__ */ bind(bindAff);
   var encodeJson5 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons6(/* @__PURE__ */ gEncodeJsonCons42({
     reflectSymbol: function() {
       return "schema";
@@ -12202,9 +12189,6 @@ ${str(snapshot)}`);
     }
   })())());
   var pure4 = /* @__PURE__ */ pure(applicativeEither);
-  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindAff);
-  var log4 = /* @__PURE__ */ log3(monadEffectAff);
-  var todo2 = /* @__PURE__ */ todo();
   var TextAssistantMsg = /* @__PURE__ */ function() {
     function TextAssistantMsg2(value0) {
       this.value0 = value0;
@@ -12374,8 +12358,9 @@ ${str(snapshot)}`);
   var generate_structure = function(dictToJsonSchema) {
     var toJsonSchema2 = toJsonSchema(dictToJsonSchema);
     return function(dictDecodeJsonFromSchema) {
+      var decodeJsonFromSchema2 = decodeJsonFromSchema(dictDecodeJsonFromSchema);
       return function(args) {
-        return bind5(mapFlipped2(toAffE(generate_structure_({
+        return mapFlipped2(toAffE(generate_structure_({
           error: Left.create,
           ok: Right.create
         })(encodeJson9({
@@ -12397,24 +12382,37 @@ ${str(snapshot)}`);
           }
           ;
           if (v instanceof Right) {
-            return pure4(v.value0);
+            var v1 = decodeJson1(v.value0);
+            if (v1 instanceof Right) {
+              var v2 = parseJson(v1.value0.content);
+              if (v2 instanceof Left) {
+                return new Left(printJsonDecodeError(v2.value0));
+              }
+              ;
+              if (v2 instanceof Right) {
+                var v3 = decodeJsonFromSchema2(v2.value0);
+                if (v3 instanceof Left) {
+                  return new Left(printJsonDecodeError(v3.value0));
+                }
+                ;
+                if (v3 instanceof Right) {
+                  return pure4(v3.value0);
+                }
+                ;
+                throw new Error("Failed pattern match at Ai2.Llm (line 236, column 25 - line 238, column 28): " + [v3.constructor.name]);
+              }
+              ;
+              throw new Error("Failed pattern match at Ai2.Llm (line 234, column 28 - line 238, column 28): " + [v2.constructor.name]);
+            }
+            ;
+            if (v1 instanceof Left) {
+              return new Left("generate_structure: failed to parsed content as JSON: " + printJsonDecodeError(v1.value0));
+            }
+            ;
+            throw new Error("Failed pattern match at Ai2.Llm (line 233, column 23 - line 239, column 110): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Ai2.Llm (line 232, column 11 - line 241, column 38): " + [v.constructor.name]);
-        }))(function(err_result) {
-          if (err_result instanceof Left) {
-            return discard2(log4("error: " + err_result.value0))(function() {
-              return todo2("end");
-            });
-          }
-          ;
-          if (err_result instanceof Right) {
-            return discard2(log4("result: " + stringifyWithIndent(4)(err_result.value0)))(function() {
-              return todo2("end");
-            });
-          }
-          ;
-          throw new Error("Failed pattern match at Ai2.Llm (line 242, column 3 - line 248, column 17): " + [err_result.constructor.name]);
+          throw new Error("Failed pattern match at Ai2.Llm (line 231, column 9 - line 239, column 110): " + [v.constructor.name]);
         });
       };
     };
@@ -12452,30 +12450,6 @@ ${str(snapshot)}`);
     });
   };
 
-  // output/Data.Argonaut.Parser/foreign.js
-  function _jsonParser(fail2, succ2, s) {
-    try {
-      return succ2(JSON.parse(s));
-    } catch (e) {
-      return fail2(e.message);
-    }
-  }
-
-  // output/Data.Argonaut.Parser/index.js
-  var jsonParser = function(j) {
-    return _jsonParser(Left.create, Right.create, j);
-  };
-
-  // output/Data.Argonaut.Decode.Parser/index.js
-  var parseJson = /* @__PURE__ */ function() {
-    var $3 = lmap(bifunctorEither)(function(v) {
-      return new TypeMismatch2("JSON");
-    });
-    return function($4) {
-      return $3(jsonParser($4));
-    };
-  }();
-
   // output/Data.Argonaut.Decode/index.js
   var composeKleisli3 = /* @__PURE__ */ composeKleisli(bindEither);
   var fromJsonString = function(dictDecodeJson) {
@@ -12506,6 +12480,37 @@ ${str(snapshot)}`);
       return function(b2) {
         return $$void7(modify5(set2(p2)(b2)));
       };
+    };
+  };
+
+  // output/Effect.Console/foreign.js
+  var log2 = function(s) {
+    return function() {
+      console.log(s);
+    };
+  };
+  var warn = function(s) {
+    return function() {
+      console.warn(s);
+    };
+  };
+  var error2 = function(s) {
+    return function() {
+      console.error(s);
+    };
+  };
+
+  // output/Effect.Class.Console/index.js
+  var log3 = function(dictMonadEffect) {
+    var $67 = liftEffect(dictMonadEffect);
+    return function($68) {
+      return $67(log2($68));
+    };
+  };
+  var error3 = function(dictMonadEffect) {
+    var $79 = liftEffect(dictMonadEffect);
+    return function($80) {
+      return $79(error2($80));
     };
   };
 
@@ -13257,7 +13262,7 @@ ${str(snapshot)}`);
 
   // output/Halogen.Subscription/index.js
   var $$void4 = /* @__PURE__ */ $$void(functorEffect);
-  var bind6 = /* @__PURE__ */ bind(bindEffect);
+  var bind5 = /* @__PURE__ */ bind(bindEffect);
   var append4 = /* @__PURE__ */ append(semigroupArray);
   var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_1 = /* @__PURE__ */ traverse_2(foldableArray);
@@ -13288,7 +13293,7 @@ ${str(snapshot)}`);
         };
       },
       listener: function(a2) {
-        return bind6(read(subscribers))(traverse_1(function(k) {
+        return bind5(read(subscribers))(traverse_1(function(k) {
           return k(a2);
         }));
       }
@@ -13823,7 +13828,7 @@ ${str(snapshot)}`);
   // output/Ai2.Widget.Provider/index.js
   var fromFoldable7 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
   var tell2 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
-  var bind7 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind6 = /* @__PURE__ */ bind(bindHalogenM);
   var get3 = /* @__PURE__ */ get(monadStateHalogenM);
   var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
@@ -13863,8 +13868,8 @@ ${str(snapshot)}`);
       return "set_open";
     }
   });
-  var discard3 = /* @__PURE__ */ discard(discardUnit);
-  var discard1 = /* @__PURE__ */ discard3(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var discard2 = /* @__PURE__ */ discard(discardUnit);
+  var discard1 = /* @__PURE__ */ discard2(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var value3 = /* @__PURE__ */ value(isPropString);
   var inj22 = /* @__PURE__ */ inj3({
     reflectSymbol: function() {
@@ -13895,8 +13900,8 @@ ${str(snapshot)}`);
   var lookup6 = /* @__PURE__ */ lookup2(ordString);
   var modify_3 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var show2 = /* @__PURE__ */ show(showString);
-  var discard22 = /* @__PURE__ */ discard3(bindHalogenM);
-  var log5 = /* @__PURE__ */ log3(monadEffectHalogenM2);
+  var discard22 = /* @__PURE__ */ discard2(bindHalogenM);
+  var log4 = /* @__PURE__ */ log3(monadEffectHalogenM2);
   var encodeJson8 = /* @__PURE__ */ encodeJson(encodeRecord1);
   var fromJsonString1 = /* @__PURE__ */ fromJsonString(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeRecord2))(/* @__PURE__ */ gDecodeJsonCons12(nameIsSymbol2)()())(configIsSymbol)()())());
   var assign2 = /* @__PURE__ */ assign(monadStateHalogenM);
@@ -13932,7 +13937,7 @@ ${str(snapshot)}`);
   };
   var component = /* @__PURE__ */ function() {
     var setProviderConfig = function(providerConfig) {
-      return bind7(get3)(function(state3) {
+      return bind6(get3)(function(state3) {
         return liftEffect4(save(state3.providerConfig_localStorageKey)(toJsonString2(providerConfig)));
       });
     };
@@ -13968,8 +13973,8 @@ ${str(snapshot)}`);
         apiKey: ""
       };
     };
-    var getSavedProviderConfigs = bind7(get3)(function(state3) {
-      return bind7(liftEffect4(load2(state3.savedProviderConfigs_localStorageKey)))(function(v) {
+    var getSavedProviderConfigs = bind6(get3)(function(state3) {
+      return bind6(liftEffect4(load2(state3.savedProviderConfigs_localStorageKey)))(function(v) {
         if (v instanceof Nothing) {
           return pure7(empty3);
         }
@@ -13992,14 +13997,14 @@ ${str(snapshot)}`);
     });
     var insertSavedProviderConfig = function(provider) {
       return function(config) {
-        return bind7(getSavedProviderConfigs)(function(savedProviderConfigs) {
-          return bind7(get3)(function(state3) {
+        return bind6(getSavedProviderConfigs)(function(savedProviderConfigs) {
+          return bind6(get3)(function(state3) {
             return liftEffect4(save(state3.savedProviderConfigs_localStorageKey)(toJsonString1(insert7(provider)(config)(savedProviderConfigs))));
           });
         });
       };
     };
-    var submit2 = bind7(get3)(function(state3) {
+    var submit2 = bind6(get3)(function(state3) {
       var v = lookup6(state3.provider)(state3.providers);
       if (v instanceof Nothing) {
         return modify_3(function(v1) {
@@ -14058,7 +14063,7 @@ ${str(snapshot)}`);
           name: state3.provider,
           config
         };
-        return discard22(log5("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson8(providerConfig))))))(function() {
+        return discard22(log4("new provider for " + (state3.providerCategory + (": " + stringifyWithIndent(4)(encodeJson8(providerConfig))))))(function() {
           return discard22(insertSavedProviderConfig(state3.provider)(config))(function() {
             return discard22(setProviderConfig(providerConfig))(function() {
               return discard22(modify_3(function(v1) {
@@ -14096,7 +14101,7 @@ ${str(snapshot)}`);
         $179.provider = provider;
         return $179;
       }))(function() {
-        return bind7(getSavedProviderConfigs)(function(savedProviderConfigs) {
+        return bind6(getSavedProviderConfigs)(function(savedProviderConfigs) {
           var v = lookup6(provider)(savedProviderConfigs);
           if (v instanceof Nothing) {
             return modify_3(function(v1) {
@@ -14133,8 +14138,8 @@ ${str(snapshot)}`);
         });
       });
     };
-    var getProviderConfig = bind7(get3)(function(state3) {
-      return bind7(liftEffect4(load2(state3.providerConfig_localStorageKey)))(function(v) {
+    var getProviderConfig = bind6(get3)(function(state3) {
+      return bind6(liftEffect4(load2(state3.providerConfig_localStorageKey)))(function(v) {
         if (v instanceof Nothing) {
           return pure7(Nothing.value);
         }
@@ -14179,7 +14184,7 @@ ${str(snapshot)}`);
       })(unit)),
       handleAction: match()()()({
         initialize: function(v1) {
-          return bind7(getProviderConfig)(function(v2) {
+          return bind6(getProviderConfig)(function(v2) {
             if (v2 instanceof Nothing) {
               return pure7(unit);
             }
@@ -14308,7 +14313,7 @@ ${str(snapshot)}`);
 
   // output/Example.DiscreteAdventure/index.js
   var pure8 = /* @__PURE__ */ pure(applicativeMaybe);
-  var bind8 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var pure1 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind12 = /* @__PURE__ */ bind(/* @__PURE__ */ bindReaderT(bindIdentity));
   var ask2 = /* @__PURE__ */ ask(/* @__PURE__ */ monadAskReaderT(monadIdentity));
@@ -14317,8 +14322,8 @@ ${str(snapshot)}`);
   var tell3 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
   var traverseWithIndex3 = /* @__PURE__ */ traverseWithIndex(traversableWithIndexArray)(applicativeReaderT2);
   var match2 = /* @__PURE__ */ match()()();
-  var discard4 = /* @__PURE__ */ discard(discardUnit);
-  var discard12 = /* @__PURE__ */ discard4(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var discard3 = /* @__PURE__ */ discard(discardUnit);
+  var discard12 = /* @__PURE__ */ discard3(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var fold4 = /* @__PURE__ */ fold(foldableArray)(monoidArray);
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
@@ -14371,8 +14376,8 @@ ${str(snapshot)}`);
       return "config";
     }
   })()()(strongFn);
-  var discard23 = /* @__PURE__ */ discard4(bindHalogenM);
-  var log6 = /* @__PURE__ */ log3(monadEffectHalogenM3);
+  var discard23 = /* @__PURE__ */ discard3(bindHalogenM);
+  var log5 = /* @__PURE__ */ log3(monadEffectHalogenM3);
   var show12 = /* @__PURE__ */ show(showString);
   var modify_4 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var inj6 = /* @__PURE__ */ inj5({
@@ -14427,7 +14432,7 @@ ${str(snapshot)}`);
       finalize: defaultEval.finalize,
       initialize: pure8(unit),
       handleAction: function(v1) {
-        return bind8(getHTMLElementRef("this"))(function(v2) {
+        return bind7(getHTMLElementRef("this"))(function(v2) {
           if (v2 instanceof Nothing) {
             return pure1(unit);
           }
@@ -14590,7 +14595,7 @@ ${str(snapshot)}`);
     });
   });
   var main_component = /* @__PURE__ */ function() {
-    var scrollDownStory = bind8(getHTMLElementRef(ref_lastStoryItem))(function(v) {
+    var scrollDownStory = bind7(getHTMLElementRef(ref_lastStoryItem))(function(v) {
       if (v instanceof Nothing) {
         return pure1(unit);
       }
@@ -14612,7 +14617,7 @@ ${str(snapshot)}`);
         choices: inj52(v.engine.initial_choices)
       };
     };
-    var getConfig = bind8(get4)(function(v) {
+    var getConfig = bind7(get4)(function(v) {
       if (v.config instanceof Nothing) {
         return throwError3(error("you must configure your AI provider first"));
       }
@@ -14628,7 +14633,7 @@ ${str(snapshot)}`);
         return assign3(prop6)(v);
       },
       submit_choice: function(choice) {
-        return discard23(log6("submit_choice: " + show12(choice.short_description)))(function() {
+        return discard23(log5("submit_choice: " + show12(choice.short_description)))(function() {
           return discard23(discard23(modify_4(function(v) {
             var $164 = {};
             for (var $165 in v) {
@@ -14643,10 +14648,10 @@ ${str(snapshot)}`);
             return $164;
           }))(function() {
             return discard23(scrollDownStory)(function() {
-              return bind8(get4)(function(v) {
-                return bind8(getConfig)(function(config) {
-                  return bind8(liftAff2(v.engine.prompt_StoryEvent(v.world)(choice)))(function(prompt_StoryEvent) {
-                    return bind8(bind8(liftAff2(generate({
+              return bind7(get4)(function(v) {
+                return bind7(getConfig)(function(config) {
+                  return bind7(liftAff2(v.engine.prompt_StoryEvent(v.world)(choice)))(function(prompt_StoryEvent) {
+                    return bind7(bind7(liftAff2(generate({
                       config,
                       messages: fold4([[mkSystemMsg(prompt_StoryEvent.system)], foldMap3(function(event) {
                         return [mkUserMsg(event.choice.description), mkTextAssistantMsg(event.description)];
@@ -14705,10 +14710,10 @@ ${str(snapshot)}`);
               });
             });
           }))(function() {
-            return bind8(get4)(function(v) {
-              return bind8(getConfig)(function(config) {
-                return bind8(liftAff2(v.engine.prompt_StoryChoices(v.world)(v.transcript)))(function(prompt_StoryChoices) {
-                  return bind8(liftAff2(generate_structure2({
+            return bind7(get4)(function(v) {
+              return bind7(getConfig)(function(config) {
+                return bind7(liftAff2(v.engine.prompt_StoryChoices(v.world)(v.transcript)))(function(prompt_StoryChoices) {
+                  return bind7(liftAff2(generate_structure2({
                     config,
                     name: "story_choices",
                     messages: [mkSystemMsg(prompt_StoryChoices.system), mkUserMsg(prompt_StoryChoices.user)]
@@ -14754,7 +14759,7 @@ ${str(snapshot)}`);
         });
       },
       save_story: function(v) {
-        return bind8(get4)(function(state3) {
+        return bind7(get4)(function(state3) {
           var text6 = state3.engine.printStory(state3.world)(state3.transcript);
           return liftEffect5(downloadMarkdownTextFile({
             filename: "story.md",
@@ -14786,7 +14791,7 @@ ${str(snapshot)}`);
 
   // output/Example.DiscreteAdventure.Engine1.Common/index.js
   var fromFoldable8 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
-  var discard5 = /* @__PURE__ */ discard(discardUnit)(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
+  var discard4 = /* @__PURE__ */ discard(discardUnit)(/* @__PURE__ */ bindWriterT(semigroupArray)(bindIdentity));
   var tell4 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidArray)(monadIdentity));
   var identity14 = /* @__PURE__ */ identity(categoryFn);
   var pure9 = /* @__PURE__ */ pure(applicativeAff);
@@ -14827,11 +14832,11 @@ ${str(snapshot)}`);
       setting_description: "New Amsterdam is a city of electric ghosts and restless ambition, where rain slicks the streets in neon reflections and the air buzzes with a thousand whispered deals. Its skyline is a jagged circuit board of corporate monoliths and black-market warrens, pulsing with the desperate glow of those buying and selling futures\u2014some digital, some flesh, some stolen. The streets pulse with life both organic and synthetic, where rogue AIs barter in darkened alleys and mercs with mirrored eyes hunt fortunes measured in crypto and blood. Here, escape is a product, danger a currency, and the only law that matters is the one you can enforce."
     },
     renderWorld: function(world) {
-      return div2([css(discard5(tell4(["padding: 1em"]))(function() {
+      return div2([css(discard4(tell4(["padding: 1em"]))(function() {
         return tell4(["display: flex", "flex-direction: column", "gap: 1em"]);
       }))])([div2([css(tell4(["display: flex", "flex-direction: column", "gap: 0.5em"]))])(function() {
         var items2 = function(xs) {
-          return div2([css(discard5(tell4(["display: flex", "flex-direction: column", "gap: 0.5em"]))(function() {
+          return div2([css(discard4(tell4(["display: flex", "flex-direction: column", "gap: 0.5em"]))(function() {
             return tell4(["padding-left: 1em"]);
           }))])(xs);
         };
@@ -14977,7 +14982,7 @@ ${str(snapshot)}`);
   var toEventTarget = unsafeCoerce2;
 
   // output/Halogen.Aff.Util/index.js
-  var bind9 = /* @__PURE__ */ bind(bindAff);
+  var bind8 = /* @__PURE__ */ bind(bindAff);
   var liftEffect6 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
@@ -14985,10 +14990,10 @@ ${str(snapshot)}`);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure12 = /* @__PURE__ */ pure(applicativeEffect);
   var map27 = /* @__PURE__ */ map(functorEffect);
-  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var discard5 = /* @__PURE__ */ discard(discardUnit);
   var throwError4 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query2) {
-    return bind9(liftEffect6(bindFlipped5(composeKleisliFlipped4(function() {
+    return bind8(liftEffect6(bindFlipped5(composeKleisliFlipped4(function() {
       var $16 = querySelector(query2);
       return function($17) {
         return $16(toParentNode($17));
@@ -15014,8 +15019,8 @@ ${str(snapshot)}`);
       return nonCanceler;
     };
   });
-  var awaitBody = /* @__PURE__ */ discard6(bindAff)(awaitLoad)(function() {
-    return bind9(selectElement("body"))(function(body2) {
+  var awaitBody = /* @__PURE__ */ discard5(bindAff)(awaitLoad)(function() {
+    return bind8(selectElement("body"))(function(body2) {
       return maybe(throwError4(error("Could not find body")))(pure10)(body2);
     });
   });
@@ -15108,8 +15113,8 @@ ${str(snapshot)}`);
   var lookup7 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind13 = /* @__PURE__ */ bind(bindAff);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard7 = /* @__PURE__ */ discard(discardUnit);
-  var discard13 = /* @__PURE__ */ discard7(bindAff);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var discard13 = /* @__PURE__ */ discard6(bindAff);
   var traverse_12 = /* @__PURE__ */ traverse_(applicativeAff);
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
   var fork3 = /* @__PURE__ */ fork2(monadForkAff);
@@ -15386,8 +15391,8 @@ ${str(snapshot)}`);
   };
 
   // output/Halogen.Aff.Driver/index.js
-  var bind10 = /* @__PURE__ */ bind(bindEffect);
-  var discard8 = /* @__PURE__ */ discard(discardUnit);
+  var bind9 = /* @__PURE__ */ bind(bindEffect);
+  var discard7 = /* @__PURE__ */ discard(discardUnit);
   var for_2 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var traverse_5 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
   var fork4 = /* @__PURE__ */ fork2(monadForkAff);
@@ -15395,7 +15400,7 @@ ${str(snapshot)}`);
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
-  var discard24 = /* @__PURE__ */ discard8(bindAff);
+  var discard24 = /* @__PURE__ */ discard7(bindAff);
   var parSequence_4 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect8 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var pure13 = /* @__PURE__ */ pure(applicativeEffect);
@@ -15532,7 +15537,7 @@ ${str(snapshot)}`);
                     })(read(childrenOutRef))();
                     when2(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_(slot3.set($$var2))(childrenOutRef)();
-                    return bind10(read($$var2))(renderStateX2(function(v) {
+                    return bind9(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
                         return $$throw("Halogen internal error: child was not initialized in renderChild");
                       }

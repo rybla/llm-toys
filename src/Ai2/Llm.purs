@@ -214,36 +214,34 @@ generate_structure args = do
   --       , schema: toJsonSchema @(Record r)
   --       }
   --   }
-  err_result <-
-    ( toAffE $ generate_structure_ { error: Left, ok: Right } $ encodeJson
-        { baseURL: args.config.baseURL
-        , model: args.config.model
-        , apiKey: args.config.apiKey
-        , messages: args.messages
-        , response_format: encodeJson $
-            { type: "json_schema"
-            , json_schema:
-                { name: args.name
-                , strict: true
-                , schema: toJsonSchema @(Record r)
-                }
-            }
-        }
-    ) <#> case _ of
-      Left err -> Left $ "generate_structure: " <> err
-      -- Right response -> case response # decodeJson @{ content :: String } of
-      --   Right { content } -> case parseJson content of
-      --     Left err -> Left $ printJsonDecodeError err
-      --     Right parsed -> case parsed # decodeJsonFromSchema of
-      --       Left err -> Left $ printJsonDecodeError err
-      --       Right a -> pure a
-      --   Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
-      Right response -> pure response
-  case err_result of
-    Left err -> do
-      Console.log $ "error: " <> err
-      todo "end"
-    Right result -> do
-      Console.log $ "result: " <> stringifyWithIndent 4 result
-      todo "end"
+  ( toAffE $ generate_structure_ { error: Left, ok: Right } $ encodeJson
+      { baseURL: args.config.baseURL
+      , model: args.config.model
+      , apiKey: args.config.apiKey
+      , messages: args.messages
+      , response_format: encodeJson $
+          { type: "json_schema"
+          , json_schema:
+              { name: args.name
+              , strict: true
+              , schema: toJsonSchema @(Record r)
+              }
+          }
+      }
+  ) <#> case _ of
+    Left err -> Left $ "generate_structure: " <> err
+    Right response -> case response # decodeJson @{ content :: String } of
+      Right { content } -> case parseJson content of
+        Left err -> Left $ printJsonDecodeError err
+        Right parsed -> case parsed # decodeJsonFromSchema of
+          Left err -> Left $ printJsonDecodeError err
+          Right a -> pure a
+      Left err -> Left $ "generate_structure: failed to parsed content as JSON: " <> printJsonDecodeError err
+-- case err_result of
+--   Left err -> do
+--     Console.log $ "error: " <> err
+--     todo "end"
+--   Right result -> do
+--     Console.log $ "result: " <> stringifyWithIndent 4 result
+--     todo "end"
 
